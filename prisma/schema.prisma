@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model accounts {
+  id                  String  @id
+  user_id             String
+  type                String
+  provider            String
+  provider_account_id String
+  refresh_token       String? @db.Text
+  access_token        String? @db.Text
+  expires_at          Int?
+  token_type          String?
+  scope               String?
+  id_token            String? @db.Text
+  session_state       String?
+  users               users   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([provider, provider_account_id])
+}
+
+model appointments {
+  id                                  String         @id
+  patientId                           String
+  doctorId                            String
+  departmentId                        String
+  type                                String
+  status                              String         @default("PENDING")
+  appointmentDate                     DateTime
+  symptoms                            String? @db.Text
+  notes                               String? @db.Text
+  personalInfo                        Json?
+  createdAt                           DateTime       @default(now())
+  updatedAt                           DateTime
+  departments                         departments    @relation(fields: [departmentId], references: [id])
+  users_appointments_doctorIdTousers  users          @relation("appointments_doctorIdTousers", fields: [doctorId], references: [id])
+  users_appointments_patientIdTousers users          @relation("appointments_patientIdTousers", fields: [patientId], references: [id])
+  prescriptions                       prescriptions?
+}
+
+model departments {
+  id               String         @id
+  name             String
+  description      String? @db.Text
+  consultationType String
+  featured         Boolean        @default(false)
+  appointments     appointments[]
+  clinic_fees      clinic_fees[]
+}
+
+model medications {
+  id                       String                     @id
+  name                     String
+  description              String? @db.Text
+  price                    Float
+  manufacturerId           String?
+  pharmacy_inventory       pharmacy_inventory[]
+  prescription_medications prescription_medications[]
+}
+
+model pharmacy_inventory {
+  id            String      @id
+  pharmacyId    String
+  medicationId  String
+  currentStock  Int
+  minStock      Int
+  maxStock      Int
+  lastOrderDate DateTime?
+  supplier      String?
+  medications   medications @relation(fields: [medicationId], references: [id])
+  users         users       @relation(fields: [pharmacyId], references: [id])
+
+  @@unique([pharmacyId, medicationId])
+}
+
+model prescription_medications {
+  id                String        @id
+  prescriptionId    String
+  medicationId      String
+  dosage            String
+  frequency         String
+  duration          String
+  quantity          String
+  substituteAllowed Boolean       @default(false)
+  price             Float
+  medications       medications   @relation(fields: [medicationId], references: [id])
+  prescriptions     prescriptions @relation(fields: [prescriptionId], references: [id])
+}
+
+model prescriptions {
+  id                                    String                     @id
+  prescriptionNumber                    String                     @unique
+  patientId                             String
+  doctorId                              String
+  appointmentId                         String?                    @unique
+  pharmacyId                            String?
+  status                                String                     @default("ISSUED")
+  diagnosis                             String
+  notes                                 String? @db.Text
+  issuedAt                              DateTime                   @default(now())
+  validUntil                            DateTime
+  totalPrice                            Float
+  createdAt                             DateTime                   @default(now())
+  updatedAt                             DateTime
+  prescription_medications              prescription_medications[]
+  users_prescriptions_pharmacyIdTousers users?                     @relation("prescriptions_pharmacyIdTousers", fields: [pharmacyId], references: [id])
+  appointments                          appointments?              @relation(fields: [appointmentId], references: [id])
+  users_prescriptions_doctorIdTousers   users                      @relation("prescriptions_doctorIdTousers", fields: [doctorId], references: [id])
+  users_prescriptions_patientIdTousers  users                      @relation("prescriptions_patientIdTousers", fields: [patientId], references: [id])
+}
+
+model sessions {
+  id            String   @id
+  session_token String   @unique
+  user_id       String
+  expires       DateTime
+  users         users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model system_alerts {
+  id          String   @id
+  type        String
+  title       String
+  description String
+  severity    String
+  resolved    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model user_notifications {
+  id        String   @id
+  userId    String
+  title     String
+  message   String
+  type      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  users     users    @relation(fields: [userId], references: [id])
+}
+
+model users {
+  id                                            String               @id
+  email                                         String               @unique
+  password                                      String
+  name                                          String
+  phone                                         String?
+  ssn                                           String?
+  role                                          String
+  avatar                                        String?
+  createdAt                                     DateTime             @default(now())
+  updatedAt                                     DateTime
+  specialization                                String?
+  license                                       String?
+  clinic                                        String?
+  address                                       String?
+  pharmacyName                                  String?
+  pharmacyAddress                               String?
+  pharmacyPhone                                 String?
+  accounts                                      accounts[]
+  appointments_appointments_doctorIdTousers     appointments[]       @relation("appointments_doctorIdTousers")
+  appointments_appointments_patientIdTousers    appointments[]       @relation("appointments_patientIdTousers")
+  pharmacy_inventory                            pharmacy_inventory[]
+  prescriptions_prescriptions_pharmacyIdTousers prescriptions[]      @relation("prescriptions_pharmacyIdTousers")
+  prescriptions_prescriptions_doctorIdTousers   prescriptions[]      @relation("prescriptions_doctorIdTousers")
+  prescriptions_prescriptions_patientIdTousers  prescriptions[]      @relation("prescriptions_patientIdTousers")
+  sessions                                      sessions[]
+  user_notifications                            user_notifications[]
+  clinic_fees                                   clinic_fees[]
+}
+
+model verificationtokens {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model clinic_fees {
+  id           String      @id
+  doctorId     String
+  departmentId String
+  consultationType String  // "ONLINE" or "OFFLINE"
+  basePrice    Float       // 기본 진료비
+  emergencyPrice Float?    // 응급 진료비 (선택사항)
+  description  String?     @db.Text
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime
+
+  departments  departments @relation(fields: [departmentId], references: [id])
+  users        users       @relation(fields: [doctorId], references: [id])
+
+  @@unique([doctorId, departmentId, consultationType])
+}
