@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect } from "react"
-import { signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Heart, Loader2 } from "lucide-react"
@@ -11,8 +10,26 @@ export default function LogoutPage() {
 
   useEffect(() => {
     const performLogout = async () => {
-      await signOut({ redirect: false })
-      router.push("/")
+      try {
+        // Call logout API to clear the JWT cookie
+        const response = await fetch('/api/auth/logout', {
+          method: 'POST',
+          credentials: 'include'
+        })
+
+        if (response.ok) {
+          // Redirect to home page after successful logout
+          router.push("/")
+        } else {
+          console.error('Logout failed')
+          // Still redirect to home page even if logout API fails
+          router.push("/")
+        }
+      } catch (error) {
+        console.error('Logout error:', error)
+        // Still redirect to home page even if there's an error
+        router.push("/")
+      }
     }
 
     performLogout()

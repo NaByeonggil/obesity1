@@ -200,29 +200,80 @@ const mockPharmacies = [
   }
 ]
 
+interface Pharmacy {
+  id: string
+  name: string
+  pharmacistName?: string
+  address: string
+  phone?: string
+  email?: string
+  hours?: {
+    weekday: string
+    saturday: string
+    sunday: string
+  }
+  available: boolean
+  rating: number
+  reviews: number
+  lat: number
+  lng: number
+  distance?: string
+}
+
+interface PrescriptionSendStatus {
+  [key: string]: { // prescriptionId_pharmacyId
+    sentAt: number // timestamp
+    pharmacyName: string
+  }
+}
+
 export default function PatientPrescriptionsPage() {
   const [activeTab, setActiveTab] = React.useState("prescriptions")
   const [selectedPharmacy, setSelectedPharmacy] = React.useState<string | null>(null)
   const [prescriptions, setPrescriptions] = React.useState<Prescription[]>([])
   const [selectedPrescription, setSelectedPrescription] = React.useState<Prescription | null>(null)
+  const [pharmacies, setPharmacies] = React.useState<Pharmacy[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [loadingPharmacies, setLoadingPharmacies] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const [sendStatus, setSendStatus] = React.useState<PrescriptionSendStatus>({})
+  const [currentTime, setCurrentTime] = React.useState(Date.now())
 
   const { user, token, isAuthenticated } = useAuth()
 
+  // Update current time every minute to refresh button states
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now())
+    }, 60000) // Update every minute
+
+    return () => clearInterval(interval)
+  }, [])
+
   // Fetch prescriptions from API
   const fetchPrescriptions = React.useCallback(async () => {
-    if (!token || !isAuthenticated) return
-
     try {
       setLoading(true)
       setError(null)
-      const response = await prescriptionsApi.getPrescriptions(token)
-      setPrescriptions(response.prescriptions || [])
+
+      const response = await fetch('/api/patient/prescriptions', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('처방전 조회 실패')
+      }
+
+      const data = await response.json()
+      setPrescriptions(data.prescriptions || [])
 
       // 가장 최근 처방전을 기본 선택
-      if (response.prescriptions && response.prescriptions.length > 0) {
-        setSelectedPrescription(response.prescriptions[0])
+      if (data.prescriptions && data.prescriptions.length > 0) {
+        setSelectedPrescription(data.prescriptions[0])
       }
     } catch (err) {
       if (err instanceof ApiError) {
@@ -233,15 +284,117 @@ export default function PatientPrescriptionsPage() {
     } finally {
       setLoading(false)
     }
-  }, [token, isAuthenticated])
+  }, [])
+
+  // Fetch pharmacies from API
+  const fetchPharmacies = React.useCallback(async () => {
+    try {
+      setLoadingPharmacies(true)
+
+      const response = await fetch('/api/patient/pharmacies', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('약국 조회 실패:', response.status, errorData)
+        throw new Error('약국 조회 실패')
+      }
+
+      const data = await response.json()
+      console.log('약국 조회 성공:', data)
+      setPharmacies(data.pharmacies || [])
+    } catch (err) {
+      console.error('약국 조회 오류:', err)
+      // 약국 조회 실패는 에러로 표시하지 않음 (처방전이 메인 기능)
+      setPharmacies([])
+    } finally {
+      setLoadingPharmacies(false)
+    }
+  }, [])
 
   React.useEffect(() => {
     fetchPrescriptions()
-  }, [fetchPrescriptions])
+    fetchPharmacies()
+  }, [fetchPrescriptions, fetchPharmacies])
 
-  const handleSendPrescription = (pharmacyId: string) => {
-    setSelectedPharmacy(pharmacyId)
-    alert(`처방전이 약국으로 전송되었습니다.\n약국에서 확인 후 연락드리겠습니다.`)
+  const handleSendPrescription = async (pharmacyId: string, pharmacyName: string) => {
+    if (!selectedPrescription) {
+      alert('처방전을 선택해주세요.')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/patient/prescriptions/send-to-pharmacy', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          prescriptionId: selectedPrescription.id,
+          pharmacyId: pharmacyId
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setSelectedPharmacy(pharmacyId)
+
+        // Track send status with timestamp
+        const sendKey = `${selectedPrescription.id}_${pharmacyId}`
+        setSendStatus(prev => ({
+          ...prev,
+          [sendKey]: {
+            sentAt: Date.now(),
+            pharmacyName: pharmacyName
+          }
+        }))
+
+        alert(data.message || '처방전이 약국으로 전송되었습니다.\n약국에서 확인 후 연락드리겠습니다.')
+        // 처방전 목록 새로고침
+        fetchPrescriptions()
+      } else {
+        alert(data.error || '처방전 전송에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('처방전 전송 오류:', error)
+      alert('처방전 전송 중 오류가 발생했습니다.')
+    }
+  }
+
+  // Check if prescription was sent to pharmacy and if 30 minutes have passed
+  const getSendButtonStatus = (pharmacyId: string) => {
+    if (!selectedPrescription) {
+      return { canSend: false, buttonText: '처방전을 선택해주세요', timeRemaining: 0 }
+    }
+
+    const sendKey = `${selectedPrescription.id}_${pharmacyId}`
+    const sendInfo = sendStatus[sendKey]
+
+    if (!sendInfo) {
+      return { canSend: true, buttonText: '이 약국으로 처방전 전송', timeRemaining: 0 }
+    }
+
+    const thirtyMinutesInMs = 30 * 60 * 1000
+    const timeSinceSend = currentTime - sendInfo.sentAt
+    const timeRemaining = thirtyMinutesInMs - timeSinceSend
+
+    if (timeSinceSend >= thirtyMinutesInMs) {
+      return { canSend: true, buttonText: '이 약국으로 처방전 재전송', timeRemaining: 0 }
+    }
+
+    const minutesRemaining = Math.ceil(timeRemaining / 60000)
+    return {
+      canSend: false,
+      buttonText: `전송완료 (${minutesRemaining}분 후 재전송 가능)`,
+      timeRemaining: minutesRemaining
+    }
   }
 
   const handleShowMap = () => {
@@ -250,7 +403,28 @@ export default function PatientPrescriptionsPage() {
 
   const handlePrescriptionSelect = (prescription: Prescription) => {
     setSelectedPrescription(prescription)
-    setActiveTab("prescription")
+    // React state 업데이트는 비동기이므로 다음 렌더링 사이클에서 탭 변경
+    setTimeout(() => {
+      setActiveTab("prescription")
+    }, 0)
+  }
+
+  // PDF 보기 함수
+  const handleViewPDF = async (prescriptionId: string) => {
+    try {
+      const response = await fetch(`/api/patient/prescriptions/pdf?id=${prescriptionId}`)
+
+      if (!response.ok) {
+        throw new Error('PDF 조회에 실패했습니다')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      window.open(url, '_blank')
+    } catch (error) {
+      console.error('PDF 조회 오류:', error)
+      alert('PDF 조회에 실패했습니다.')
+    }
   }
 
   // 상태별 배지 변환
@@ -421,9 +595,19 @@ export default function PatientPrescriptionsPage() {
                           발급일: {formatDate(selectedPrescription.issuedAt)}
                         </p>
                       </div>
-                      <Badge variant={getStatusBadge(selectedPrescription.status).variant} className="text-sm">
-                        {getStatusBadge(selectedPrescription.status).text}
-                      </Badge>
+                      <div className="flex items-center gap-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewPDF(selectedPrescription.id)}
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          처방전 보기
+                        </Button>
+                        <Badge variant={getStatusBadge(selectedPrescription.status).variant} className="text-sm">
+                          {getStatusBadge(selectedPrescription.status).text}
+                        </Badge>
+                      </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6">
@@ -550,40 +734,120 @@ export default function PatientPrescriptionsPage() {
           <TabsContent value="pharmacies" className="space-y-6">
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-sm text-gray-600">
-                💊 처방전을 전송할 약국을 선택해주세요. 비급여 의약품 가격을 미리 확인하실 수 있습니다.
+                💊 처방전을 전송할 약국을 선택해주세요.
               </p>
             </div>
 
-            {mockPharmacies.map((pharmacy) => (
-              <PharmacyCard
-                key={pharmacy.id}
-                pharmacy={pharmacy}
-                onSendPrescription={() => handleSendPrescription(pharmacy.id)}
-                onShowMap={handleShowMap}
-              />
-            ))}
+            {loadingPharmacies ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-patient" />
+                <span className="ml-2">약국 정보를 불러오는 중...</span>
+              </div>
+            ) : pharmacies.length === 0 ? (
+              <Card className="p-8 text-center">
+                <div className="text-gray-500">
+                  <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-medium mb-2">등록된 약국이 없습니다</h3>
+                  <p className="text-sm">현재 시스템에 등록된 약국이 없습니다.</p>
+                </div>
+              </Card>
+            ) : (
+              pharmacies.map((pharmacy) => {
+                const buttonStatus = getSendButtonStatus(pharmacy.id)
+                return (
+                  <Card key={pharmacy.id} className="p-6 hover:shadow-lg transition-shadow">
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold text-gray-900">{pharmacy.name}</h3>
+                          {pharmacy.pharmacistName && (
+                            <p className="text-sm text-gray-600 mt-1">약사: {pharmacy.pharmacistName}</p>
+                          )}
+                        </div>
+                        {pharmacy.available && (
+                          <Badge variant="default" className="bg-green-600">영업중</Badge>
+                        )}
+                      </div>
+
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-start gap-2">
+                          <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                          <span className="text-gray-700">{pharmacy.address}</span>
+                        </div>
+                        {pharmacy.phone && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-400">📞</span>
+                            <span className="text-gray-700">{pharmacy.phone}</span>
+                          </div>
+                        )}
+                        {pharmacy.hours && (
+                          <div className="mt-3 pt-3 border-t">
+                            <p className="text-xs text-gray-500 font-medium mb-1">영업시간</p>
+                            <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
+                              <div>평일: {pharmacy.hours.weekday}</div>
+                              <div>토요일: {pharmacy.hours.saturday}</div>
+                              <div>일요일: {pharmacy.hours.sunday}</div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2 pt-2">
+                        <Button
+                          className={`flex-1 ${buttonStatus.canSend ? 'bg-patient hover:bg-patient-dark' : 'bg-gray-400 cursor-not-allowed'}`}
+                          onClick={() => buttonStatus.canSend && handleSendPrescription(pharmacy.id, pharmacy.name)}
+                          disabled={!buttonStatus.canSend}
+                        >
+                          {buttonStatus.buttonText}
+                        </Button>
+                        <Button variant="outline" onClick={handleShowMap}>
+                          <MapPin className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                )
+              })
+            )}
           </TabsContent>
 
           <TabsContent value="map" className="space-y-6">
-            <PharmacyMap
-              pharmacies={mockPharmacies}
-              currentLocation={{ lat: 37.5000, lng: 127.0300 }}
-            />
+            {loadingPharmacies ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-patient" />
+                <span className="ml-2">지도 정보를 불러오는 중...</span>
+              </div>
+            ) : pharmacies.length === 0 ? (
+              <Card className="p-8 text-center">
+                <div className="text-gray-500">
+                  <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-medium mb-2">표시할 약국이 없습니다</h3>
+                  <p className="text-sm">등록된 약국이 없어 지도를 표시할 수 없습니다.</p>
+                </div>
+              </Card>
+            ) : (
+              <>
+                <PharmacyMap
+                  pharmacies={pharmacies}
+                  currentLocation={{ lat: 37.5665, lng: 126.9780 }}
+                />
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h4 className="font-semibold text-green-900 mb-2">영업중인 약국</h4>
-                <p className="text-sm text-green-700">
-                  현재 {mockPharmacies.filter(p => p.available).length}개 약국이 영업 중입니다
-                </p>
-              </div>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-900 mb-2">가까운 약국</h4>
-                <p className="text-sm text-blue-700">
-                  가장 가까운 약국은 {mockPharmacies[0].distance} 거리에 있습니다
-                </p>
-              </div>
-            </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-green-900 mb-2">영업중인 약국</h4>
+                    <p className="text-sm text-green-700">
+                      현재 {pharmacies.filter(p => p.available).length}개 약국이 영업 중입니다
+                    </p>
+                  </div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-blue-900 mb-2">등록된 약국</h4>
+                    <p className="text-sm text-blue-700">
+                      총 {pharmacies.length}개의 약국이 등록되어 있습니다
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
           </TabsContent>
         </Tabs>
       </div>

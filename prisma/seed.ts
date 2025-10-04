@@ -261,6 +261,26 @@ async function main() {
     }
   })
 
+  // 젤라의원 의사 추가
+  const zellaPassword = await bcrypt.hash('123456', 10)  // 비밀번호 123456
+  const doctorZella = await prisma.users.create({
+    data: {
+      id: 'doc_zella',
+      email: 'kim@naver.com',  // 변경된 이메일
+      password: zellaPassword,  // 비밀번호 123456
+      name: '김원장',
+      phone: '010-6666-7777',
+      role: 'DOCTOR',
+      specialization: '비만치료 전문의',
+      license: 'DOC-2024-ZELLA',
+      clinic: '젤라의원',
+      address: '경기도 부천시 심곡동 668',  // 변경된 주소
+      avatar: 'https://ui-avatars.com/api/?name=김원장&background=3B82F6&color=fff',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+  })
+
   // Create pharmacy
   const pharmacy1 = await prisma.users.create({
     data: {

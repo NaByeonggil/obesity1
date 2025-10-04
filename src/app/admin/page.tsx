@@ -1,13 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
+import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
 import { StatsCard } from "@/components/dashboard/stats-card"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuth } from "@/hooks/use-auth"
 import {
   Users,
   Activity,
@@ -57,7 +58,7 @@ interface AdminStats {
 const mockUser = {
   name: "관리자",
   email: "admin@healthcare.com",
-  avatar: "https://ui-avatars.com/api/?name=관리자&background=8B5CF6&color=fff"
+  image: "https://ui-avatars.com/api/?name=관리자&background=8B5CF6&color=fff"
 }
 
 const mockStats: AdminStats = {
@@ -151,20 +152,29 @@ const mockRecentActivities = [
   }
 ]
 
-export default function AdminDashboard() {
-  const { user } = useAuth()
+function AdminDashboardContent() {
+  const { data: session, status } = useSession()
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   // 사용자 데이터가 없을 경우 목업 데이터 사용
-  const displayUser = user || mockUser
+  const displayUser = session?.user || mockUser
 
   // Fetch admin statistics
   useEffect(() => {
     const fetchStats = async () => {
+      if (status !== 'authenticated') {
+        setStats(mockStats)
+        setIsLoading(false)
+        return
+      }
+
       try {
-        const response = await fetch('/api/admin/stats')
+        const response = await fetch('/api/admin/stats', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        })
         if (!response.ok) {
           throw new Error('통계 데이터를 불러오는데 실패했습니다')
         }
@@ -181,7 +191,7 @@ export default function AdminDashboard() {
     }
 
     fetchStats()
-  }, [])
+  }, [status])
 
   // Display stats (real data or fallback)
   const displayStats = stats || mockStats
@@ -472,7 +482,7 @@ export default function AdminDashboard() {
                 >
                   <div className="flex items-center space-x-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={`https://ui-avatars.com/api/?name=${activity.user}&background=8B5CF6&color=fff`} />
+                      <AvatarImage src={`https://ui-avatars.com/api/?name=${encodeURIComponent(activity.user)}&background=8B5CF6&color=fff`} />
                       <AvatarFallback className="bg-admin text-white text-xs">
                         {activity.user.charAt(0)}
                       </AvatarFallback>
@@ -497,5 +507,13 @@ export default function AdminDashboard() {
         </div>
       </div>
     </DashboardLayout>
+  )
+}
+
+export default function AdminDashboard() {
+  return (
+    <ProtectedRoute requiredRole="admin">
+      <AdminDashboardContent />
+    </ProtectedRoute>
   )
 }

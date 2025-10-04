@@ -1,14 +1,15 @@
 "use client"
 
 import * as React from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
 import { StatsCard } from "@/components/dashboard/stats-card"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuth } from "@/hooks/use-auth"
-import { pharmacyApi, ApiError } from "@/lib/api-client"
 import {
   Pill,
   Package,
@@ -158,7 +159,9 @@ const mockLowStock: LowStockItem[] = [
   }
 ]
 
-export default function PharmacyDashboard() {
+function PharmacyDashboardContent() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [stats, setStats] = React.useState<PharmacyStats | null>(null)
   const [pendingPrescriptions, setPendingPrescriptions] = React.useState<PendingPrescription[]>([])
   const [lowStockItems, setLowStockItems] = React.useState<LowStockItem[]>([])
@@ -166,10 +169,8 @@ export default function PharmacyDashboard() {
   const [error, setError] = React.useState<string | null>(null)
   const [useMockData, setUseMockData] = React.useState(false)
 
-  const { user, token, isAuthenticated } = useAuth()
-
   const loadDashboardData = React.useCallback(async () => {
-    if (!token || !isAuthenticated) {
+    if (status !== 'authenticated' || !session?.user) {
       // 인증되지 않은 경우 목업 데이터 사용
       setUseMockData(true)
       setStats(mockStats)
@@ -185,24 +186,49 @@ export default function PharmacyDashboard() {
       setUseMockData(false)
 
       const [statsResponse, prescriptionsResponse, inventoryResponse] = await Promise.all([
-        pharmacyApi.getStats(token),
-        pharmacyApi.getPendingPrescriptions(token),
-        pharmacyApi.getLowStockItems(token)
+        fetch('/api/pharmacy/stats', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        }),
+        fetch('/api/pharmacy/prescriptions', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        }),
+        fetch('/api/pharmacy/inventory', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        })
       ])
 
-      setStats(statsResponse.stats)
-      setPendingPrescriptions(prescriptionsResponse.prescriptions.slice(0, 3))
-      setLowStockItems(inventoryResponse.lowStockItems.slice(0, 3))
-    } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message)
-      } else {
-        setError('대시보드 정보를 불러오는 중 오류가 발생했습니다.')
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json()
+        setStats(statsData.stats)
       }
+
+      if (prescriptionsResponse.ok) {
+        const prescData = await prescriptionsResponse.json()
+        setPendingPrescriptions(prescData.prescriptions.slice(0, 3))
+      }
+
+      if (inventoryResponse.ok) {
+        const invData = await inventoryResponse.json()
+        setLowStockItems(invData.lowStockItems.slice(0, 3))
+      }
+    } catch (err) {
+      console.error('Dashboard data fetch error:', err)
+      setError('대시보드 정보를 불러오는 중 오류가 발생했습니다.')
+      // Fallback to mock data
+      setUseMockData(true)
+      setStats(mockStats)
+      setPendingPrescriptions(mockPrescriptions)
+      setLowStockItems(mockLowStock)
     } finally {
       setLoading(false)
     }
-  }, [token, isAuthenticated])
+  }, [status, session])
 
   React.useEffect(() => {
     loadDashboardData()
@@ -218,21 +244,29 @@ export default function PharmacyDashboard() {
   }
 
   const handleUpdatePrescriptionStatus = async (prescriptionId: string, status: string) => {
-    if (!token) return
+    if (!session?.user) return
 
     try {
-      await pharmacyApi.updatePrescriptionStatus(token, prescriptionId, { status })
-      loadDashboardData()
+      const response = await fetch(`/api/pharmacy/prescriptions/${prescriptionId}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      })
+
+      if (response.ok) {
+        loadDashboardData()
+      }
     } catch (err) {
       console.error('처방전 상태 업데이트 오류:', err)
     }
   }
 
   if (loading) {
-    const loadingUser = user || {
+    const loadingUser = session?.user || {
       name: "약사",
       email: "pharmacy@example.com",
-      avatar: undefined
+      image: undefined
     }
 
     return (
@@ -246,34 +280,34 @@ export default function PharmacyDashboard() {
   }
 
   // 데모 사용자 데이터
-  const demoUser = useMockData && !user ? {
+  const demoUser = useMockData && !session?.user ? {
     name: "김약사",
     email: "pharmacy@example.com",
-    avatar: undefined
-  } : user
+    image: undefined
+  } : session?.user || null
 
   return (
     <DashboardLayout userRole="pharmacy" user={demoUser}>
       <div className="space-y-6">
-        {error && (
-          <Alert>
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+      {error && (
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
-        {useMockData && (
-          <Alert className="bg-blue-50 border-blue-200">
-            <AlertTriangle className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="text-blue-800">
-              데모 모드로 실행 중입니다. 로그인하면 실제 데이터를 볼 수 있습니다.
-            </AlertDescription>
-          </Alert>
-        )}
+      {useMockData && (
+        <Alert className="bg-blue-50 border-blue-200">
+          <AlertTriangle className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-blue-800">
+            데모 모드로 실행 중입니다. 로그인하면 실제 데이터를 볼 수 있습니다.
+          </AlertDescription>
+        </Alert>
+      )}
 
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-pharmacy to-pharmacy-dark rounded-xl p-6 text-white">
-          <h2 className="text-2xl font-bold mb-2">안녕하세요, {demoUser?.name} 약사님!</h2>
+          <h2 className="text-2xl font-bold mb-2">안녕하세요, {demoUser?.name || '약사'} 약사님!</h2>
           <p className="text-pharmacy-light">
             현재 {stats?.pendingPrescriptions || 0}건의 처방전이 조제 대기 중입니다.
             오늘 {stats?.completedToday || 0}건을 완료하셨습니다.
@@ -325,13 +359,21 @@ export default function PharmacyDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Button className="h-20 flex-col space-y-2" variant="pharmacy">
+              <Button
+                className="h-20 flex-col space-y-2"
+                variant="pharmacy"
+                onClick={() => router.push('/pharmacy/prescriptions')}
+              >
                 <Pill className="h-6 w-6" />
                 <span>처방전 조제</span>
               </Button>
-              <Button className="h-20 flex-col space-y-2" variant="outline">
+              <Button
+                className="h-20 flex-col space-y-2"
+                variant="outline"
+                onClick={() => router.push('/pharmacy/medication-pricing')}
+              >
                 <Package className="h-6 w-6" />
-                <span>재고 관리</span>
+                <span>비급여 의약품 가격</span>
               </Button>
               <Button className="h-20 flex-col space-y-2" variant="outline">
                 <Search className="h-6 w-6" />
@@ -478,5 +520,13 @@ export default function PharmacyDashboard() {
         </div>
       </div>
     </DashboardLayout>
+  )
+}
+
+export default function PharmacyDashboard() {
+  return (
+    <ProtectedRoute requiredRole="pharmacy">
+      <PharmacyDashboardContent />
+    </ProtectedRoute>
   )
 }

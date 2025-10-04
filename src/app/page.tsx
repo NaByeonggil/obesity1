@@ -231,47 +231,163 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Role Selection Section */}
+      {/* Role Selection Section - 회원 유형 선택 */}
       <section className="py-20 bg-white/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              어떤 서비스를 이용하시나요?
+              회원 유형을 선택하세요
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              역할에 맞는 최적화된 서비스를 제공합니다
+              각 역할에 맞는 전문 서비스를 제공합니다. 회원가입 시 선택한 유형에 따라 접근 권한이 설정됩니다.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <RoleCard
-              icon={<Users className="h-8 w-8" />}
-              title="일반 사용자"
-              description="병원 예약 및 건강 관리"
-              color="text-patient"
-              href="/patient"
-            />
-            <RoleCard
-              icon={<Stethoscope className="h-8 w-8" />}
-              title="의료진"
-              description="환자 진료 및 일정 관리"
-              color="text-doctor"
-              href="/doctor"
-            />
-            <RoleCard
-              icon={<Pill className="h-8 w-8" />}
-              title="약사"
-              description="처방전 관리 및 조제"
-              color="text-pharmacy"
-              href="/pharmacy"
-            />
-            <RoleCard
-              icon={<Shield className="h-8 w-8" />}
-              title="관리자"
-              description="시스템 관리 및 운영"
-              color="text-admin"
-              href="/admin"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* 일반 회원 카드 */}
+            <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-patient">
+              <CardHeader className="pb-6">
+                <div className="mx-auto p-4 bg-patient/10 rounded-full text-patient w-fit mb-4">
+                  <Users className="h-10 w-10" />
+                </div>
+                <CardTitle className="text-2xl text-center">일반 회원</CardTitle>
+                <CardDescription className="text-center text-base">
+                  병원 예약 및 건강 관리 서비스
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-start gap-2">
+                    <ChevronRight className="h-5 w-5 text-patient mt-0.5" />
+                    <span className="text-sm">온라인/오프라인 진료 예약</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ChevronRight className="h-5 w-5 text-patient mt-0.5" />
+                    <span className="text-sm">전자 처방전 관리</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ChevronRight className="h-5 w-5 text-patient mt-0.5" />
+                    <span className="text-sm">진료 기록 조회</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ChevronRight className="h-5 w-5 text-patient mt-0.5" />
+                    <span className="text-sm">약국 찾기 및 약품 정보</span>
+                  </li>
+                </ul>
+                <div className="flex gap-2">
+                  <Link href="/auth/register?role=patient" className="flex-1">
+                    <Button className="w-full bg-patient hover:bg-patient/90">
+                      일반 회원으로 가입
+                    </Button>
+                  </Link>
+                  <Link href="/patient">
+                    <Button variant="outline">
+                      둘러보기
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 의사 회원 카드 */}
+            <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-doctor">
+              <CardHeader className="pb-6">
+                <div className="mx-auto p-4 bg-doctor/10 rounded-full text-doctor w-fit mb-4">
+                  <Stethoscope className="h-10 w-10" />
+                </div>
+                <CardTitle className="text-2xl text-center">의사 회원</CardTitle>
+                <CardDescription className="text-center text-base">
+                  환자 진료 및 의원 관리 서비스
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-start gap-2">
+                    <ChevronRight className="h-5 w-5 text-doctor mt-0.5" />
+                    <span className="text-sm">환자 예약 및 일정 관리</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ChevronRight className="h-5 w-5 text-doctor mt-0.5" />
+                    <span className="text-sm">비대면 진료 시스템</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ChevronRight className="h-5 w-5 text-doctor mt-0.5" />
+                    <span className="text-sm">전자 처방전 발급</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ChevronRight className="h-5 w-5 text-doctor mt-0.5" />
+                    <span className="text-sm">의원 프로필 관리</span>
+                  </li>
+                </ul>
+                <div className="flex gap-2">
+                  <Link href="/auth/register?role=doctor" className="flex-1">
+                    <Button className="w-full bg-doctor hover:bg-doctor/90">
+                      의사 회원으로 가입
+                    </Button>
+                  </Link>
+                  <Link href="/doctor">
+                    <Button variant="outline">
+                      둘러보기
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 약사 회원 카드 */}
+            <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-pharmacy">
+              <CardHeader className="pb-6">
+                <div className="mx-auto p-4 bg-pharmacy/10 rounded-full text-pharmacy w-fit mb-4">
+                  <Pill className="h-10 w-10" />
+                </div>
+                <CardTitle className="text-2xl text-center">약사 회원</CardTitle>
+                <CardDescription className="text-center text-base">
+                  처방전 조제 및 약국 관리 서비스
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-start gap-2">
+                    <ChevronRight className="h-5 w-5 text-pharmacy mt-0.5" />
+                    <span className="text-sm">전자 처방전 수령</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ChevronRight className="h-5 w-5 text-pharmacy mt-0.5" />
+                    <span className="text-sm">의약품 재고 관리</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ChevronRight className="h-5 w-5 text-pharmacy mt-0.5" />
+                    <span className="text-sm">복약 지도 및 상담</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ChevronRight className="h-5 w-5 text-pharmacy mt-0.5" />
+                    <span className="text-sm">보험 청구 관리</span>
+                  </li>
+                </ul>
+                <div className="flex gap-2">
+                  <Link href="/auth/register?role=pharmacy" className="flex-1">
+                    <Button className="w-full bg-pharmacy hover:bg-pharmacy/90">
+                      약사 회원으로 가입
+                    </Button>
+                  </Link>
+                  <Link href="/pharmacy">
+                    <Button variant="outline">
+                      둘러보기
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* 로그인 섹션 */}
+          <div className="mt-12 text-center">
+            <p className="text-gray-600 mb-4">이미 회원이신가요?</p>
+            <Link href="/auth/login">
+              <Button size="lg" variant="outline">
+                로그인하기
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

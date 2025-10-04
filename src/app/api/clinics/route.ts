@@ -3,6 +3,28 @@ import { PrismaClient } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
+/**
+ * CORS 헤더 추가
+ */
+function addCorsHeaders(response: NextResponse, request?: NextRequest) {
+  const origin = request?.headers.get('origin') || 'http://localhost:8080'
+  response.headers.set('Access-Control-Allow-Origin', origin)
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  response.headers.set('Access-Control-Allow-Credentials', 'true')
+  return response
+}
+
+/**
+ * OPTIONS 요청 처리 (Preflight)
+ */
+export async function OPTIONS(request: NextRequest) {
+  return addCorsHeaders(
+    new NextResponse(null, { status: 200 }),
+    request
+  )
+}
+
 // 진료비 조회 함수
 function getConsultationFee(doctor: any, department: string | null): { fee: number, isOffline: boolean } {
   const departmentNames: { [key: string]: string } = {
@@ -225,8 +247,8 @@ export async function GET(req: NextRequest) {
         name: doctor.clinic || `${doctor.name} 클리닉`,
         doctorName: doctor.name,
         doctorImage: doctor.avatar,
-        address: doctor.address || `서울시 ${clinicDistrict} 가상주소 ${index + 1}번지`,
-        phone: doctor.phone || `02-${1000 + index}-${2000 + index}`,
+        address: doctor.address || '주소 정보 없음',
+        phone: doctor.phone || '전화번호 정보 없음',
         specialization: doctor.specialization || "일반의",
         distance: `${distance.toFixed(1)}km`,
         district: clinicDistrict,
@@ -269,16 +291,24 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      clinics: clinics
-    })
+    return addCorsHeaders(
+      NextResponse.json({
+        success: true,
+        clinics: clinics
+      }),
+      req
+    )
 
   } catch (error) {
     console.error('Clinics API error:', error)
-    return NextResponse.json(
-      { error: "클리닉 정보를 가져오는 중 오류가 발생했습니다." },
-      { status: 500 }
+    return addCorsHeaders(
+      NextResponse.json(
+        { error: "클리닉 정보를 가져오는 중 오류가 발생했습니다." },
+        { status: 500 }
+      ),
+      req
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }

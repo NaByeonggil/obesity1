@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    const departments = await prisma.department.findMany({
+    const departments = await prisma.departments.findMany({
       orderBy: [
         { featured: 'desc' },
         { name: 'asc' }

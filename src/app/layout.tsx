@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/auth/providers'
+import { Toaster } from 'sonner'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -22,6 +23,7 @@ export default function RootLayout({
           <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
             {children}
           </div>
+          <Toaster position="top-right" />
         </Providers>
       </body>
     </html>

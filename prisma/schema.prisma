@@ -23,6 +23,7 @@ model accounts {
   users               users   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([provider, provider_account_id])
+  @@index([user_id], map: "accounts_user_id_fkey")
 }
 
 model appointments {
@@ -33,21 +34,25 @@ model appointments {
   type                                String
   status                              String         @default("PENDING")
   appointmentDate                     DateTime
-  symptoms                            String? @db.Text
-  notes                               String? @db.Text
-  personalInfo                        Json?
+  symptoms                            String?        @db.Text
+  notes                               String?        @db.Text
+  personalInfo                        String?        @db.LongText
   createdAt                           DateTime       @default(now())
   updatedAt                           DateTime
   departments                         departments    @relation(fields: [departmentId], references: [id])
   users_appointments_doctorIdTousers  users          @relation("appointments_doctorIdTousers", fields: [doctorId], references: [id])
   users_appointments_patientIdTousers users          @relation("appointments_patientIdTousers", fields: [patientId], references: [id])
   prescriptions                       prescriptions?
+
+  @@index([departmentId], map: "appointments_departmentId_fkey")
+  @@index([doctorId], map: "appointments_doctorId_fkey")
+  @@index([patientId], map: "appointments_patientId_fkey")
 }
 
 model departments {
   id               String         @id
   name             String
-  description      String? @db.Text
+  description      String?        @db.Text
   consultationType String
   featured         Boolean        @default(false)
   appointments     appointments[]
@@ -57,7 +62,7 @@ model departments {
 model medications {
   id                       String                     @id
   name                     String
-  description              String? @db.Text
+  description              String?                    @db.Text
   price                    Float
   manufacturerId           String?
   pharmacy_inventory       pharmacy_inventory[]
@@ -77,6 +82,7 @@ model pharmacy_inventory {
   users         users       @relation(fields: [pharmacyId], references: [id])
 
   @@unique([pharmacyId, medicationId])
+  @@index([medicationId], map: "pharmacy_inventory_medicationId_fkey")
 }
 
 model prescription_medications {
@@ -91,6 +97,9 @@ model prescription_medications {
   price             Float
   medications       medications   @relation(fields: [medicationId], references: [id])
   prescriptions     prescriptions @relation(fields: [prescriptionId], references: [id])
+
+  @@index([medicationId], map: "prescription_medications_medicationId_fkey")
+  @@index([prescriptionId], map: "prescription_medications_prescriptionId_fkey")
 }
 
 model prescriptions {
@@ -102,17 +111,21 @@ model prescriptions {
   pharmacyId                            String?
   status                                String                     @default("ISSUED")
   diagnosis                             String
-  notes                                 String? @db.Text
+  notes                                 String?                    @db.Text
   issuedAt                              DateTime                   @default(now())
   validUntil                            DateTime
   totalPrice                            Float
   createdAt                             DateTime                   @default(now())
   updatedAt                             DateTime
   prescription_medications              prescription_medications[]
-  users_prescriptions_pharmacyIdTousers users?                     @relation("prescriptions_pharmacyIdTousers", fields: [pharmacyId], references: [id])
   appointments                          appointments?              @relation(fields: [appointmentId], references: [id])
   users_prescriptions_doctorIdTousers   users                      @relation("prescriptions_doctorIdTousers", fields: [doctorId], references: [id])
   users_prescriptions_patientIdTousers  users                      @relation("prescriptions_patientIdTousers", fields: [patientId], references: [id])
+  users_prescriptions_pharmacyIdTousers users?                     @relation("prescriptions_pharmacyIdTousers", fields: [pharmacyId], references: [id])
+
+  @@index([doctorId], map: "prescriptions_doctorId_fkey")
+  @@index([patientId], map: "prescriptions_patientId_fkey")
+  @@index([pharmacyId], map: "prescriptions_pharmacyId_fkey")
 }
 
 model sessions {
@@ -121,6 +134,8 @@ model sessions {
   user_id       String
   expires       DateTime
   users         users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id], map: "sessions_user_id_fkey")
 }
 
 model system_alerts {
@@ -142,6 +157,8 @@ model user_notifications {
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
   users     users    @relation(fields: [userId], references: [id])
+
+  @@index([userId], map: "user_notifications_userId_fkey")
 }
 
 model users {
@@ -162,16 +179,20 @@ model users {
   pharmacyName                                  String?
   pharmacyAddress                               String?
   pharmacyPhone                                 String?
+  latitude                                      Float?
+  longitude                                     Float?
+  hasOfflineConsultation                        Boolean              @default(true)
+  hasOnlineConsultation                         Boolean              @default(true)
   accounts                                      accounts[]
   appointments_appointments_doctorIdTousers     appointments[]       @relation("appointments_doctorIdTousers")
   appointments_appointments_patientIdTousers    appointments[]       @relation("appointments_patientIdTousers")
+  clinic_fees                                   clinic_fees[]
   pharmacy_inventory                            pharmacy_inventory[]
-  prescriptions_prescriptions_pharmacyIdTousers prescriptions[]      @relation("prescriptions_pharmacyIdTousers")
   prescriptions_prescriptions_doctorIdTousers   prescriptions[]      @relation("prescriptions_doctorIdTousers")
   prescriptions_prescriptions_patientIdTousers  prescriptions[]      @relation("prescriptions_patientIdTousers")
+  prescriptions_prescriptions_pharmacyIdTousers prescriptions[]      @relation("prescriptions_pharmacyIdTousers")
   sessions                                      sessions[]
   user_notifications                            user_notifications[]
-  clinic_fees                                   clinic_fees[]
 }
 
 model verificationtokens {
@@ -183,19 +204,19 @@ model verificationtokens {
 }
 
 model clinic_fees {
-  id           String      @id
-  doctorId     String
-  departmentId String
-  consultationType String  // "ONLINE" or "OFFLINE"
-  basePrice    Float       // 기본 진료비
-  emergencyPrice Float?    // 응급 진료비 (선택사항)
-  description  String?     @db.Text
-  isActive     Boolean     @default(true)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime
-
-  departments  departments @relation(fields: [departmentId], references: [id])
-  users        users       @relation(fields: [doctorId], references: [id])
+  id               String      @id
+  doctorId         String
+  departmentId     String
+  consultationType String
+  basePrice        Float
+  emergencyPrice   Float?
+  description      String?     @db.Text
+  isActive         Boolean     @default(true)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime
+  departments      departments @relation(fields: [departmentId], references: [id])
+  users            users       @relation(fields: [doctorId], references: [id])
 
   @@unique([doctorId, departmentId, consultationType])
+  @@index([departmentId], map: "clinic_fees_departmentId_fkey")
 }

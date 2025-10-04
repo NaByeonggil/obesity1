@@ -1,22 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { prisma } from '@/lib/prisma'
-import { verifyToken, getTokenFromAuthHeader } from '@/lib/auth'
-import { UserRole, PrescriptionStatus } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization')
-    const token = getTokenFromAuthHeader(authHeader)
+    const session = await getServerSession(authOptions)
 
-    if (!token) {
+    if (!session || !session.user) {
       return NextResponse.json(
-        { error: '인증 토큰이 필요합니다.' },
+        { error: '로그인이 필요합니다.' },
         { status: 401 }
       )
     }
 
-    const payload = verifyToken(token)
-    if (!payload || payload.role !== UserRole.PHARMACY) {
+    if (session.user.role?.toLowerCase() !== 'pharmacy') {
       return NextResponse.json(
         { error: '약국 계정만 접근할 수 있습니다.' },
         { status: 403 }
@@ -29,24 +27,24 @@ export async function GET(request: NextRequest) {
     const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
 
     // 대기 중인 처방전 수 (PENDING 상태)
-    const pendingPrescriptions = await prisma.prescription.count({
+    const pendingPrescriptions = await prisma.prescriptions.count({
       where: {
-        status: PrescriptionStatus.PENDING
+        status: 'PENDING'
       }
     })
 
     // 총 고객 수 (처방전을 가진 고유 환자 수)
-    const totalCustomers = await prisma.prescription.groupBy({
+    const totalCustomers = await prisma.prescriptions.groupBy({
       by: ['patientId'],
       where: {
         status: {
-          in: [PrescriptionStatus.PENDING, PrescriptionStatus.DISPENSED, PrescriptionStatus.COMPLETED]
+          in: ['PENDING', 'DISPENSED', 'COMPLETED']
         }
       }
     })
 
     // 재고 부족 품목 수 (임시로 처방전에서 자주 사용되는 의약품 기준)
-    const lowStockItems = await prisma.medication.count({
+    const lowStockItems = await prisma.medications.count({
       where: {
         // 임시 조건: 재고 관리 기능이 없으므로 샘플 데이터로 계산
         name: {
@@ -56,9 +54,9 @@ export async function GET(request: NextRequest) {
     })
 
     // 오늘 완료된 처방전 수
-    const completedToday = await prisma.prescription.count({
+    const completedToday = await prisma.prescriptions.count({
       where: {
-        status: PrescriptionStatus.COMPLETED,
+        status: 'COMPLETED',
         updatedAt: {
           gte: startOfDay,
           lt: endOfDay
@@ -68,7 +66,7 @@ export async function GET(request: NextRequest) {
 
     // 이번 달 신규 고객 수 (트렌드 계산용)
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-    const thisMonthNewCustomers = await prisma.prescription.groupBy({
+    const thisMonthNewCustomers = await prisma.prescriptions.groupBy({
       by: ['patientId'],
       where: {
         createdAt: {
@@ -80,7 +78,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    const newCustomersThisMonth = thisMonthNewCustomers.filter(customer =>
+    const newCustomersThisMonth = thisMonthNewCustomers.filter((customer: any) =>
       customer._min.createdAt && customer._min.createdAt >= startOfMonth
     ).length
 

@@ -19,20 +19,29 @@ import {
   FileText,
   CheckCircle,
   Building,
-  Stethoscope
+  Stethoscope,
+  Video,
+  PhoneCall
 } from "lucide-react"
 
 export default function BookingConfirmPage() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const searchParams = useSearchParams()
   const clinicId = searchParams.get('clinic')
   const department = searchParams.get('department')
+
+  // 디버깅: URL 파라미터 확인
+  React.useEffect(() => {
+    console.log('🔍 URL 파라미터:', { clinicId, department })
+    console.log('🔍 비대면 진료 선택 가능?', !(department === 'obesity-treatment' || department === 'obesity'))
+  }, [clinicId, department])
 
   const [date, setDate] = React.useState<Date | undefined>(new Date())
   const [selectedTime, setSelectedTime] = React.useState<string>("")
   const [symptoms, setSymptoms] = React.useState("")
   const [phoneNumber, setPhoneNumber] = React.useState("")
+  const [consultationMethod, setConsultationMethod] = React.useState<"video" | "phone">("video")
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [bookingSuccess, setBookingSuccess] = React.useState(false)
 
@@ -42,6 +51,33 @@ export default function BookingConfirmPage() {
     "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
     "17:00", "17:30"
   ]
+
+  // Redirect to login if not authenticated
+  React.useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/login')
+    }
+  }, [status, router])
+
+  // Show loading while checking authentication
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="max-w-2xl mx-auto px-4 py-16">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">인증 확인 중...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Redirect if no session
+  if (!session || !session.user) {
+    return null
+  }
 
   const handleBookingSubmit = async () => {
     setIsSubmitting(true)
@@ -65,11 +101,34 @@ export default function BookingConfirmPage() {
 
       const departmentName = departmentNames[department || ''] || department
 
+      // 진료 타입 결정: 비대면 진료 가능한 진료과 목록
+      const onlineDepartments = [
+        'eye-care',
+        'cold',
+        'internal-medicine',
+        'pediatrics',
+        'dermatology',
+        'orthopedics',
+        'neurosurgery',
+        'ent'
+      ]
+      const isOnlineConsultation = onlineDepartments.includes(department || '')
+      const consultationType = isOnlineConsultation ? 'online' : 'offline'
+
+      console.log('📋 예약 정보:', {
+        department,
+        departmentName,
+        isOnlineConsultation,
+        consultationType,
+        consultationMethod
+      })
+
       // API 호출하여 예약 생성
       const response = await fetch('/api/appointments/create', {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           doctorId: null, // 특정 의사가 없으면 자동 할당
@@ -77,12 +136,13 @@ export default function BookingConfirmPage() {
           clinicName: `${departmentName} 클리닉`, // 클리닉 이름 생성
           appointmentDate: date?.toISOString().split('T')[0],
           appointmentTime: selectedTime,
-          consultationType: department === 'obesity-treatment' || department === 'obesity' ? 'offline' : 'online',
+          consultationType: consultationType,
+          consultationMethod: isOnlineConsultation ? consultationMethod : undefined, // 비대면일 때만 화상/전화 구분
           symptoms,
           personalInfo: {
             phoneNumber,
-            patientName: session?.user?.name,
-            patientEmail: session?.user?.email
+            patientName: session.user?.name,
+            patientEmail: session.user?.email
           }
         })
       })
@@ -160,7 +220,6 @@ export default function BookingConfirmPage() {
             </CardHeader>
             <CardContent>
               <Calendar
-                mode="single"
                 selected={date}
                 onSelect={setDate}
                 className="rounded-md border"
@@ -195,6 +254,68 @@ export default function BookingConfirmPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* 진료 방식 선택 (비대면 진료 가능한 경우 표시) */}
+          {(department === 'eye-care' ||
+            department === 'cold' ||
+            department === 'internal-medicine' ||
+            department === 'pediatrics' ||
+            department === 'dermatology' ||
+            department === 'orthopedics' ||
+            department === 'neurosurgery' ||
+            department === 'ent') && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Video className="h-5 w-5" />
+                  진료 방식 선택
+                </CardTitle>
+                <CardDescription>
+                  원하시는 비대면 진료 방식을 선택해주세요
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => setConsultationMethod("video")}
+                    className={`p-4 border-2 rounded-lg transition-all ${
+                      consultationMethod === "video"
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <Video className={`h-8 w-8 ${consultationMethod === "video" ? "text-blue-500" : "text-gray-400"}`} />
+                      <span className={`font-medium ${consultationMethod === "video" ? "text-blue-600" : "text-gray-700"}`}>
+                        화상진료
+                      </span>
+                      <span className="text-xs text-gray-500 text-center">
+                        화상 통화로 진료
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setConsultationMethod("phone")}
+                    className={`p-4 border-2 rounded-lg transition-all ${
+                      consultationMethod === "phone"
+                        ? "border-green-500 bg-green-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <PhoneCall className={`h-8 w-8 ${consultationMethod === "phone" ? "text-green-500" : "text-gray-400"}`} />
+                      <span className={`font-medium ${consultationMethod === "phone" ? "text-green-600" : "text-gray-700"}`}>
+                        전화진료
+                      </span>
+                      <span className="text-xs text-gray-500 text-center">
+                        음성 통화로 진료
+                      </span>
+                    </div>
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* 증상 입력 */}
           <Card>
@@ -232,7 +353,7 @@ export default function BookingConfirmPage() {
               <div>
                 <label className="block text-sm font-medium mb-2">이름</label>
                 <Input
-                  value={session?.user?.name || ''}
+                  value={session.user?.name || ''}
                   disabled
                   className="bg-gray-50"
                 />
@@ -268,9 +389,17 @@ export default function BookingConfirmPage() {
               <div className="flex justify-between">
                 <span className="text-gray-600">진료 유형:</span>
                 <Badge>
-                  {department === 'obesity-treatment' || department === 'obesity' ? '대면' : '비대면'}
+                  {['eye-care', 'cold', 'internal-medicine', 'pediatrics', 'dermatology', 'orthopedics', 'neurosurgery', 'ent'].includes(department || '') ? '비대면' : '대면'}
                 </Badge>
               </div>
+              {['eye-care', 'cold', 'internal-medicine', 'pediatrics', 'dermatology', 'orthopedics', 'neurosurgery', 'ent'].includes(department || '') && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">진료 방식:</span>
+                  <Badge variant={consultationMethod === 'video' ? 'default' : 'secondary'}>
+                    {consultationMethod === 'video' ? '화상진료' : '전화진료'}
+                  </Badge>
+                </div>
+              )}
             </CardContent>
           </Card>
 

@@ -1,37 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { prisma } from '@/lib/prisma'
-import { verifyToken, getTokenFromAuthHeader } from '@/lib/auth'
-import { UserRole } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization')
-    const token = getTokenFromAuthHeader(authHeader)
+    const session = await getServerSession(authOptions)
 
-    if (!token) {
+    if (!session || !session.user) {
       return NextResponse.json(
-        { error: '인증 토큰이 필요합니다.' },
+        { error: '로그인이 필요합니다.' },
         { status: 401 }
       )
     }
 
-    const payload = verifyToken(token)
-    if (!payload || payload.role !== UserRole.PHARMACY) {
+    if (session.user.role?.toLowerCase() !== 'pharmacy') {
       return NextResponse.json(
         { error: '약국 계정만 접근할 수 있습니다.' },
         { status: 403 }
       )
     }
 
-    // 재고 정보 가져오기 (PharmacyInventory 테이블 사용)
-    const inventory = await prisma.pharmacyInventory.findMany({
+    // 재고 정보 가져오기 (pharmacy_inventory 테이블 사용)
+    const inventory = await prisma.pharmacy_inventory.findMany({
       include: {
-        medication: {
+        medications: {
           select: {
             id: true,
             name: true,
-            category: true,
-            manufacturer: true,
+            description: true,
             price: true
           }
         }
@@ -42,17 +39,17 @@ export async function GET(request: NextRequest) {
     })
 
     // 재고 부족 품목 필터링 (현재 재고가 최소 재고보다 적은 경우)
-    const lowStockItems = inventory.filter(item => item.currentStock <= item.minStock)
+    const lowStockItems = inventory.filter((item: any) => item.currentStock <= item.minStock)
 
-    const formattedLowStockItems = lowStockItems.map(item => ({
+    const formattedLowStockItems = lowStockItems.map((item: any) => ({
       id: item.id,
-      name: item.medication.name,
+      name: item.medications.name,
       currentStock: item.currentStock,
       minStock: item.minStock,
-      supplier: item.medication.manufacturer,
+      supplier: item.supplier,
       lastOrderDate: item.lastOrderDate,
-      category: item.medication.category,
-      price: item.medication.price
+      description: item.medications.description,
+      price: item.medications.price
     }))
 
     return NextResponse.json({ lowStockItems: formattedLowStockItems })

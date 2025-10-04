@@ -1,8 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -31,19 +31,25 @@ export function DepartmentCard({
   featured = false,
   requireLogin = false
 }: DepartmentCardProps) {
-  const { data: session } = useSession()
   const router = useRouter()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    // localStorage에서 토큰 확인
+    const token = localStorage.getItem('auth-token')
+    setIsAuthenticated(!!token)
+  }, [])
 
   const handleClick = (e: React.MouseEvent) => {
-    console.log('Card clicked:', { requireLogin, session: !!session, href })
-    if (requireLogin && !session) {
+    console.log('Card clicked:', { requireLogin, isAuthenticated, href })
+    if (requireLogin && !isAuthenticated) {
       e.preventDefault()
       console.log('Redirecting to login:', '/auth/login?callbackUrl=' + encodeURIComponent(href))
       router.push('/auth/login?callbackUrl=' + encodeURIComponent(href))
       return
     }
     // 로그인이 되어있으면 일반적인 링크 동작
-    if (requireLogin && session) {
+    if (requireLogin && isAuthenticated) {
       e.preventDefault()
       router.push(href)
       return
@@ -91,6 +97,15 @@ export function DepartmentCard({
           >
             {available === 'both' ? '대면/비대면' : available === 'online' ? '비대면' : '대면'}
           </Badge>
+
+          {/* 로그인 필요 시 로그인 버튼 표시 */}
+          {requireLogin && !isAuthenticated && (
+            <div className="mt-2">
+              <button className="bg-blue-500 hover:bg-blue-600 text-white text-xs md:text-sm px-3 py-1.5 md:px-4 md:py-2 rounded-full transition-colors duration-200">
+                로그인 후 이용
+              </button>
+            </div>
+          )}
         </div>
       </CardContent>
 

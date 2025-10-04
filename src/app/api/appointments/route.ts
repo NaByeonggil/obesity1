@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyToken, getTokenFromAuthHeader } from '@/lib/auth'
-import { AppointmentType, AppointmentStatus, UserRole } from '@prisma/client'
+
+type AppointmentType = 'ONLINE' | 'OFFLINE'
+type AppointmentStatus = 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED'
+type UserRole = 'PATIENT' | 'DOCTOR' | 'PHARMACY' | 'ADMIN'
 
 export async function GET(request: NextRequest) {
   try {
@@ -46,10 +49,10 @@ export async function GET(request: NextRequest) {
       whereClause.doctorId = doctorId
     }
 
-    const appointments = await prisma.appointment.findMany({
+    const appointments = await prisma.appointments.findMany({
       where: whereClause,
       include: {
-        patient: {
+        users_appointments_patientIdTousers: {
           select: {
             id: true,
             name: true,
@@ -57,7 +60,7 @@ export async function GET(request: NextRequest) {
             avatar: true
           }
         },
-        doctor: {
+        users_appointments_doctorIdTousers: {
           select: {
             id: true,
             name: true,
@@ -66,14 +69,14 @@ export async function GET(request: NextRequest) {
             avatar: true
           }
         },
-        department: {
+        departments: {
           select: {
             id: true,
             name: true,
             consultationType: true
           }
         },
-        prescription: {
+        prescriptions: {
           select: {
             id: true,
             prescriptionNumber: true,
@@ -144,10 +147,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if doctor exists
-    const doctor = await prisma.user.findFirst({
+    const doctor = await prisma.users.findFirst({
       where: {
         id: doctorId,
-        role: UserRole.DOCTOR
+        role: 'DOCTOR'
       }
     })
 
@@ -159,7 +162,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if department exists
-    const department = await prisma.department.findUnique({
+    const department = await prisma.departments.findUnique({
       where: { id: departmentId }
     })
 
@@ -171,7 +174,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create appointment
-    const appointment = await prisma.appointment.create({
+    const appointment = await prisma.appointments.create({
       data: {
         patientId: payload.userId,
         doctorId,
@@ -184,7 +187,7 @@ export async function POST(request: NextRequest) {
         personalInfo: type === AppointmentType.ONLINE ? personalInfo : null
       },
       include: {
-        patient: {
+        users_appointments_patientIdTousers: {
           select: {
             id: true,
             name: true,
@@ -192,7 +195,7 @@ export async function POST(request: NextRequest) {
             avatar: true
           }
         },
-        doctor: {
+        users_appointments_doctorIdTousers: {
           select: {
             id: true,
             name: true,
@@ -201,7 +204,7 @@ export async function POST(request: NextRequest) {
             avatar: true
           }
         },
-        department: {
+        departments: {
           select: {
             id: true,
             name: true,

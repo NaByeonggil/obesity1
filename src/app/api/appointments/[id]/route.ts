@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyToken, getTokenFromAuthHeader } from '@/lib/auth'
-import { AppointmentStatus, UserRole } from '@prisma/client'
+
+type AppointmentStatus = 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED'
+type UserRole = 'PATIENT' | 'DOCTOR' | 'PHARMACY' | 'ADMIN'
 
 export async function GET(
   request: NextRequest,

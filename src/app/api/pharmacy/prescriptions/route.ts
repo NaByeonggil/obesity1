@@ -1,71 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { verifyToken, getTokenFromAuthHeader } from '@/lib/auth'
-import { UserRole, PrescriptionStatus } from '@prisma/client'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { PrismaClient } from '@prisma/client'
 
-export async function GET(request: NextRequest) {
+const prisma = new PrismaClient()
+
+// 약국의 처방전 목록 조회
+export async function GET() {
   try {
-    const authHeader = request.headers.get('authorization')
-    const token = getTokenFromAuthHeader(authHeader)
+    const session = await getServerSession(authOptions)
 
-    if (!token) {
-      return NextResponse.json(
-        { error: '인증 토큰이 필요합니다.' },
-        { status: 401 }
-      )
+    if (!session || !session.user) {
+      return NextResponse.json({ error: '로그인이 필요합니다' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
-    if (!payload || payload.role !== UserRole.PHARMACY) {
-      return NextResponse.json(
-        { error: '약국 계정만 접근할 수 있습니다.' },
-        { status: 403 }
-      )
+    if (session.user.role?.toLowerCase() !== 'pharmacy') {
+      return NextResponse.json({ error: '약국만 접근 가능합니다' }, { status: 403 })
     }
 
-    const { searchParams } = new URL(request.url)
-    const status = searchParams.get('status')
-
-    let whereClause: any = {}
-
-    if (status) {
-      whereClause.status = status as PrescriptionStatus
-    }
-
-    // 모든 처방전 가져오기 (최근 순으로)
-    const prescriptions = await prisma.prescription.findMany({
-      where: whereClause,
+    // 약국으로 전송된 처방전 목록 조회
+    const prescriptions = await prisma.prescriptions.findMany({
+      where: {
+        pharmacyId: session.user.id
+      },
       include: {
-        patient: {
+        users_prescriptions_patientIdTousers: {
           select: {
             id: true,
             name: true,
             phone: true,
-            avatar: true
+            email: true
           }
         },
-        doctor: {
+        users_prescriptions_doctorIdTousers: {
           select: {
             id: true,
             name: true,
+            clinic: true,
             specialization: true
           }
         },
-        appointment: {
-          select: {
-            id: true,
-            appointmentDate: true,
-            type: true
+        appointments: {
+          include: {
+            departments: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
           }
         },
-        medications: {
+        prescription_medications: {
           include: {
-            medication: {
+            medications: {
               select: {
                 id: true,
                 name: true,
-                category: true,
-                manufacturer: true,
+                description: true,
                 price: true
               }
             }
@@ -73,48 +64,153 @@ export async function GET(request: NextRequest) {
         }
       },
       orderBy: {
-        createdAt: 'desc'
+        updatedAt: 'desc'
       }
     })
+
+    // 처방전 통계 계산
+    const totalPrescriptions = prescriptions.length
+    const pendingPrescriptions = prescriptions.filter(p => p.status === 'PENDING').length
+    const dispensingPrescriptions = prescriptions.filter(p => p.status === 'DISPENSING').length
+    const dispensedPrescriptions = prescriptions.filter(p => p.status === 'DISPENSED').length
 
     // 처방전 데이터 포맷팅
     const formattedPrescriptions = prescriptions.map(prescription => {
-      const totalPrice = prescription.medications.reduce(
-        (sum, med) => sum + (med.medication.price * med.quantity),
-        0
-      )
+      const issuedDate = new Date(prescription.issuedAt)
+      const validDate = new Date(prescription.validUntil)
 
       return {
         id: prescription.id,
-        patientName: prescription.patient.name,
-        patientPhone: prescription.patient.phone,
-        doctorName: prescription.doctor.name,
-        clinic: prescription.doctor.specialization || '전문의',
-        receivedTime: prescription.createdAt,
-        medications: prescription.medications.map(med => ({
-          name: med.medication.name,
-          quantity: med.quantity,
-          dosage: med.dosage,
-          frequency: med.frequency,
-          duration: med.duration,
-          price: med.medication.price,
-          manufacturer: med.medication.manufacturer
-        })),
-        totalPrice,
+        prescriptionNumber: prescription.prescriptionNumber,
+        patient: {
+          id: prescription.users_prescriptions_patientIdTousers?.id || '',
+          name: prescription.users_prescriptions_patientIdTousers?.name || '환자',
+          phone: prescription.users_prescriptions_patientIdTousers?.phone || '',
+          email: prescription.users_prescriptions_patientIdTousers?.email || ''
+        },
+        doctor: {
+          id: prescription.users_prescriptions_doctorIdTousers?.id || '',
+          name: prescription.users_prescriptions_doctorIdTousers?.name || '담당의',
+          clinic: prescription.users_prescriptions_doctorIdTousers?.clinic || '',
+          specialization: prescription.users_prescriptions_doctorIdTousers?.specialization || ''
+        },
+        department: {
+          id: prescription.appointments?.departments?.id || '',
+          name: prescription.appointments?.departments?.name || '일반'
+        },
         status: prescription.status,
-        urgent: false, // 긴급 여부는 추후 추가 가능
         diagnosis: prescription.diagnosis,
-        notes: prescription.notes
+        notes: prescription.notes,
+        issuedAt: issuedDate.toISOString(),
+        validUntil: validDate.toISOString(),
+        totalPrice: prescription.totalPrice,
+        medications: prescription.prescription_medications.map(pm => ({
+          id: pm.id,
+          medicationId: pm.medicationId,
+          name: pm.medications.name,
+          description: pm.medications.description,
+          dosage: pm.dosage,
+          frequency: pm.frequency,
+          duration: pm.duration,
+          quantity: pm.quantity,
+          price: pm.price,
+          substituteAllowed: pm.substituteAllowed,
+          originalPrice: pm.medications.price
+        }))
       }
     })
 
-    return NextResponse.json({ prescriptions: formattedPrescriptions })
+    return NextResponse.json({
+      success: true,
+      prescriptions: formattedPrescriptions,
+      stats: {
+        totalPrescriptions,
+        pendingPrescriptions,
+        dispensingPrescriptions,
+        dispensedPrescriptions
+      }
+    })
 
   } catch (error) {
-    console.error('Get pharmacy prescriptions error:', error)
+    console.error('처방전 조회 오류:', error)
     return NextResponse.json(
-      { error: '서버 오류가 발생했습니다.' },
+      { success: false, error: '처방전 조회에 실패했습니다' },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
+// 처방전 상태 업데이트 (조제 시작, 조제 완료 등)
+export async function PUT(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session || !session.user) {
+      return NextResponse.json({ error: '로그인이 필요합니다' }, { status: 401 })
+    }
+
+    if (session.user.role?.toLowerCase() !== 'pharmacy') {
+      return NextResponse.json({ error: '약국만 접근 가능합니다' }, { status: 403 })
+    }
+
+    const body = await request.json()
+    const { prescriptionId, status, copayment, substitutions } = body
+
+    // 처방전 존재 확인 및 권한 검증
+    const prescription = await prisma.prescriptions.findFirst({
+      where: {
+        id: prescriptionId,
+        pharmacyId: session.user.id
+      }
+    })
+
+    if (!prescription) {
+      return NextResponse.json({ error: '처방전을 찾을 수 없습니다' }, { status: 404 })
+    }
+
+    // 처방전 업데이트 데이터 준비
+    const updateData: any = {
+      status,
+      updatedAt: new Date()
+    }
+
+    // 조제 완료 시 본인 부담금 기록
+    if (status === 'DISPENSED' && copayment !== undefined) {
+      updateData.totalPrice = copayment
+    }
+
+    // 대체 조제 정보 기록 (notes에 추가)
+    if (substitutions && substitutions.length > 0) {
+      const substitutionNotes = substitutions.map((sub: any) =>
+        `[대체조제] ${sub.originalMedication} → ${sub.substituteMedication}`
+      ).join('\n')
+
+      updateData.notes = prescription.notes
+        ? `${prescription.notes}\n\n${substitutionNotes}`
+        : substitutionNotes
+    }
+
+    // 처방전 업데이트
+    const updatedPrescription = await prisma.prescriptions.update({
+      where: { id: prescriptionId },
+      data: updateData
+    })
+
+    return NextResponse.json({
+      success: true,
+      message: '처방전이 업데이트되었습니다',
+      prescription: updatedPrescription
+    })
+
+  } catch (error) {
+    console.error('처방전 업데이트 오류:', error)
+    return NextResponse.json(
+      { success: false, error: '처방전 업데이트에 실패했습니다' },
+      { status: 500 }
+    )
+  } finally {
+    await prisma.$disconnect()
   }
 }

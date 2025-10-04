@@ -21,7 +21,9 @@ import {
   LogOut,
   Stethoscope,
   Pill,
-  Shield
+  Shield,
+  UserCheck,
+  User
 } from "lucide-react"
 
 interface DashboardLayoutProps {
@@ -41,6 +43,46 @@ export function DashboardLayout({ children, userRole, user }: DashboardLayoutPro
 
   const navigation = getNavigationItems(userRole)
   const roleConfig = getRoleConfig(userRole)
+
+  // 역할별 로그아웃 후 리다이렉트 URL 결정
+  const getRedirectUrl = (role: UserRole) => {
+    switch (role) {
+      case 'doctor':
+        return '/auth/login?role=doctor'
+      case 'pharmacy':
+        return '/auth/login?role=pharmacy'
+      case 'admin':
+        return '/auth/login?role=admin'
+      case 'patient':
+      default:
+        return '/'
+    }
+  }
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      })
+
+      const redirectUrl = getRedirectUrl(userRole)
+
+      if (response.ok) {
+        console.log(`로그아웃 성공 - ${userRole} → ${redirectUrl}`)
+        router.push(redirectUrl)
+      } else {
+        console.error('Logout failed')
+        // 실패해도 적절한 페이지로 리다이렉트
+        router.push(redirectUrl)
+      }
+    } catch (error) {
+      console.error('Logout error:', error)
+      // 오류가 발생해도 적절한 페이지로 리다이렉트
+      const redirectUrl = getRedirectUrl(userRole)
+      router.push(redirectUrl)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -136,6 +178,7 @@ export function DashboardLayout({ children, userRole, user }: DashboardLayoutPro
             <Button
               variant="ghost"
               className="w-full justify-start text-gray-600 hover:text-gray-900"
+              onClick={handleLogout}
             >
               <LogOut className="mr-3 h-5 w-5" />
               로그아웃
@@ -206,18 +249,19 @@ function getNavigationItems(role: UserRole) {
     case 'doctor':
       return [
         ...baseItems.slice(0, 2),
-        { name: "환자 관리", href: "/doctor/patients", icon: Users },
-        { name: "진료 기록", href: "/doctor/records", icon: FileText },
+        { name: "예약 관리", href: "/doctor/appointments", icon: Calendar },
         { name: "처방전 관리", href: "/doctor/prescriptions", icon: Pill },
+        { name: "프로필 설정", href: "/doctor/profile", icon: User },
         baseItems[2]
       ]
     case 'pharmacy':
       return [
-        ...baseItems.slice(0, 2),
+        baseItems[0],
         { name: "처방전 조제", href: "/pharmacy/prescriptions", icon: Pill },
-        { name: "재고 관리", href: "/pharmacy/inventory", icon: FileText },
+        { name: "비급여 의약품 가격", href: "/pharmacy/medication-pricing", icon: FileText },
         { name: "고객 관리", href: "/pharmacy/customers", icon: Users },
-        baseItems[2]
+        { name: "일일 정산", href: "/pharmacy/daily-settlement", icon: Calendar },
+        { name: "프로필 설정", href: "/pharmacy/profile", icon: User }
       ]
     case 'admin':
       return [

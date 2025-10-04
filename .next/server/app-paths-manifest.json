@@ -1,6 +1,10 @@
 {
-  "/patient/page": "app/patient/page.js",
-  "/patient/booking/page": "app/patient/booking/page.js",
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/api/clinics/route": "app/api/clinics/route.js"
+  "/page": "app/page.js",
+  "/appointments/[department]/page": "app/appointments/[department]/page.js",
+  "/auth/login/page": "app/auth/login/page.js",
+  "/patient/clinics/page": "app/patient/clinics/page.js",
+  "/api/auth/login/route": "app/api/auth/login/route.js",
+  "/api/patient/appointments/route": "app/api/patient/appointments/route.js",
+  "/api/patient/prescriptions/route": "app/api/patient/prescriptions/route.js",
+  "/api/doctors/route": "app/api/doctors/route.js"
 }

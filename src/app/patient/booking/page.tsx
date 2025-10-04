@@ -49,6 +49,13 @@ export default function BookingPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const department = searchParams.get('department') || ''
+  const clinicId = searchParams.get('clinicId')
+  const clinicName = searchParams.get('clinicName')
+  const doctorName = searchParams.get('doctorName')
+  const address = searchParams.get('address')
+  const phone = searchParams.get('phone')
+  const consultationFee = searchParams.get('consultationFee')
+
   const [clinics, setClinics] = React.useState<Clinic[]>([])
   const [loading, setLoading] = React.useState(true)
   const [searchQuery, setSearchQuery] = React.useState("")
@@ -56,6 +63,8 @@ export default function BookingPage() {
   const [userLocation, setUserLocation] = React.useState<{lat: number, lng: number} | null>(null)
   const [locationPermission, setLocationPermission] = React.useState<'granted' | 'denied' | 'prompt'>('prompt')
   const [sortBy, setSortBy] = React.useState('auto')
+  const [selectedDate, setSelectedDate] = React.useState<string>('')
+  const [selectedTime, setSelectedTime] = React.useState<string>('')
 
   // 진료과목별 한글 이름
   const departmentNames: { [key: string]: string } = {
@@ -142,13 +151,30 @@ export default function BookingPage() {
   }
 
   React.useEffect(() => {
-    // 페이지 로드 시 위치 권한 요청
-    if (locationPermission === 'prompt') {
-      requestLocation()
+    // URL 파라미터로 특정 클리닉 정보를 받았다면 해당 정보만 표시
+    if (clinicId && clinicName) {
+      const selectedClinic: Clinic = {
+        id: clinicId,
+        name: clinicName,
+        doctorName: doctorName || '',
+        address: address || '',
+        phone: phone || '',
+        specialization: departmentName,
+        distance: '',
+        consultationType: 'offline',
+        consultationFee: parseInt(consultationFee || '0')
+      }
+      setClinics([selectedClinic])
+      setLoading(false)
     } else {
-      fetchClinics()
+      // 페이지 로드 시 위치 권한 요청
+      if (locationPermission === 'prompt') {
+        requestLocation()
+      } else {
+        fetchClinics()
+      }
     }
-  }, [department])
+  }, [department, clinicId])
 
   React.useEffect(() => {
     // 지역 선택 변경 시 재조회
@@ -283,7 +309,97 @@ export default function BookingPage() {
         </div>
       </div>
 
-      {/* 의원 리스트 */}
+      {/* 특정 병원이 선택된 경우 예약 UI 표시 */}
+      {clinicId && clinics.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>{clinics[0].name} 예약하기</CardTitle>
+              <CardDescription>
+                {clinics[0].doctorName} • {clinics[0].address}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* 예약 날짜 선택 */}
+                <div>
+                  <h3 className="font-semibold mb-3">예약 날짜 선택</h3>
+                  <div className="grid grid-cols-7 gap-2">
+                    {[0, 1, 2, 3, 4, 5, 6].map((dayOffset) => {
+                      const date = new Date();
+                      date.setDate(date.getDate() + dayOffset);
+                      const dateStr = date.toISOString().split('T')[0];
+                      const dayName = date.toLocaleDateString('ko-KR', { weekday: 'short' });
+                      const dayNum = date.getDate();
+
+                      return (
+                        <Button
+                          key={dayOffset}
+                          variant={selectedDate === dateStr ? 'default' : 'outline'}
+                          onClick={() => setSelectedDate(dateStr)}
+                          className="flex-col h-16"
+                        >
+                          <span className="text-xs">{dayName}</span>
+                          <span className="text-lg font-semibold">{dayNum}</span>
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 예약 시간 선택 */}
+                {selectedDate && (
+                  <div>
+                    <h3 className="font-semibold mb-3">예약 시간 선택</h3>
+                    <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
+                      {[
+                        '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+                        '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
+                        '17:00', '17:30', '18:00'
+                      ].map((time) => (
+                        <Button
+                          key={time}
+                          variant={selectedTime === time ? 'default' : 'outline'}
+                          onClick={() => setSelectedTime(time)}
+                          className="text-sm"
+                        >
+                          {time}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 진료비 정보 */}
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">예상 진료비</span>
+                    <span className="text-xl font-bold text-blue-600">
+                      {clinics[0].consultationFee.toLocaleString()}원
+                    </span>
+                  </div>
+                </div>
+
+                {/* 예약 확인 버튼 */}
+                {selectedDate && selectedTime && (
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    onClick={() => {
+                      router.push(`/patient/booking/confirm?clinic=${clinics[0].id}&date=${selectedDate}&time=${selectedTime}&department=${department}`);
+                    }}
+                  >
+                    예약 확인하기
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* 병원 선택이 안 된 경우 의원 리스트 표시 */}
+      {!clinicId && (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 정렬 옵션 */}
         {filteredClinics.length > 0 && (
@@ -443,6 +559,7 @@ export default function BookingPage() {
           </div>
         )}
       </div>
+      )}
     </div>
   )
 }

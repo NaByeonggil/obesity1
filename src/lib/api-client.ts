@@ -77,14 +77,15 @@ export const authApi = {
 // Appointments API
 export const appointmentsApi = {
   getAppointments: (token: string, params?: { status?: string; doctorId?: string }) => {
-    const searchParams = new URLSearchParams()
-    if (params?.status) searchParams.append('status', params.status)
-    if (params?.doctorId) searchParams.append('doctorId', params.doctorId)
+    // 환자용 예약 조회 엔드포인트 사용
+    const endpoint = `/api/patient/appointments`
 
-    const query = searchParams.toString()
-    const endpoint = `/api/appointments${query ? `?${query}` : ''}`
-
-    return apiRequest(endpoint, { token })
+    return apiRequest(endpoint, {
+      token,
+      headers: {
+        'Cookie': `auth-token=${token}`
+      }
+    })
   },
 
   getAppointment: (token: string, id: string) =>
@@ -113,7 +114,7 @@ export const prescriptionsApi = {
     if (params?.patientId) searchParams.append('patientId', params.patientId)
 
     const query = searchParams.toString()
-    const endpoint = `/api/prescriptions${query ? `?${query}` : ''}`
+    const endpoint = `/api/patient/prescriptions${query ? `?${query}` : ''}`
 
     return apiRequest(endpoint, { token })
   },

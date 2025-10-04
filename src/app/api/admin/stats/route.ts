@@ -18,10 +18,10 @@ export async function GET(req: NextRequest) {
     }
 
     // 1. 전체 사용자 통계
-    const totalUsers = await prisma.user.count()
+    const totalUsers = await prisma.users.count()
 
     // 2. 역할별 사용자 수
-    const usersByRole = await prisma.user.groupBy({
+    const usersByRole = await prisma.users.groupBy({
       by: ['role'],
       _count: {
         role: true
@@ -39,17 +39,17 @@ export async function GET(req: NextRequest) {
     const oneMonthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
 
     const [weeklySignups, monthlySignups, todaySignups] = await Promise.all([
-      prisma.user.count({
+      prisma.users.count({
         where: {
           createdAt: { gte: oneWeekAgo }
         }
       }),
-      prisma.user.count({
+      prisma.users.count({
         where: {
           createdAt: { gte: oneMonthAgo }
         }
       }),
-      prisma.user.count({
+      prisma.users.count({
         where: {
           createdAt: {
             gte: new Date(today.getFullYear(), today.getMonth(), today.getDate())
@@ -60,12 +60,12 @@ export async function GET(req: NextRequest) {
 
     // 4. 활동 통계
     const [totalAppointments, totalPrescriptions] = await Promise.all([
-      prisma.appointment.count(),
-      prisma.prescription.count()
+      prisma.appointments.count(),
+      prisma.prescriptions.count()
     ])
 
     // 5. 시스템 알림 수
-    const systemAlerts = await prisma.systemAlert.count({
+    const systemAlerts = await prisma.system_alerts.count({
       where: {
         resolved: false
       }
@@ -73,14 +73,14 @@ export async function GET(req: NextRequest) {
 
     // 6. 일일 거래 수 (오늘의 예약 + 처방전)
     const todayTransactions = await Promise.all([
-      prisma.appointment.count({
+      prisma.appointments.count({
         where: {
           createdAt: {
             gte: new Date(today.getFullYear(), today.getMonth(), today.getDate())
           }
         }
       }),
-      prisma.prescription.count({
+      prisma.prescriptions.count({
         where: {
           createdAt: {
             gte: new Date(today.getFullYear(), today.getMonth(), today.getDate())
@@ -92,18 +92,18 @@ export async function GET(req: NextRequest) {
     const dailyTransactions = todayTransactions[0] + todayTransactions[1]
 
     // 7. 활성 사용자 (최근 30일 내 활동)
-    const activeUsers = await prisma.user.count({
+    const activeUsers = await prisma.users.count({
       where: {
         OR: [
           {
-            patientAppointments: {
+            appointments_appointments_patientIdTousers: {
               some: {
                 createdAt: { gte: oneMonthAgo }
               }
             }
           },
           {
-            doctorAppointments: {
+            appointments_appointments_doctorIdTousers: {
               some: {
                 createdAt: { gte: oneMonthAgo }
               }
@@ -114,7 +114,7 @@ export async function GET(req: NextRequest) {
     })
 
     // 8. 소셜 로그인 통계
-    const socialAccounts = await prisma.account.groupBy({
+    const socialAccounts = await prisma.accounts.groupBy({
       by: ['provider'],
       _count: {
         provider: true

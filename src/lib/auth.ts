@@ -1,49 +1,60 @@
-import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { UserRole } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
-export interface JWTPayload {
+type UserRole = 'PATIENT' | 'DOCTOR' | 'PHARMACY' | 'ADMIN'
+
+interface TokenPayload {
   userId: string
-  email: string
   role: UserRole
-  name: string
-}
-
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 12)
-}
-
-export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  return bcrypt.compare(password, hashedPassword)
-}
-
-export function generateToken(payload: JWTPayload): string {
-  const secret = process.env.JWT_SECRET
-  if (!secret) {
-    throw new Error('JWT_SECRET is not defined')
-  }
-
-  return jwt.sign(payload, secret, { expiresIn: '7d' })
-}
-
-export function verifyToken(token: string): JWTPayload | null {
-  try {
-    const secret = process.env.JWT_SECRET
-    if (!secret) {
-      throw new Error('JWT_SECRET is not defined')
-    }
-
-    const decoded = jwt.verify(token, secret) as JWTPayload
-    return decoded
-  } catch (error) {
-    return null
-  }
+  iat?: number
+  exp?: number
 }
 
 export function getTokenFromAuthHeader(authHeader: string | null): string | null {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return null
+  if (!authHeader) return null
+
+  // Check for Bearer token
+  if (authHeader.startsWith('Bearer ')) {
+    return authHeader.substring(7)
   }
 
-  return authHeader.substring(7)
+  return authHeader
+}
+
+export function verifyToken(token: string): TokenPayload | null {
+  try {
+    const secret = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET
+    if (!secret) {
+      console.error('JWT_SECRET or NEXTAUTH_SECRET is not defined')
+      return null
+    }
+
+    const payload = jwt.verify(token, secret) as TokenPayload
+    return payload
+  } catch (error) {
+    console.error('Token verification failed:', error)
+    return null
+  }
+}
+
+export function generateToken(userId: string, role: UserRole): string {
+  const secret = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET
+  if (!secret) {
+    throw new Error('JWT_SECRET or NEXTAUTH_SECRET is not defined')
+  }
+
+  return jwt.sign(
+    { userId, role },
+    secret,
+    { expiresIn: '24h' }
+  )
+}
+
+export async function hashPassword(password: string): Promise<string> {
+  const saltRounds = 12
+  return bcrypt.hash(password, saltRounds)
+}
+
+export async function comparePassword(password: string, hashedPassword: string): Promise<boolean> {
+  return bcrypt.compare(password, hashedPassword)
 }

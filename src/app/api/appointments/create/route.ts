@@ -24,11 +24,16 @@ export async function POST(req: NextRequest) {
       appointmentDate,
       appointmentTime,
       consultationType,
+      consultationMethod, // 화상진료 or 전화진료
       symptoms,
       personalInfo
     } = body
 
-    console.log('Appointment creation request:', body)
+    console.log('📝 예약 생성 요청:')
+    console.log('  - departmentName:', departmentName)
+    console.log('  - consultationType:', consultationType)
+    console.log('  - consultationMethod:', consultationMethod)
+    console.log('  - 전체 body:', JSON.stringify(body, null, 2))
 
     // 실제 데이터베이스 연동
     try {
@@ -88,6 +93,17 @@ export async function POST(req: NextRequest) {
       // 4. 예약 생성
       const appointmentDateTime = new Date(`${appointmentDate}T${appointmentTime}:00`)
 
+      // 진료 방식 메모 생성
+      let consultationNote = consultationType === 'online' ? '비대면 진료\n' : '대면 진료\n'
+      if (consultationType === 'online' && consultationMethod) {
+        consultationNote += `진료 방법: ${consultationMethod === 'video' ? '화상진료' : '전화진료'}\n`
+      }
+      consultationNote += `환자 연락처: ${personalInfo.phoneNumber}`
+
+      console.log('💾 데이터베이스 저장 정보:')
+      console.log('  - type:', consultationType.toUpperCase())
+      console.log('  - notes:', consultationNote)
+
       const appointment = await prisma.appointments.create({
         data: {
           id: `apt_${Date.now()}`,
@@ -98,7 +114,7 @@ export async function POST(req: NextRequest) {
           status: 'PENDING',
           appointmentDate: appointmentDateTime,
           symptoms: symptoms,
-          notes: `환자 연락처: ${personalInfo.phoneNumber}`,
+          notes: consultationNote,
           personalInfo: personalInfo,
           createdAt: new Date(),
           updatedAt: new Date()
