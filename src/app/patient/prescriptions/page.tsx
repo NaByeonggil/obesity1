@@ -238,6 +238,7 @@ export default function PatientPrescriptionsPage() {
   const [error, setError] = React.useState<string | null>(null)
   const [sendStatus, setSendStatus] = React.useState<PrescriptionSendStatus>({})
   const [currentTime, setCurrentTime] = React.useState(Date.now())
+  const [showPharmacyModal, setShowPharmacyModal] = React.useState(false)
 
   const { user, token, isAuthenticated } = useAuth()
 
@@ -356,6 +357,7 @@ export default function PatientPrescriptionsPage() {
           }
         }))
 
+        setShowPharmacyModal(false)
         alert(data.message || '처방전이 약국으로 전송되었습니다.\n약국에서 확인 후 연락드리겠습니다.')
         // 처방전 목록 새로고침
         fetchPrescriptions()
@@ -366,6 +368,11 @@ export default function PatientPrescriptionsPage() {
       console.error('처방전 전송 오류:', error)
       alert('처방전 전송 중 오류가 발생했습니다.')
     }
+  }
+
+  const handleOpenPharmacyModal = (prescription: Prescription) => {
+    setSelectedPrescription(prescription)
+    setShowPharmacyModal(true)
   }
 
   // Check if prescription was sent to pharmacy and if 30 minutes have passed
@@ -415,7 +422,13 @@ export default function PatientPrescriptionsPage() {
       const response = await fetch(`/api/patient/prescriptions/pdf?id=${prescriptionId}`)
 
       if (!response.ok) {
-        throw new Error('PDF 조회에 실패했습니다')
+        const errorData = await response.json()
+        if (response.status === 404) {
+          alert('의사가 아직 처방전 파일을 첨부하지 않았습니다.\n의사에게 문의해주세요.')
+        } else {
+          alert(errorData.error || 'PDF 조회에 실패했습니다.')
+        }
+        return
       }
 
       const blob = await response.blob()
@@ -423,7 +436,7 @@ export default function PatientPrescriptionsPage() {
       window.open(url, '_blank')
     } catch (error) {
       console.error('PDF 조회 오류:', error)
-      alert('PDF 조회에 실패했습니다.')
+      alert('PDF 조회 중 오류가 발생했습니다.')
     }
   }
 
@@ -565,7 +578,29 @@ export default function PatientPrescriptionsPage() {
                           </div>
                         </div>
 
-                        <div className="ml-4">
+                        <div className="ml-4 flex flex-col gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleViewPDF(prescription.id)
+                            }}
+                          >
+                            <FileText className="h-4 w-4 mr-1" />
+                            처방전 보기
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="bg-pharmacy hover:bg-pharmacy-dark text-white"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleOpenPharmacyModal(prescription)
+                            }}
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            약국으로 전송
+                          </Button>
                           <Button
                             size="sm"
                             className="bg-patient hover:bg-patient-dark"
@@ -850,6 +885,110 @@ export default function PatientPrescriptionsPage() {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* 약국 선택 모달 */}
+        {showPharmacyModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+              <div className="p-6 border-b">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">약국 선택</h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      처방전을 전송할 약국을 선택해주세요
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowPharmacyModal(false)}
+                  >
+                    닫기
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6">
+                {loadingPharmacies ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-patient" />
+                    <span className="ml-2">약국 정보를 불러오는 중...</span>
+                  </div>
+                ) : pharmacies.length === 0 ? (
+                  <Card className="p-8 text-center">
+                    <div className="text-gray-500">
+                      <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <h3 className="text-lg font-medium mb-2">등록된 약국이 없습니다</h3>
+                      <p className="text-sm">현재 시스템에 등록된 약국이 없습니다.</p>
+                    </div>
+                  </Card>
+                ) : (
+                  <div className="space-y-4">
+                    {pharmacies.map((pharmacy) => {
+                      const buttonStatus = getSendButtonStatus(pharmacy.id)
+                      return (
+                        <Card key={pharmacy.id} className="p-6 hover:shadow-lg transition-shadow">
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <h3 className="text-xl font-bold text-gray-900">{pharmacy.name}</h3>
+                                {pharmacy.pharmacistName && (
+                                  <p className="text-sm text-gray-600 mt-1">약사: {pharmacy.pharmacistName}</p>
+                                )}
+                              </div>
+                              {pharmacy.available ? (
+                                <Badge variant="default" className="bg-green-600">영업중</Badge>
+                              ) : (
+                                <Badge variant="secondary">영업종료</Badge>
+                              )}
+                            </div>
+
+                            <div className="space-y-2 text-sm">
+                              <div className="flex items-start gap-2">
+                                <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                <span className="text-gray-700">{pharmacy.address}</span>
+                              </div>
+                              {pharmacy.phone && (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-gray-400">📞</span>
+                                  <span className="text-gray-700">{pharmacy.phone}</span>
+                                </div>
+                              )}
+                              {pharmacy.distance && (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-gray-400">📍</span>
+                                  <span className="text-gray-700">현재 위치에서 {pharmacy.distance}</span>
+                                </div>
+                              )}
+                              {pharmacy.hours && (
+                                <div className="mt-3 pt-3 border-t">
+                                  <p className="text-xs text-gray-500 font-medium mb-1">영업시간</p>
+                                  <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
+                                    <div>평일: {pharmacy.hours.weekday}</div>
+                                    <div>토요일: {pharmacy.hours.saturday}</div>
+                                    <div>일요일: {pharmacy.hours.sunday}</div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            <Button
+                              className={`w-full ${buttonStatus.canSend ? 'bg-pharmacy hover:bg-pharmacy-dark' : 'bg-gray-400 cursor-not-allowed'}`}
+                              onClick={() => buttonStatus.canSend && handleSendPrescription(pharmacy.id, pharmacy.name)}
+                              disabled={!buttonStatus.canSend}
+                            >
+                              {buttonStatus.buttonText}
+                            </Button>
+                          </div>
+                        </Card>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   )

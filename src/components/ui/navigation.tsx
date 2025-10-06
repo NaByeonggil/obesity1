@@ -22,10 +22,10 @@ export function Navigation({ className }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
 
   const navItems = [
-    { href: "/about", label: "서비스 소개" },
-    { href: "/doctors", label: "의료진 찾기" },
-    { href: "/pharmacy", label: "약국 찾기" },
-    { href: "/support", label: "고객지원" },
+    { href: "/", label: "서비스 소개" },
+    { href: "/patient/clinics", label: "의원 찾기" },
+    { href: "/pharmacy", label: "약국 서비스" },
+    { href: "/patient", label: "환자 서비스" },
   ]
 
   return (

@@ -254,7 +254,8 @@ export async function POST(request: NextRequest) {
         doctorId: session.user.id,
         appointmentId,
         diagnosis,
-        notes: pdfPath ? `${notes}\n[첨부 PDF: ${pdfPath}]` : notes,
+        notes,
+        pdfFilePath: pdfPath,
         totalPrice,
         validUntil,
         updatedAt: new Date(),
@@ -312,6 +313,101 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Prescription creation error:', error)
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
+// 처방전 수정 (진단명, 참고사항, PDF 파일 업데이트)
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session || !session.user) {
+      return NextResponse.json({ success: false, error: 'No token provided' }, { status: 401 })
+    }
+
+    if (session.user.role?.toLowerCase() !== 'doctor') {
+      return NextResponse.json({ success: false, error: 'Invalid token or unauthorized role' }, { status: 401 })
+    }
+
+    // FormData 파싱
+    const formData = await request.formData()
+    const prescriptionId = formData.get('prescriptionId') as string
+    const diagnosis = formData.get('diagnosis') as string | null
+    const notes = formData.get('notes') as string | null
+    const pdfFile = formData.get('pdfFile') as File | null
+
+    if (!prescriptionId) {
+      return NextResponse.json({ success: false, error: '처방전 ID가 필요합니다.' }, { status: 400 })
+    }
+
+    // 처방전 조회 및 권한 확인
+    const prescription = await prisma.prescriptions.findUnique({
+      where: { id: prescriptionId }
+    })
+
+    if (!prescription) {
+      return NextResponse.json({ success: false, error: '처방전을 찾을 수 없습니다.' }, { status: 404 })
+    }
+
+    if (prescription.doctorId !== session.user.id) {
+      return NextResponse.json({ success: false, error: '권한이 없습니다.' }, { status: 403 })
+    }
+
+    // PDF 파일 저장 (업로드된 경우)
+    let pdfPath: string | null = prescription.pdfFilePath
+    if (pdfFile) {
+      try {
+        // public/prescriptions 디렉토리 생성
+        const uploadDir = join(process.cwd(), 'public', 'prescriptions')
+        if (!existsSync(uploadDir)) {
+          await mkdir(uploadDir, { recursive: true })
+        }
+
+        // 파일명 생성
+        const now = new Date()
+        const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '')
+        const fileName = `${prescriptionId}_updated_${dateStr}.pdf`
+        const filePath = join(uploadDir, fileName)
+
+        // 파일 저장
+        const bytes = await pdfFile.arrayBuffer()
+        const buffer = Buffer.from(bytes)
+        await writeFile(filePath, buffer)
+
+        pdfPath = `/prescriptions/${fileName}`
+        console.log('PDF 파일 업데이트 완료:', pdfPath)
+      } catch (error) {
+        console.error('PDF 파일 저장 오류:', error)
+        return NextResponse.json({ success: false, error: 'PDF 파일 저장에 실패했습니다.' }, { status: 500 })
+      }
+    }
+
+    // 처방전 업데이트
+    const updatedPrescription = await prisma.prescriptions.update({
+      where: { id: prescriptionId },
+      data: {
+        ...(diagnosis && { diagnosis }),
+        ...(notes !== null && { notes }),
+        ...(pdfPath && { pdfFilePath: pdfPath }),
+        updatedAt: new Date()
+      }
+    })
+
+    return NextResponse.json({
+      success: true,
+      message: pdfFile
+        ? '처방전이 성공적으로 수정되었습니다. (PDF 첨부 완료)'
+        : '처방전이 성공적으로 수정되었습니다.',
+      prescription: updatedPrescription
+    })
+
+  } catch (error) {
+    console.error('Prescription update error:', error)
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }
 

@@ -17,3 +17,7 @@ coverage/
 # Misc
 .DS_Store
 *.log
+
+# Development utilities
+hash.js
+hash_password.js

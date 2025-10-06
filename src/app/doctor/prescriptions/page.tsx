@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { FileText, Video, Eye, Plus, Calendar, Clock, Loader2, AlertCircle, Check } from 'lucide-react'
+import { FileText, Video, Eye, Plus, Calendar, Clock, Loader2, AlertCircle, Check, Edit } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -76,7 +76,9 @@ function DoctorPrescriptionsContent() {
   const [error, setError] = useState<string | null>(null)
   const [selectedTab, setSelectedTab] = useState('all')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [availableAppointments, setAvailableAppointments] = useState<any[]>([])
+  const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null)
 
   const [newPrescription, setNewPrescription] = useState({
     appointmentId: '',
@@ -92,6 +94,13 @@ function DoctorPrescriptionsContent() {
       substituteAllowed: false
     }]
   })
+  const [pdfFile, setPdfFile] = useState<File | null>(null)
+
+  const [editData, setEditData] = useState({
+    diagnosis: '',
+    notes: ''
+  })
+  const [editPdfFile, setEditPdfFile] = useState<File | null>(null)
 
   // 처방전 목록 및 통계 가져오기
   useEffect(() => {
@@ -178,13 +187,22 @@ function DoctorPrescriptionsContent() {
         return
       }
 
+      // FormData 생성
+      const formData = new FormData()
+      formData.append('appointmentId', newPrescription.appointmentId)
+      formData.append('diagnosis', newPrescription.diagnosis)
+      formData.append('notes', newPrescription.notes)
+      formData.append('medications', JSON.stringify(newPrescription.medications))
+
+      // PDF 파일 첨부
+      if (pdfFile) {
+        formData.append('pdfFile', pdfFile)
+      }
+
       const response = await fetch('/api/doctor/prescriptions', {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(newPrescription)
+        body: formData
       })
 
       const data = await response.json()
@@ -206,6 +224,7 @@ function DoctorPrescriptionsContent() {
             substituteAllowed: false
           }]
         })
+        setPdfFile(null)
         fetchPrescriptions() // 목록 새로고침
         fetchAvailableAppointments() // 가능한 예약 목록 새로고침
       } else {
@@ -214,6 +233,64 @@ function DoctorPrescriptionsContent() {
     } catch (error) {
       console.error('Prescription creation error:', error)
       alert('처방전 발행 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleEditPrescription = (prescription: Prescription) => {
+    setSelectedPrescription(prescription)
+    setEditData({
+      diagnosis: prescription.diagnosis,
+      notes: prescription.notes || ''
+    })
+    setEditPdfFile(null)
+    setIsEditModalOpen(true)
+  }
+
+  const handleUpdatePrescription = async () => {
+    if (!selectedPrescription) return
+    if (!editData.diagnosis) {
+      alert('진단명을 입력해주세요.')
+      return
+    }
+
+    try {
+      if (!session?.user) {
+        alert('로그인이 필요합니다. 다시 로그인해주세요.')
+        return
+      }
+
+      // FormData 생성
+      const formData = new FormData()
+      formData.append('prescriptionId', selectedPrescription.id)
+      formData.append('diagnosis', editData.diagnosis)
+      formData.append('notes', editData.notes)
+
+      // PDF 파일 첨부
+      if (editPdfFile) {
+        formData.append('pdfFile', editPdfFile)
+      }
+
+      const response = await fetch('/api/doctor/prescriptions', {
+        method: 'PATCH',
+        credentials: 'include',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        alert(data.message)
+        setIsEditModalOpen(false)
+        setSelectedPrescription(null)
+        setEditData({ diagnosis: '', notes: '' })
+        setEditPdfFile(null)
+        fetchPrescriptions() // 목록 새로고침
+      } else {
+        alert(data.error || '처방전 수정에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('Prescription update error:', error)
+      alert('처방전 수정 중 오류가 발생했습니다.')
     }
   }
 
@@ -367,6 +444,14 @@ function DoctorPrescriptionsContent() {
                       </CardDescription>
                     </div>
                     <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEditPrescription(prescription)}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        수정
+                      </Button>
                       <Button size="sm" variant="outline">
                         <Eye className="h-4 w-4 mr-1" />
                         상세보기
@@ -421,6 +506,133 @@ function DoctorPrescriptionsContent() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* 처방전 수정 모달 */}
+      {isEditModalOpen && selectedPrescription && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto mx-4">
+            <div className="p-6 border-b">
+              <h2 className="text-lg font-semibold">처방전 수정</h2>
+              <p className="text-sm text-gray-600 mt-1">
+                처방전 번호: {selectedPrescription.prescriptionNumber}
+              </p>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="edit-diagnosis">진단명 *</Label>
+                <Input
+                  id="edit-diagnosis"
+                  value={editData.diagnosis}
+                  onChange={(e) => setEditData({
+                    ...editData,
+                    diagnosis: e.target.value
+                  })}
+                  placeholder="진단명을 입력하세요"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-notes">참고사항</Label>
+                <Textarea
+                  id="edit-notes"
+                  value={editData.notes}
+                  onChange={(e) => setEditData({
+                    ...editData,
+                    notes: e.target.value
+                  })}
+                  placeholder="환자에게 전달할 참고사항을 입력하세요"
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-blue-700 font-semibold">📎 처방전 PDF 파일 첨부/변경</Label>
+                <div className="relative">
+                  <Input
+                    type="file"
+                    accept=".pdf"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        if (file.type !== 'application/pdf') {
+                          alert('PDF 파일만 업로드 가능합니다.')
+                          e.target.value = ''
+                          return
+                        }
+                        if (file.size > 10 * 1024 * 1024) { // 10MB 제한
+                          alert('파일 크기는 10MB 이하여야 합니다.')
+                          e.target.value = ''
+                          return
+                        }
+                        setEditPdfFile(file)
+                      }
+                    }}
+                    className="cursor-pointer border-2 border-blue-400 focus:border-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
+                  />
+                </div>
+                {editPdfFile && (
+                  <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <Check className="h-4 w-4 text-green-600" />
+                    <p className="text-sm text-green-700 font-medium">
+                      선택된 파일: {editPdfFile.name} ({(editPdfFile.size / 1024).toFixed(2)} KB)
+                    </p>
+                  </div>
+                )}
+                <p className="text-xs text-blue-600 font-medium">
+                  💡 PDF 파일을 첨부하면 환자가 처방전을 볼 때 첨부된 파일이 표시됩니다.
+                </p>
+              </div>
+
+              <Alert className="bg-yellow-50 border-yellow-200">
+                <AlertCircle className="h-4 w-4 text-yellow-600" />
+                <AlertDescription className="text-yellow-800">
+                  <strong>주의:</strong> 약물 정보는 수정할 수 없습니다. 진단명, 참고사항, PDF 파일만 수정 가능합니다.
+                </AlertDescription>
+              </Alert>
+
+              <div className="space-y-2">
+                <Label>처방 약물 (수정 불가)</Label>
+                <div className="space-y-2 bg-gray-50 p-4 rounded-lg">
+                  {selectedPrescription.medications.length > 0 ? (
+                    selectedPrescription.medications.map((med, index) => (
+                      <div key={index} className="text-sm bg-white p-3 rounded border">
+                        <div className="font-medium text-gray-900">{med.name}</div>
+                        <div className="text-gray-600 mt-1">
+                          용량: {med.dosage} • 복용법: {med.frequency} • 투약기간: {med.duration}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">약물 정보 없음</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 p-6 border-t">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsEditModalOpen(false)
+                  setSelectedPrescription(null)
+                  setEditData({ diagnosis: '', notes: '' })
+                  setEditPdfFile(null)
+                }}
+              >
+                취소
+              </Button>
+              <Button
+                onClick={handleUpdatePrescription}
+                disabled={!editData.diagnosis}
+              >
+                <Check className="h-4 w-4 mr-2" />
+                저장
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 처방전 발행 모달 */}
       {isCreateModalOpen && (
@@ -491,6 +703,44 @@ function DoctorPrescriptionsContent() {
                       placeholder="환자에게 전달할 참고사항을 입력하세요"
                       rows={3}
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-blue-700 font-semibold">📎 처방전 PDF 파일 (선택사항)</Label>
+                    <div className="relative">
+                      <Input
+                        type="file"
+                        accept=".pdf"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            if (file.type !== 'application/pdf') {
+                              alert('PDF 파일만 업로드 가능합니다.')
+                              e.target.value = ''
+                              return
+                            }
+                            if (file.size > 10 * 1024 * 1024) { // 10MB 제한
+                              alert('파일 크기는 10MB 이하여야 합니다.')
+                              e.target.value = ''
+                              return
+                            }
+                            setPdfFile(file)
+                          }
+                        }}
+                        className="cursor-pointer border-2 border-blue-400 focus:border-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
+                      />
+                    </div>
+                    {pdfFile && (
+                      <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <Check className="h-4 w-4 text-green-600" />
+                        <p className="text-sm text-green-700 font-medium">
+                          선택된 파일: {pdfFile.name} ({(pdfFile.size / 1024).toFixed(2)} KB)
+                        </p>
+                      </div>
+                    )}
+                    <p className="text-xs text-blue-600 font-medium">
+                      💡 PDF 파일을 첨부하면 환자가 처방전을 볼 때 첨부된 파일이 표시됩니다.
+                    </p>
                   </div>
 
                   <div className="space-y-4">

@@ -237,8 +237,29 @@ export async function POST(request: NextRequest) {
     // Combine date and time into a DateTime object
     const appointmentDateTime = new Date(`${date}T${time}:00.000Z`)
 
-    // Get department ID
-    let departmentId = 'dept-internal-001'
+    // Get department ID - department 파라미터를 기반으로 매핑
+    let departmentId = 'dept_internal' // 기본값: 내과
+
+    // department 이름을 기반으로 departmentId 매핑
+    if (department) {
+      const departmentMap: { [key: string]: string } = {
+        '마운자로 위고비': 'dept_internal',
+        '비만관련 처방': 'dept_internal',
+        '인공눈물': 'dept_dermatology',
+        '감기관련': 'dept_internal',
+        '내과': 'dept_internal',
+        '신경외과': 'dept_neurosurgery',
+        '심장내과': 'dept_cardiology',
+        '피부과': 'dept_dermatology',
+        '소아과': 'dept_pediatrics',
+        '정신건강의학과': 'dept_psychiatry'
+      }
+
+      // 정확한 매치가 있으면 사용, 없으면 기본값 사용
+      departmentId = departmentMap[department] || 'dept_internal'
+    }
+
+    console.log('[예약 생성] 매핑된 departmentId:', departmentId, '원본 department:', department)
 
     // 예약 생성
     const appointmentType = (type === 'telehealth' || type === 'online') ? 'ONLINE' : 'OFFLINE'

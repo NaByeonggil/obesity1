@@ -112,6 +112,7 @@ model prescriptions {
   status                                String                     @default("ISSUED")
   diagnosis                             String
   notes                                 String?                    @db.Text
+  pdfFilePath                           String?                    @db.Text
   issuedAt                              DateTime                   @default(now())
   validUntil                            DateTime
   totalPrice                            Float

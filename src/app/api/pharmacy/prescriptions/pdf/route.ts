@@ -295,58 +295,68 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '처방전을 찾을 수 없습니다' }, { status: 404 })
     }
 
-    console.log('[Pharmacy PDF API] 처방전 조회 성공, PDF 생성 시작')
+    // 의사가 첨부한 PDF 파일이 있으면 그것을 반환
+    if ((prescription as any).pdfFilePath) {
+      console.log('[Pharmacy PDF API] 의사 첨부 PDF 파일 발견:', (prescription as any).pdfFilePath)
 
-    // Puppeteer로 PDF 생성
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    })
+      const fs = await import('fs')
+      const path = await import('path')
 
-    const page = await browser.newPage()
+      try {
+        // 파일 경로 처리
+        const pdfPath = (prescription as any).pdfFilePath
+        const filePath = pdfPath.startsWith('http')
+          ? pdfPath
+          : path.join(process.cwd(), 'public', pdfPath)
 
-    // HTML 설정
-    const html = generatePrescriptionHTML(prescription)
-    await page.setContent(html, {
-      waitUntil: 'networkidle0'
-    })
+        // URL인 경우 fetch로 다운로드
+        if (pdfPath.startsWith('http')) {
+          const response = await fetch(pdfPath)
+          if (!response.ok) {
+            throw new Error('PDF 파일 다운로드 실패')
+          }
+          const buffer = await response.arrayBuffer()
 
-    // PDF 생성
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '20px',
-        right: '20px',
-        bottom: '20px',
-        left: '20px'
+          return new NextResponse(buffer as any, {
+            headers: {
+              'Content-Type': 'application/pdf',
+              'Content-Disposition': `inline; filename="prescription_${prescription.prescriptionNumber}.pdf"`
+            }
+          })
+        }
+
+        // 로컬 파일인 경우
+        if (fs.existsSync(filePath)) {
+          const fileBuffer = fs.readFileSync(filePath)
+
+          return new NextResponse(fileBuffer as any, {
+            headers: {
+              'Content-Type': 'application/pdf',
+              'Content-Disposition': `inline; filename="prescription_${prescription.prescriptionNumber}.pdf"`
+            }
+          })
+        } else {
+          console.log('[Pharmacy PDF API] 첨부 파일을 찾을 수 없음')
+          return NextResponse.json({ error: '첨부된 처방전 파일을 찾을 수 없습니다' }, { status: 404 })
+        }
+      } catch (fileError) {
+        console.error('[Pharmacy PDF API] 첨부 파일 로드 오류:', fileError)
+        return NextResponse.json({
+          error: '첨부된 처방전 파일을 불러오는데 실패했습니다',
+          details: fileError instanceof Error ? fileError.message : String(fileError)
+        }, { status: 500 })
       }
-    })
-
-    await browser.close()
-    browser = null
-
-    console.log('[Pharmacy PDF API] PDF 생성 완료, 크기:', pdfBuffer.length, 'bytes')
-
-    // PDF 응답 반환
-    return new NextResponse(pdfBuffer as any, {
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="prescription_${prescription.prescriptionNumber}.pdf"`
-      }
-    })
-
-  } catch (error) {
-    console.error('[Pharmacy PDF API] PDF 다운로드 오류:', error)
-    console.error('[Pharmacy PDF API] 에러 스택:', error instanceof Error ? error.stack : 'Unknown error')
-
-    // 브라우저 정리
-    if (browser) {
-      await browser.close()
+    } else {
+      console.log('[Pharmacy PDF API] 첨부된 PDF 파일이 없음')
+      return NextResponse.json({ error: '첨부된 처방전 파일이 없습니다' }, { status: 404 })
     }
 
+  } catch (error) {
+    console.error('[Pharmacy PDF API] PDF 조회 오류:', error)
+    console.error('[Pharmacy PDF API] 에러 스택:', error instanceof Error ? error.stack : 'Unknown error')
+
     return NextResponse.json(
-      { error: 'PDF 다운로드에 실패했습니다', details: error instanceof Error ? error.message : String(error) },
+      { error: 'PDF 조회에 실패했습니다', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   } finally {

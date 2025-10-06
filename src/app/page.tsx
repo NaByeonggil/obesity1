@@ -505,10 +505,10 @@ export default function HomePage() {
             <div>
               <h3 className="font-semibold mb-4">서비스</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/about" className="hover:text-white">서비스 소개</Link></li>
-                <li><Link href="/doctors" className="hover:text-white">의료진 찾기</Link></li>
-                <li><Link href="/pharmacy" className="hover:text-white">약국 찾기</Link></li>
-                <li><Link href="/support" className="hover:text-white">고객지원</Link></li>
+                <li><Link href="/" className="hover:text-white">서비스 소개</Link></li>
+                <li><Link href="/patient/clinics" className="hover:text-white">의원 찾기</Link></li>
+                <li><Link href="/pharmacy" className="hover:text-white">약국 서비스</Link></li>
+                <li><Link href="/patient" className="hover:text-white">환자 서비스</Link></li>
               </ul>
             </div>
 

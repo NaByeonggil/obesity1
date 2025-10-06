@@ -561,19 +561,49 @@ function PatientDashboardContent() {
                         처방의: {prescription.appointment.doctor.name}
                         {prescription.appointment.doctor.clinic && ` (${prescription.appointment.doctor.clinic})`}
                       </div>
-                      {prescription.status === 'ISSUED' && (
+                      <div className="flex gap-2 mt-2">
                         <Button
                           size="sm"
-                          className="mt-2"
-                          onClick={(e) => {
+                          variant="outline"
+                          onClick={async (e) => {
                             e.stopPropagation()
-                            router.push('/patient/prescriptions')
+                            try {
+                              const response = await fetch(`/api/patient/prescriptions/pdf?id=${prescription.id}`)
+                              if (!response.ok) {
+                                const errorData = await response.json()
+                                if (response.status === 404) {
+                                  alert('의사가 아직 처방전 파일을 첨부하지 않았습니다.\n의사에게 문의해주세요.')
+                                } else {
+                                  alert(errorData.error || 'PDF 조회에 실패했습니다.')
+                                }
+                                return
+                              }
+                              const blob = await response.blob()
+                              const url = window.URL.createObjectURL(blob)
+                              window.open(url, '_blank')
+                            } catch (error) {
+                              console.error('PDF 조회 오류:', error)
+                              alert('PDF 조회 중 오류가 발생했습니다.')
+                            }
                           }}
                         >
-                          <Send className="h-3 w-3 mr-1" />
-                          약국으로 전송
+                          <FileText className="h-3 w-3 mr-1" />
+                          처방전 보기
                         </Button>
-                      )}
+                        {prescription.status === 'ISSUED' && (
+                          <Button
+                            size="sm"
+                            className="bg-patient hover:bg-patient-dark"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              router.push('/patient/prescriptions')
+                            }}
+                          >
+                            <Send className="h-3 w-3 mr-1" />
+                            약국으로 전송
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   )
                 })}

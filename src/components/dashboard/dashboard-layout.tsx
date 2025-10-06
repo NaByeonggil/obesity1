@@ -240,19 +240,20 @@ function getNavigationItems(role: UserRole) {
   switch (role) {
     case 'patient':
       return [
-        ...baseItems.slice(0, 2),
+        { name: "대시보드", href: "/patient", icon: Home },
         { name: "예약 내역", href: "/patient/appointments", icon: Calendar },
         { name: "처방전", href: "/patient/prescriptions", icon: FileText },
-        { name: "의료진 찾기", href: "/patient/doctors", icon: Stethoscope },
-        baseItems[2]
+        { name: "의원 찾기", href: "/patient/clinics", icon: Stethoscope },
+        { name: "예약 하기", href: "/patient/booking", icon: UserCheck }
       ]
     case 'doctor':
       return [
-        ...baseItems.slice(0, 2),
+        { name: "대시보드", href: "/doctor", icon: Home },
         { name: "예약 관리", href: "/doctor/appointments", icon: Calendar },
+        { name: "일정 관리", href: "/doctor/calendar", icon: Calendar },
         { name: "처방전 관리", href: "/doctor/prescriptions", icon: Pill },
         { name: "프로필 설정", href: "/doctor/profile", icon: User },
-        baseItems[2]
+        { name: "설정", href: "/doctor/settings", icon: Settings }
       ]
     case 'pharmacy':
       return [

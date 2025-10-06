@@ -33,21 +33,11 @@ services:
     restart: always
     ports:
       - "3000:3000"
+    env_file:
+      - .env.production
     environment:
       NODE_ENV: production
       DATABASE_URL: mysql://${MYSQL_USER:-obesity1user}:${MYSQL_PASSWORD:-obesity1password}@db:3306/${MYSQL_DATABASE:-obesity1}
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-      JWT_SECRET: ${JWT_SECRET}
-      KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID}
-      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}
-      NAVER_CLIENT_ID: ${NAVER_CLIENT_ID}
-      NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET}
-      EMAIL_SERVER_HOST: ${EMAIL_SERVER_HOST}
-      EMAIL_SERVER_PORT: ${EMAIL_SERVER_PORT}
-      EMAIL_SERVER_USER: ${EMAIL_SERVER_USER}
-      EMAIL_SERVER_PASSWORD: ${EMAIL_SERVER_PASSWORD}
-      EMAIL_FROM: ${EMAIL_FROM}
     depends_on:
       db:
         condition: service_healthy

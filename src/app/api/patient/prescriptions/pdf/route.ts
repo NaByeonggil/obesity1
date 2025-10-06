@@ -2,236 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { PrismaClient } from '@prisma/client'
-import puppeteer from 'puppeteer'
 
 const prisma = new PrismaClient()
 
-// HTML 템플릿 생성 함수
-function generatePrescriptionHTML(prescription: any): string {
-  return `
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>처방전</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Malgun Gothic', '맑은 고딕', 'Apple SD Gothic Neo', sans-serif;
-      padding: 40px;
-      font-size: 12px;
-      line-height: 1.6;
-      color: #333;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 3px solid #2563eb;
-    }
-
-    .header h1 {
-      font-size: 28px;
-      color: #1e40af;
-      margin-bottom: 10px;
-    }
-
-    .section {
-      margin-bottom: 25px;
-    }
-
-    .section-title {
-      font-size: 16px;
-      font-weight: bold;
-      color: #1e40af;
-      margin-bottom: 12px;
-      padding-bottom: 6px;
-      border-bottom: 2px solid #e5e7eb;
-    }
-
-    .info-table {
-      width: 100%;
-      margin-bottom: 10px;
-    }
-
-    .info-row {
-      display: flex;
-      padding: 8px 0;
-      border-bottom: 1px solid #f3f4f6;
-    }
-
-    .info-label {
-      font-weight: bold;
-      width: 150px;
-      color: #4b5563;
-    }
-
-    .info-value {
-      flex: 1;
-      color: #1f2937;
-    }
-
-    .medication-item {
-      background-color: #f9fafb;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      border-left: 4px solid #2563eb;
-    }
-
-    .medication-name {
-      font-size: 14px;
-      font-weight: bold;
-      color: #1e40af;
-      margin-bottom: 10px;
-    }
-
-    .medication-detail {
-      padding: 4px 0;
-      padding-left: 15px;
-      color: #4b5563;
-    }
-
-    .total-price {
-      text-align: right;
-      font-size: 18px;
-      font-weight: bold;
-      color: #dc2626;
-      margin-top: 20px;
-      padding-top: 15px;
-      border-top: 2px solid #e5e7eb;
-    }
-
-    .notes-box {
-      background-color: #fef3c7;
-      padding: 15px;
-      border-radius: 8px;
-      border-left: 4px solid #f59e0b;
-      margin-top: 20px;
-    }
-
-    .footer {
-      margin-top: 40px;
-      text-align: center;
-      font-size: 10px;
-      color: #9ca3af;
-      padding-top: 20px;
-      border-top: 1px solid #e5e7eb;
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>처방전</h1>
-    <p>Medical Prescription</p>
-  </div>
-
-  <div class="section">
-    <div class="section-title">처방전 정보</div>
-    <div class="info-table">
-      <div class="info-row">
-        <div class="info-label">처방전 번호</div>
-        <div class="info-value">${prescription.prescriptionNumber}</div>
-      </div>
-      <div class="info-row">
-        <div class="info-label">발급일</div>
-        <div class="info-value">${new Date(prescription.issuedAt).toLocaleDateString('ko-KR')}</div>
-      </div>
-      <div class="info-row">
-        <div class="info-label">유효기간</div>
-        <div class="info-value">${new Date(prescription.validUntil).toLocaleDateString('ko-KR')}</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">환자 정보</div>
-    <div class="info-table">
-      <div class="info-row">
-        <div class="info-label">이름</div>
-        <div class="info-value">${prescription.users_prescriptions_patientIdTousers?.name || ''}</div>
-      </div>
-      <div class="info-row">
-        <div class="info-label">연락처</div>
-        <div class="info-value">${prescription.users_prescriptions_patientIdTousers?.phone || ''}</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">의사 정보</div>
-    <div class="info-table">
-      <div class="info-row">
-        <div class="info-label">의사</div>
-        <div class="info-value">${prescription.users_prescriptions_doctorIdTousers?.name || ''}</div>
-      </div>
-      <div class="info-row">
-        <div class="info-label">전문과목</div>
-        <div class="info-value">${prescription.users_prescriptions_doctorIdTousers?.specialization || ''}</div>
-      </div>
-      <div class="info-row">
-        <div class="info-label">병원</div>
-        <div class="info-value">${prescription.users_prescriptions_doctorIdTousers?.clinic || ''}</div>
-      </div>
-      <div class="info-row">
-        <div class="info-label">면허번호</div>
-        <div class="info-value">${prescription.users_prescriptions_doctorIdTousers?.license || ''}</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">진단</div>
-    <div class="info-value" style="padding: 10px 0;">
-      ${prescription.diagnosis || ''}
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">처방 약물</div>
-    ${prescription.prescription_medications.map((med: any, index: number) => `
-      <div class="medication-item">
-        <div class="medication-name">${index + 1}. ${med.medications.name}</div>
-        <div class="medication-detail">• 용량: ${med.dosage}</div>
-        <div class="medication-detail">• 복용법: ${med.frequency}</div>
-        <div class="medication-detail">• 투약기간: ${med.duration}</div>
-        <div class="medication-detail">• 수량: ${med.quantity}</div>
-      </div>
-    `).join('')}
-  </div>
-
-  <div class="total-price">
-    총 금액: ${prescription.totalPrice?.toLocaleString('ko-KR') || '0'}원
-  </div>
-
-  ${prescription.notes ? `
-    <div class="notes-box">
-      <div class="section-title" style="border: none; color: #92400e;">⚠️ 주의사항</div>
-      <div style="color: #92400e; padding-top: 10px;">
-        ${prescription.notes}
-      </div>
-    </div>
-  ` : ''}
-
-  <div class="footer">
-    본 처방전은 전자 처방전으로 법적 효력을 가집니다.
-  </div>
-</body>
-</html>
-  `
-}
-
-// 환자용 처방전 PDF 다운로드 (Puppeteer 사용 - 한글 완벽 지원)
+// 환자용 처방전 PDF 조회
 export async function GET(request: NextRequest) {
-  let browser = null
-
   try {
     console.log('[PDF API] 처방전 PDF 다운로드 요청')
     const session = await getServerSession(authOptions)
@@ -295,58 +70,68 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '처방전을 찾을 수 없습니다' }, { status: 404 })
     }
 
-    console.log('[PDF API] 처방전 조회 성공, PDF 생성 시작')
+    // 의사가 첨부한 PDF 파일이 있으면 그것을 반환
+    if ((prescription as any).pdfFilePath) {
+      console.log('[PDF API] 의사 첨부 PDF 파일 발견:', (prescription as any).pdfFilePath)
 
-    // Puppeteer로 PDF 생성
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    })
+      const fs = await import('fs')
+      const path = await import('path')
 
-    const page = await browser.newPage()
+      try {
+        // 파일 경로 처리
+        const pdfPath = (prescription as any).pdfFilePath
+        const filePath = pdfPath.startsWith('http')
+          ? pdfPath
+          : path.join(process.cwd(), 'public', pdfPath)
 
-    // HTML 설정
-    const html = generatePrescriptionHTML(prescription)
-    await page.setContent(html, {
-      waitUntil: 'networkidle0'
-    })
+        // URL인 경우 fetch로 다운로드
+        if (pdfPath.startsWith('http')) {
+          const response = await fetch(pdfPath)
+          if (!response.ok) {
+            throw new Error('PDF 파일 다운로드 실패')
+          }
+          const buffer = await response.arrayBuffer()
 
-    // PDF 생성
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '20px',
-        right: '20px',
-        bottom: '20px',
-        left: '20px'
+          return new NextResponse(buffer as any, {
+            headers: {
+              'Content-Type': 'application/pdf',
+              'Content-Disposition': `inline; filename="prescription_${prescription.prescriptionNumber}.pdf"`
+            }
+          })
+        }
+
+        // 로컬 파일인 경우
+        if (fs.existsSync(filePath)) {
+          const fileBuffer = fs.readFileSync(filePath)
+
+          return new NextResponse(fileBuffer as any, {
+            headers: {
+              'Content-Type': 'application/pdf',
+              'Content-Disposition': `inline; filename="prescription_${prescription.prescriptionNumber}.pdf"`
+            }
+          })
+        } else {
+          console.log('[PDF API] 첨부 파일을 찾을 수 없음')
+          return NextResponse.json({ error: '첨부된 처방전 파일을 찾을 수 없습니다' }, { status: 404 })
+        }
+      } catch (fileError) {
+        console.error('[PDF API] 첨부 파일 로드 오류:', fileError)
+        return NextResponse.json({
+          error: '첨부된 처방전 파일을 불러오는데 실패했습니다',
+          details: fileError instanceof Error ? fileError.message : String(fileError)
+        }, { status: 500 })
       }
-    })
-
-    await browser.close()
-    browser = null
-
-    console.log('[PDF API] PDF 생성 완료, 크기:', pdfBuffer.length, 'bytes')
-
-    // PDF 응답 반환
-    return new NextResponse(pdfBuffer as any, {
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="prescription_${prescription.prescriptionNumber}.pdf"`
-      }
-    })
-
-  } catch (error) {
-    console.error('[PDF API] PDF 다운로드 오류:', error)
-    console.error('[PDF API] 에러 스택:', error instanceof Error ? error.stack : 'Unknown error')
-
-    // 브라우저 정리
-    if (browser) {
-      await browser.close()
+    } else {
+      console.log('[PDF API] 첨부된 PDF 파일이 없음')
+      return NextResponse.json({ error: '첨부된 처방전 파일이 없습니다' }, { status: 404 })
     }
 
+  } catch (error) {
+    console.error('[PDF API] PDF 조회 오류:', error)
+    console.error('[PDF API] 에러 스택:', error instanceof Error ? error.stack : 'Unknown error')
+
     return NextResponse.json(
-      { error: 'PDF 다운로드에 실패했습니다', details: error instanceof Error ? error.message : String(error) },
+      { error: 'PDF 조회에 실패했습니다', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   } finally {
