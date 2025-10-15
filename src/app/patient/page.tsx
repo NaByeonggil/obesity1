@@ -80,12 +80,21 @@ interface Prescription {
   }>
 }
 
+interface Medication {
+  id: string
+  name: string
+  description?: string
+  price: number
+}
+
 function PatientDashboardContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const pathname = usePathname()
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([])
+  const [medications, setMedications] = useState<Medication[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
@@ -173,12 +182,32 @@ function PatientDashboardContent() {
     }
   }, [status, router])
 
+  // 의약품 데이터 로드
+  const fetchMedications = useCallback(async (search: string = '') => {
+    try {
+      const url = search
+        ? `/api/medications?search=${encodeURIComponent(search)}&limit=6`
+        : '/api/medications?limit=6'
+
+      const response = await fetch(url)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.medications) {
+          setMedications(data.medications)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch medications:', error)
+    }
+  }, [])
+
   // 인증 후 데이터 로드
   useEffect(() => {
     const fetchData = async () => {
       if (!isAuthenticated || !session?.user) {
         setAppointments([])
         setPrescriptions([])
+        setMedications([])
         return
       }
 
@@ -255,17 +284,21 @@ function PatientDashboardContent() {
           console.error('Failed to fetch prescriptions:', error)
           setPrescriptions([])
         }
+
+        // 의약품 데이터 로드
+        await fetchMedications()
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error)
         setAppointments([])
         setPrescriptions([])
+        setMedications([])
       }
     }
 
     if (status === 'authenticated') {
       fetchData()
     }
-  }, [isAuthenticated, session, status])
+  }, [isAuthenticated, session, status, fetchMedications])
 
   // 페이지 포커스 시 자동 새로고침
   useEffect(() => {
@@ -319,10 +352,6 @@ function PatientDashboardContent() {
         </div>
       </div>
     )
-  }
-
-  const handlePharmacySearch = () => {
-    router.push('/pharmacy/search')
   }
 
   const handleLogout = async () => {
@@ -689,6 +718,91 @@ function PatientDashboardContent() {
           </Card>
         </div>
 
+        {/* Medication Search Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Pill className="h-5 w-5" />
+              비급여 의약품 검색
+            </CardTitle>
+            <CardDescription>
+              원하시는 의약품을 검색하고 가격을 비교해보세요
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {/* Search Bar */}
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="의약품명을 입력하세요 (예: 타이레놀, 게보린)"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        fetchMedications(searchQuery)
+                      }
+                    }}
+                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-patient"
+                  />
+                </div>
+                <Button
+                  onClick={() => fetchMedications(searchQuery)}
+                  className="bg-patient hover:bg-patient-dark"
+                >
+                  검색
+                </Button>
+              </div>
+
+              {/* Medication List */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {medications.map((medication) => (
+                  <div
+                    key={medication.id}
+                    className="p-4 border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => router.push(`/patient/medications/${medication.id}`)}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Pill className="h-5 w-5 text-patient" />
+                        <h3 className="font-semibold">{medication.name}</h3>
+                      </div>
+                      <Badge variant="secondary">
+                        {medication.price.toLocaleString()}원
+                      </Badge>
+                    </div>
+                    {medication.description && (
+                      <p className="text-sm text-gray-600 line-clamp-2">
+                        {medication.description}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {medications.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <Pill className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+                  <p>검색 결과가 없습니다</p>
+                  <p className="text-sm">다른 의약품명으로 검색해보세요</p>
+                </div>
+              )}
+
+              <div className="flex justify-center mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => router.push('/patient/medications')}
+                >
+                  전체 의약품 보기
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Quick Actions */}
         <Card>
           <CardHeader>
@@ -699,16 +813,6 @@ function PatientDashboardContent() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Button
-                variant="outline"
-                className="h-24 flex-col"
-                onClick={handlePharmacySearch}
-              >
-                <Search className="h-6 w-6 mb-2" />
-                <span className="text-center">
-                  비급여 의약품<br/>검색
-                </span>
-              </Button>
               <Button variant="outline" className="h-24 flex-col">
                 <FileText className="h-6 w-6 mb-2" />
                 <span className="text-center">
@@ -721,10 +825,24 @@ function PatientDashboardContent() {
                   의료진<br/>상담
                 </span>
               </Button>
-              <Button variant="outline" className="h-24 flex-col">
+              <Button
+                variant="outline"
+                className="h-24 flex-col"
+                onClick={() => router.push('/patient/pharmacy-finder')}
+              >
                 <Building className="h-6 w-6 mb-2" />
                 <span className="text-center">
                   약국<br/>찾기
+                </span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-24 flex-col"
+                onClick={() => router.push('/patient/appointments')}
+              >
+                <Calendar className="h-6 w-6 mb-2" />
+                <span className="text-center">
+                  예약 내역<br/>전체보기
                 </span>
               </Button>
             </div>
