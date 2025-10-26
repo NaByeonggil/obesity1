@@ -430,6 +430,50 @@ export default function LoginPage() {
 
             {/* 회원가입 탭 */}
             <TabsContent value="signup" className="space-y-4">
+              {/* 소셜 간편가입 */}
+              <div className="space-y-3">
+                <div className="text-center">
+                  <p className="text-sm font-medium text-gray-700 mb-3">간편 가입하기</p>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full bg-yellow-300 hover:bg-yellow-400 border-yellow-400"
+                  onClick={() => handleSocialLogin("kakao")}
+                  disabled={isLoading}
+                >
+                  <div className="flex items-center">
+                    <MessageSquare className="mr-2 h-5 w-5" style={{ color: "#3C1E1E" }} />
+                    <span className="font-medium">카카오로 3초만에 가입하기</span>
+                  </div>
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full bg-green-500 hover:bg-green-600 text-white border-green-600"
+                  onClick={() => handleSocialLogin("naver")}
+                  disabled={isLoading}
+                >
+                  <div className="flex items-center">
+                    <div className="mr-2 w-4 h-4 bg-white rounded-sm flex items-center justify-center">
+                      <span className="text-green-500 text-xs font-bold">N</span>
+                    </div>
+                    <span className="font-medium">네이버로 3초만에 가입하기</span>
+                  </div>
+                </Button>
+
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-gray-500">또는 이메일로 가입</span>
+                  </div>
+                </div>
+              </div>
+
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">이름</Label>

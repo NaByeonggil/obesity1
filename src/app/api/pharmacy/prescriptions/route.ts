@@ -76,8 +76,16 @@ export async function GET() {
 
     // 처방전 데이터 포맷팅
     const formattedPrescriptions = prescriptions.map(prescription => {
-      const issuedDate = new Date(prescription.issuedAt)
-      const validDate = new Date(prescription.validUntil)
+      // 날짜를 안전하게 처리
+      const getISODate = (dateValue: any) => {
+        if (!dateValue) return null
+        try {
+          const date = new Date(dateValue)
+          return isNaN(date.getTime()) ? null : date.toISOString()
+        } catch {
+          return null
+        }
+      }
 
       return {
         id: prescription.id,
@@ -101,8 +109,8 @@ export async function GET() {
         status: prescription.status,
         diagnosis: prescription.diagnosis,
         notes: prescription.notes,
-        issuedAt: issuedDate.toISOString(),
-        validUntil: validDate.toISOString(),
+        issuedAt: getISODate(prescription.issuedAt),
+        validUntil: getISODate(prescription.validUntil),
         totalPrice: prescription.totalPrice,
         medications: prescription.prescription_medications.map(pm => ({
           id: pm.id,

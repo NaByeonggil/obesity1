@@ -1,4 +1,4 @@
-// File: /home/nbg/Desktop/obesity1/src/app/api/auth/[...nextauth]/route.ts
+// File: /home/nbg/바탕화면/obesity1/src/app/api/auth/[...nextauth]/route.ts
 import * as entry from '../../../../../../src/app/api/auth/[...nextauth]/route.js'
 import type { NextRequest } from 'next/server.js'
 

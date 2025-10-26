@@ -181,6 +181,11 @@ function DoctorPrescriptionsContent() {
       return
     }
 
+    if (!pdfFile) {
+      alert('처방전 PDF 파일을 반드시 첨부해야 합니다.')
+      return
+    }
+
     try {
       if (!session?.user) {
         alert('로그인이 필요합니다. 다시 로그인해주세요.')
@@ -194,10 +199,8 @@ function DoctorPrescriptionsContent() {
       formData.append('notes', newPrescription.notes)
       formData.append('medications', JSON.stringify(newPrescription.medications))
 
-      // PDF 파일 첨부
-      if (pdfFile) {
-        formData.append('pdfFile', pdfFile)
-      }
+      // PDF 파일 첨부 (필수)
+      formData.append('pdfFile', pdfFile)
 
       const response = await fetch('/api/doctor/prescriptions', {
         method: 'POST',
@@ -446,6 +449,40 @@ function DoctorPrescriptionsContent() {
                     <div className="flex gap-2">
                       <Button
                         size="sm"
+                        variant="default"
+                        onClick={async () => {
+                          try {
+                            const response = await fetch(`/api/doctor/prescriptions/pdf?id=${prescription.id}`, {
+                              credentials: 'include'
+                            })
+
+                            if (response.ok) {
+                              const contentType = response.headers.get('content-type')
+
+                              if (contentType === 'application/pdf') {
+                                const blob = await response.blob()
+                                const url = URL.createObjectURL(blob)
+                                // 새 탭에서 PDF 열기
+                                window.open(url, '_blank')
+                                // 약간의 지연 후 URL 정리
+                                setTimeout(() => URL.revokeObjectURL(url), 1000)
+                              } else {
+                                alert('PDF 파일을 찾을 수 없습니다.')
+                              }
+                            } else {
+                              alert('처방전 PDF를 불러올 수 없습니다.')
+                            }
+                          } catch (error) {
+                            console.error('PDF 보기 오류:', error)
+                            alert('PDF를 여는 중 오류가 발생했습니다.')
+                          }
+                        }}
+                      >
+                        <FileText className="h-4 w-4 mr-1" />
+                        처방전 PDF
+                      </Button>
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => handleEditPrescription(prescription)}
                       >
@@ -668,12 +705,24 @@ function DoctorPrescriptionsContent() {
                         <SelectValue placeholder="처방전을 발행할 예약을 선택하세요" />
                       </SelectTrigger>
                       <SelectContent>
-                        {availableAppointments.map((appointment) => (
-                          <SelectItem key={appointment.id} value={appointment.id}>
-                            {appointment.patient.name} - {appointment.department}
-                            ({new Date(appointment.appointmentDate).toLocaleDateString('ko-KR')})
-                          </SelectItem>
-                        ))}
+                        {availableAppointments.map((appointment) => {
+                          const dateStr = appointment.appointmentDate
+                            ? (() => {
+                                try {
+                                  const date = new Date(appointment.appointmentDate)
+                                  return isNaN(date.getTime()) ? '' : date.toLocaleDateString('ko-KR')
+                                } catch {
+                                  return ''
+                                }
+                              })()
+                            : ''
+                          return (
+                            <SelectItem key={appointment.id} value={appointment.id}>
+                              {appointment.patient.name} - {appointment.department}
+                              {dateStr && ` (${dateStr})`}
+                            </SelectItem>
+                          )
+                        })}
                       </SelectContent>
                     </Select>
                   </div>
@@ -706,29 +755,36 @@ function DoctorPrescriptionsContent() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-blue-700 font-semibold">📎 처방전 PDF 파일 (선택사항)</Label>
+                    <Label className="text-red-700 font-semibold">📎 처방전 PDF 파일 <span className="text-red-500">*</span></Label>
                     <div className="relative">
-                      <Input
-                        type="file"
-                        accept=".pdf"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0]
-                          if (file) {
-                            if (file.type !== 'application/pdf') {
-                              alert('PDF 파일만 업로드 가능합니다.')
-                              e.target.value = ''
-                              return
+                      <label className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg cursor-pointer transition-all shadow-md hover:shadow-lg">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <span>{pdfFile ? '파일 변경' : 'PDF 파일 선택'}</span>
+                        <Input
+                          type="file"
+                          accept=".pdf"
+                          required
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) {
+                              if (file.type !== 'application/pdf') {
+                                alert('PDF 파일만 업로드 가능합니다.')
+                                e.target.value = ''
+                                return
+                              }
+                              if (file.size > 10 * 1024 * 1024) { // 10MB 제한
+                                alert('파일 크기는 10MB 이하여야 합니다.')
+                                e.target.value = ''
+                                return
+                              }
+                              setPdfFile(file)
                             }
-                            if (file.size > 10 * 1024 * 1024) { // 10MB 제한
-                              alert('파일 크기는 10MB 이하여야 합니다.')
-                              e.target.value = ''
-                              return
-                            }
-                            setPdfFile(file)
-                          }
-                        }}
-                        className="cursor-pointer border-2 border-blue-400 focus:border-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
-                      />
+                          }}
+                          className="hidden"
+                        />
+                      </label>
                     </div>
                     {pdfFile && (
                       <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
@@ -737,6 +793,11 @@ function DoctorPrescriptionsContent() {
                           선택된 파일: {pdfFile.name} ({(pdfFile.size / 1024).toFixed(2)} KB)
                         </p>
                       </div>
+                    )}
+                    {!pdfFile && (
+                      <p className="text-sm text-red-600 font-medium">
+                        ⚠️ 처방전 PDF 파일을 반드시 첨부해야 합니다.
+                      </p>
                     )}
                     <p className="text-xs text-blue-600 font-medium">
                       💡 PDF 파일을 첨부하면 환자가 처방전을 볼 때 첨부된 파일이 표시됩니다.

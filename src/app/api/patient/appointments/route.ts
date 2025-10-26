@@ -276,7 +276,49 @@ export async function POST(request: NextRequest) {
         notes: notes || '',
         status: 'PENDING',
         updatedAt: new Date()
+      },
+      include: {
+        users_appointments_patientIdTousers: true,
+        departments: true
       }
+    })
+
+    // 환자 알림 생성
+    const patient = await prisma.users.findUnique({
+      where: { id: userId }
+    })
+
+    if (patient) {
+      await prisma.user_notifications.create({
+        data: {
+          id: `notif_patient_${Date.now()}`,
+          userId: patient.id,
+          title: '예약 확정 알림',
+          message: `${department || '진료'} 예약이 확정되었습니다. (${date} ${time})`,
+          type: 'APPOINTMENT_CONFIRMED',
+          read: false,
+          createdAt: new Date()
+        }
+      })
+    }
+
+    // 의사 알림 생성
+    await prisma.user_notifications.create({
+      data: {
+        id: `notif_doctor_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+        userId: doctorId,
+        title: '새로운 예약',
+        message: `${patient?.name || '환자'}님의 ${department || '진료'} 예약이 접수되었습니다. (${date} ${time})`,
+        type: 'NEW_APPOINTMENT',
+        read: false,
+        createdAt: new Date()
+      }
+    })
+
+    console.log('✅ 예약 및 알림 생성 완료:', {
+      appointmentId: appointment.id,
+      patientId: userId,
+      doctorId: doctorId
     })
 
     return addCorsHeaders(

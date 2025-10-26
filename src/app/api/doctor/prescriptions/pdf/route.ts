@@ -21,6 +21,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const prescriptionId = searchParams.get('id')
 
+    console.log('[Doctor PDF API] 처방전 ID:', prescriptionId)
+    console.log('[Doctor PDF API] 의사 ID:', session.user.id)
+
     if (!prescriptionId) {
       return NextResponse.json({ error: '처방전 ID가 필요합니다' }, { status: 400 })
     }
@@ -65,10 +68,66 @@ export async function GET(request: NextRequest) {
     })
 
     if (!prescription) {
+      console.log('[Doctor PDF API] 처방전을 찾을 수 없음')
+      // 권한 없이 모든 처방전 검색 (디버깅용)
+      const anyPrescription = await prisma.prescriptions.findUnique({
+        where: { id: prescriptionId }
+      })
+      if (anyPrescription) {
+        console.log('[Doctor PDF API] 처방전은 존재하지만 doctorId 불일치')
+        console.log('[Doctor PDF API] DB doctorId:', anyPrescription.doctorId)
+      }
       return NextResponse.json({ error: '처방전을 찾을 수 없습니다' }, { status: 404 })
     }
 
-    // PDF 데이터 형식으로 변환
+    // 의사가 첨부한 PDF 파일이 있으면 그것을 반환
+    if ((prescription as any).pdfFilePath) {
+      console.log('[Doctor PDF API] 첨부 PDF 파일 발견:', (prescription as any).pdfFilePath)
+
+      const fs = await import('fs')
+      const path = await import('path')
+
+      try {
+        const pdfPath = (prescription as any).pdfFilePath
+        const filePath = pdfPath.startsWith('http')
+          ? pdfPath
+          : path.join(process.cwd(), 'public', pdfPath)
+
+        // URL인 경우 fetch로 다운로드
+        if (pdfPath.startsWith('http')) {
+          const response = await fetch(pdfPath)
+          if (!response.ok) {
+            throw new Error('PDF 파일 다운로드 실패')
+          }
+          const buffer = await response.arrayBuffer()
+
+          return new NextResponse(buffer as any, {
+            headers: {
+              'Content-Type': 'application/pdf',
+              'Content-Disposition': `attachment; filename="prescription_${prescription.prescriptionNumber}.pdf"`
+            }
+          })
+        }
+
+        // 로컬 파일인 경우
+        if (fs.existsSync(filePath)) {
+          const fileBuffer = fs.readFileSync(filePath)
+
+          return new NextResponse(fileBuffer as any, {
+            headers: {
+              'Content-Type': 'application/pdf',
+              'Content-Disposition': `attachment; filename="prescription_${prescription.prescriptionNumber}.pdf"`
+            }
+          })
+        } else {
+          console.log('[Doctor PDF API] 첨부 파일을 찾을 수 없음, 데이터로 반환')
+        }
+      } catch (fileError) {
+        console.error('[Doctor PDF API] 첨부 파일 로드 오류, 데이터로 반환:', fileError)
+      }
+    }
+
+    // 첨부 PDF가 없거나 로드 실패한 경우 데이터 반환 (react-pdf로 생성용)
     const pdfData = {
       prescriptionNumber: prescription.prescriptionNumber,
       patientName: prescription.users_prescriptions_patientIdTousers?.name || '정보 없음',

@@ -1,0 +1,18 @@
+[Unit]
+Description=Obesity1 Medical Platform Docker Compose Application
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/nbg/바탕화면/obesity1
+ExecStartPre=/usr/bin/docker-compose -f docker-compose.production.yml down
+ExecStart=/usr/bin/docker-compose -f docker-compose.production.yml up -d
+ExecStop=/usr/bin/docker-compose -f docker-compose.production.yml down
+TimeoutStartSec=300
+User=nbg
+
+[Install]
+WantedBy=multi-user.target

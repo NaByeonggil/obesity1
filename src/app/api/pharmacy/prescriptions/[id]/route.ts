@@ -1,27 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { verifyToken, getTokenFromAuthHeader } from '@/lib/auth'
-import { UserRole, PrescriptionStatus } from '@prisma/client'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const authHeader = request.headers.get('authorization')
-    const token = getTokenFromAuthHeader(authHeader)
+    const session = await getServerSession(authOptions)
 
-    if (!token) {
+    if (!session || !session.user) {
       return NextResponse.json(
-        { error: '인증 토큰이 필요합니다.' },
+        { error: '로그인이 필요합니다.' },
         { status: 401 }
       )
     }
 
-    const payload = verifyToken(token)
-    if (!payload || payload.role !== UserRole.PHARMACY) {
+    if (session.user.role?.toLowerCase() !== 'pharmacy') {
       return NextResponse.json(
-        { error: '약국 계정만 접근할 수 있습니다.' },
+        { error: '약국만 접근 가능합니다.' },
         { status: 403 }
       )
     }
@@ -30,32 +30,31 @@ export async function PATCH(
     const prescriptionId = params.id
 
     // 처방전 상태 업데이트
-    const updatedPrescription = await prisma.prescription.update({
+    const updatedPrescription = await prisma.prescriptions.update({
       where: {
         id: prescriptionId
       },
       data: {
-        status: status as PrescriptionStatus,
-        notes: notes || undefined,
-        updatedAt: new Date()
+        status: status,
+        notes: notes || undefined
       },
       include: {
-        patient: {
+        users_prescriptions_patientIdTousers: {
           select: {
             id: true,
             name: true,
             phone: true
           }
         },
-        doctor: {
+        users_prescriptions_doctorIdTousers: {
           select: {
             id: true,
             name: true
           }
         },
-        medications: {
+        prescription_medications: {
           include: {
-            medication: true
+            medications: true
           }
         }
       }
@@ -72,6 +71,8 @@ export async function PATCH(
       { error: '서버 오류가 발생했습니다.' },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
@@ -80,20 +81,18 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const authHeader = request.headers.get('authorization')
-    const token = getTokenFromAuthHeader(authHeader)
+    const session = await getServerSession(authOptions)
 
-    if (!token) {
+    if (!session || !session.user) {
       return NextResponse.json(
-        { error: '인증 토큰이 필요합니다.' },
+        { error: '로그인이 필요합니다.' },
         { status: 401 }
       )
     }
 
-    const payload = verifyToken(token)
-    if (!payload || payload.role !== UserRole.PHARMACY) {
+    if (session.user.role?.toLowerCase() !== 'pharmacy') {
       return NextResponse.json(
-        { error: '약국 계정만 접근할 수 있습니다.' },
+        { error: '약국만 접근 가능합니다.' },
         { status: 403 }
       )
     }
@@ -101,12 +100,12 @@ export async function GET(
     const prescriptionId = params.id
 
     // 처방전 상세 정보 가져오기
-    const prescription = await prisma.prescription.findUnique({
+    const prescription = await prisma.prescriptions.findUnique({
       where: {
         id: prescriptionId
       },
       include: {
-        patient: {
+        users_prescriptions_patientIdTousers: {
           select: {
             id: true,
             name: true,
@@ -115,28 +114,27 @@ export async function GET(
             avatar: true
           }
         },
-        doctor: {
+        users_prescriptions_doctorIdTousers: {
           select: {
             id: true,
             name: true,
             specialization: true
           }
         },
-        appointment: {
+        appointments: {
           select: {
             id: true,
             appointmentDate: true,
             type: true
           }
         },
-        medications: {
+        prescription_medications: {
           include: {
-            medication: {
+            medications: {
               select: {
                 id: true,
                 name: true,
-                category: true,
-                manufacturer: true,
+                description: true,
                 price: true
               }
             }
@@ -160,5 +158,7 @@ export async function GET(
       { error: '서버 오류가 발생했습니다.' },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }

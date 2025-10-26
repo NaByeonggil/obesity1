@@ -184,6 +184,9 @@ model users {
   longitude                                     Float?
   hasOfflineConsultation                        Boolean              @default(true)
   hasOnlineConsultation                         Boolean              @default(true)
+  workingHours                                  String?              @db.Text
+  insuranceAccepted                             Boolean              @default(false)
+  parkingAvailable                              Boolean              @default(false)
   accounts                                      accounts[]
   appointments_appointments_doctorIdTousers     appointments[]       @relation("appointments_doctorIdTousers")
   appointments_appointments_patientIdTousers    appointments[]       @relation("appointments_patientIdTousers")

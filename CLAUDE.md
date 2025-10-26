@@ -57,22 +57,25 @@ This is a Korean healthcare platform with four distinct user roles, each with se
 - **ADMIN**: System management and analytics
 
 ### Authentication System
-**Dual Authentication**: The platform uses both NextAuth.js (for web sessions) and JWT tokens (for API authentication):
-- NextAuth handles session-based authentication with support for:
+**Dual Authentication**: The platform uses both NextAuth.js (primary) and JWT tokens (secondary for Flutter app):
+
+**NextAuth.js (Primary - Web)**:
+- Session-based authentication using `getServerSession(authOptions)`
+- Supports multiple providers:
   - Credentials (email/password)
   - Social login (Kakao, Naver)
   - Email magic links
-- JWT tokens (`src/lib/auth.ts`) authenticate API requests
-- Token verification middleware checks role-based access control
+- Most API routes use this pattern for authentication
 
-**Important**: When calling APIs from client components, include credentials and proper authorization headers:
-```typescript
-fetch('/api/endpoint', {
-  method: 'POST',
-  credentials: 'include',
-  headers: { 'Authorization': `Bearer ${token}` }
-})
-```
+**JWT Tokens (Secondary - Mobile App)**:
+- Some routes (e.g., `/api/patient/appointments`) support both NextAuth sessions AND JWT tokens
+- JWT utilities in `src/lib/auth.ts`: `generateToken`, `verifyToken`, `getTokenFromAuthHeader`
+- Enables Flutter/mobile app integration alongside web sessions
+
+**Important**: When calling APIs:
+- **From web components**: Use `credentials: 'include'` to send session cookies
+- **From mobile apps**: Include JWT in Authorization header: `Bearer ${token}`
+- Some routes accept both authentication methods
 
 ### Database Architecture (Prisma + MySQL)
 **Core Models**:
@@ -125,19 +128,35 @@ tests/                    # Development test files
 - `/api/pharmacy/*` - Pharmacy-specific endpoints (process prescriptions, inventory)
 - `/api/admin/*` - Admin-only endpoints (stats, system management)
 
-**Authentication Pattern**: Most API routes follow this structure:
-```typescript
-// 1. Extract and verify token
-const authHeader = req.headers.get('authorization')
-const token = getTokenFromAuthHeader(authHeader)
-const payload = verifyToken(token)
+**Authentication Patterns**:
 
-// 2. Check role authorization
-if (payload.role !== 'EXPECTED_ROLE') {
+Most API routes use NextAuth session-based authentication:
+```typescript
+// 1. Get server session
+const session = await getServerSession(authOptions)
+
+// 2. Verify user is logged in
+if (!session || !session.user) {
+  return NextResponse.json({ error: '로그인이 필요합니다' }, { status: 401 })
+}
+
+// 3. Check role authorization
+if (session.user.role?.toLowerCase() !== 'expected_role') {
   return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
 }
 
-// 3. Perform operation with user context
+// 4. Perform operation with session.user.id
+```
+
+Some routes support dual authentication (NextAuth + JWT):
+```typescript
+// 1. Check both auth methods
+const session = await getServerSession(authOptions)
+const tokenUser = getUserFromToken(request) // JWT fallback
+
+// 2. Use either authentication source
+const user = session?.user || tokenUser
+const userId = session?.user?.id || tokenUser?.userId
 ```
 
 ### Component Architecture
@@ -168,23 +187,38 @@ if (payload.role !== 'EXPECTED_ROLE') {
 
 ## Environment Variables
 Required in `.env`:
-```
-DATABASE_URL="mysql://..."
+```bash
+# Database
+DATABASE_URL="mysql://user:password@host:3306/database"
+
+# Authentication
 NEXTAUTH_SECRET="..."
 JWT_SECRET="..."
+NEXTAUTH_URL="https://obesity.ai.kr" # or http://localhost:3000 for dev
+
+# Social Login
 KAKAO_CLIENT_ID="..."
 KAKAO_CLIENT_SECRET="..."
 NAVER_CLIENT_ID="..."
 NAVER_CLIENT_SECRET="..."
 ```
 
+Production environment (`.env.production`):
+```bash
+DATABASE_URL="mysql://root:password@obesity1-mysql-1:3306/medical_db"
+NEXTAUTH_URL="https://obesity.ai.kr"
+```
+
 ## Common Development Patterns
 
 ### Adding a New API Route
 1. Create route file in appropriate role directory: `src/app/api/{role}/{feature}/route.ts`
-2. Implement JWT authentication and role verification
-3. Use Prisma client for database operations
-4. Return proper NextResponse with error handling
+2. Import and use NextAuth session: `import { getServerSession } from 'next-auth'`
+3. Verify authentication with `getServerSession(authOptions)`
+4. Check role authorization: `session.user.role?.toLowerCase() === 'expected_role'`
+5. Use Prisma client for database operations
+6. Always call `await prisma.$disconnect()` in `finally` block
+7. Return proper NextResponse with Korean error messages for consistency
 
 ### Adding a New Page
 1. Create page in role directory: `src/app/{role}/{feature}/page.tsx`
@@ -196,9 +230,55 @@ NAVER_CLIENT_SECRET="..."
 - Always regenerate Prisma client after schema changes: `npx prisma generate`
 - Use relation names exactly as defined in schema (e.g., `appointments_doctorIdTousers`)
 - Include all required fields when creating records (id, timestamps, foreign keys)
+- Generate unique IDs using pattern: `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
+- Always disconnect in finally block: `await prisma.$disconnect()`
+- Use `PrismaClient` or import from `@/lib/prisma` depending on existing pattern in similar routes
 
 ### Testing Changes
 - Type-check before committing: `npm run type-check`
 - Test role-based access control by logging in as different user types
 - Verify API endpoints with test scripts in `tests/` directory
 - Check database state with Prisma Studio: `npx prisma studio`
+
+## Deployment
+
+### Docker Production Deployment
+The platform is deployed using Docker with the following services:
+- **App**: Next.js application (port 3000 internal, 443 external via nginx)
+- **MySQL**: Database service (port 3306 internal)
+- **Nginx**: Reverse proxy with SSL/TLS (port 80, 443)
+
+```bash
+# Full deployment
+./deploy.sh
+
+# Manual deployment
+docker-compose -f docker-compose.production.yml up -d --build
+
+# SSL certificate setup
+./setup-ssl.sh
+```
+
+**Important**: The platform is deployed at `https://obesity.ai.kr` with Let's Encrypt SSL certificates. See `docs/deployment/` for detailed deployment guides.
+
+### Systemd Auto-start (Optional)
+Use `install-service.sh` or `setup-autostart.sh` to configure automatic startup on system boot. See `AUTO-START-SETUP.md` for details.
+
+## Additional Features
+
+### Notifications System
+- User notifications stored in `user_notifications` table
+- System alerts in `system_alerts` table
+- `NotificationBell` component displays real-time notifications in dashboard header
+- API endpoints at `/api/notifications/`
+
+### Prescription PDF Generation
+- Uses `@react-pdf/renderer` for PDF creation
+- Component: `src/components/prescription/PrescriptionPDF.tsx`
+- PDFs stored in `public/prescriptions/` directory
+- Naming pattern: `presc_{timestamp}_{uniqueId}_{patientName}_{date}.pdf`
+
+### Geolocation Features
+- Pharmacies have `latitude` and `longitude` fields for location-based features
+- Medication pharmacy finder feature in patient dashboard
+- Scripts available in `scripts/` for updating pharmacy coordinates

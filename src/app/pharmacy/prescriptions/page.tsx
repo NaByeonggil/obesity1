@@ -73,6 +73,7 @@ function PharmacyPrescriptionsContent() {
   const [error, setError] = React.useState<string | null>(null)
   const [selectedPrescription, setSelectedPrescription] = React.useState<PrescriptionData | null>(null)
   const [showDetailModal, setShowDetailModal] = React.useState(false)
+  const [loadingPdf, setLoadingPdf] = React.useState(false)
 
   const loadPrescriptions = React.useCallback(async () => {
     try {
@@ -92,6 +93,16 @@ function PharmacyPrescriptionsContent() {
       }
 
       const data = await response.json()
+      console.log('[Pharmacy Prescriptions] API 응답:', data)
+      if (data.prescriptions && data.prescriptions.length > 0) {
+        console.log('[Pharmacy Prescriptions] 첫 번째 처방전:', data.prescriptions[0])
+        console.log('[Pharmacy Prescriptions] 날짜 데이터:', {
+          issuedAt: data.prescriptions[0].issuedAt,
+          validUntil: data.prescriptions[0].validUntil,
+          issuedAtType: typeof data.prescriptions[0].issuedAt,
+          validUntilType: typeof data.prescriptions[0].validUntil
+        })
+      }
       setPrescriptions(data.prescriptions || [])
     } catch (err) {
       console.error('처방전 조회 오류:', err)
@@ -110,6 +121,10 @@ function PharmacyPrescriptionsContent() {
     setShowDetailModal(true)
   }
 
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false)
+  }
+
   const handlePrintPrescription = (prescriptionId: string) => {
     console.log("처방전 프린트:", prescriptionId)
     window.print()
@@ -117,21 +132,30 @@ function PharmacyPrescriptionsContent() {
 
   const handleViewPDF = async (prescriptionId: string) => {
     try {
+      setLoadingPdf(true)
       const response = await fetch(`/api/pharmacy/prescriptions/pdf?prescriptionId=${prescriptionId}`, {
         method: 'GET',
         credentials: 'include'
       })
 
       if (!response.ok) {
-        throw new Error('PDF 로드 실패')
+        const errorData = await response.json()
+        if (response.status === 404) {
+          alert('의사가 아직 처방전 PDF를 첨부하지 않았습니다.\n의사에게 문의해주세요.')
+        } else {
+          alert(errorData.error || 'PDF 조회에 실패했습니다.')
+        }
+        return
       }
 
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       window.open(url, '_blank')
     } catch (error) {
-      console.error('PDF 보기 오류:', error)
-      alert('처방전 PDF를 불러오는 중 오류가 발생했습니다.')
+      console.error('PDF 조회 오류:', error)
+      alert('PDF 조회 중 오류가 발생했습니다.')
+    } finally {
+      setLoadingPdf(false)
     }
   }
 
@@ -143,7 +167,13 @@ function PharmacyPrescriptionsContent() {
       })
 
       if (!response.ok) {
-        throw new Error('PDF 로드 실패')
+        const errorData = await response.json()
+        if (response.status === 404) {
+          alert('의사가 아직 처방전 PDF를 첨부하지 않았습니다.\n의사에게 문의해주세요.')
+        } else {
+          alert(errorData.error || 'PDF 조회에 실패했습니다.')
+        }
+        return
       }
 
       const blob = await response.blob()
@@ -156,7 +186,18 @@ function PharmacyPrescriptionsContent() {
       document.body.appendChild(iframe)
 
       iframe.onload = () => {
-        iframe.contentWindow?.print()
+        setTimeout(() => {
+          iframe.contentWindow?.print()
+        }, 100)
+        // Clean up after printing (give enough time for print dialog)
+        setTimeout(() => {
+          try {
+            document.body.removeChild(iframe)
+            window.URL.revokeObjectURL(url)
+          } catch (e) {
+            console.error('iframe cleanup error:', e)
+          }
+        }, 60000) // 1분 후 정리
       }
     } catch (error) {
       console.error('PDF 프린트 오류:', error)
@@ -207,15 +248,27 @@ function PharmacyPrescriptionsContent() {
     }
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+  const formatDate = (dateString: string | undefined | null) => {
+    if (!dateString) {
+      return '-'
+    }
+
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) {
+        return '-'
+      }
+      return date.toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    } catch (error) {
+      console.error('날짜 포맷 오류:', error, dateString)
+      return '-'
+    }
   }
 
   if (loading) {
@@ -303,15 +356,28 @@ function PharmacyPrescriptionsContent() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleViewPrescription(prescription)}
+                          onClick={() => handleViewPDF(prescription.id)}
+                          disabled={loadingPdf}
                         >
-                          <Eye className="h-4 w-4 mr-1" />
+                          {loadingPdf ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Eye className="h-4 w-4 mr-1" />
+                          )}
                           처방전 보기
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handlePrintPrescription(prescription.id)}
+                          onClick={() => handleViewPrescription(prescription)}
+                        >
+                          <FileText className="h-4 w-4 mr-1" />
+                          상세 정보
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handlePrintPDF(prescription.id)}
                         >
                           <Printer className="h-4 w-4 mr-1" />
                           프린트
@@ -441,7 +507,7 @@ function PharmacyPrescriptionsContent() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setShowDetailModal(false)}
+                  onClick={handleCloseDetailModal}
                 >
                   닫기
                 </Button>
@@ -577,9 +643,19 @@ function PharmacyPrescriptionsContent() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleViewPDF(selectedPrescription.id)}
+                          disabled={loadingPdf}
                         >
-                          <Eye className="h-4 w-4 mr-1" />
-                          처방전 보기
+                          {loadingPdf ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                              로딩 중...
+                            </>
+                          ) : (
+                            <>
+                              <Eye className="h-4 w-4 mr-1" />
+                              처방전 보기
+                            </>
+                          )}
                         </Button>
                         <Button
                           variant="outline"
@@ -595,7 +671,7 @@ function PharmacyPrescriptionsContent() {
                   <CardContent>
                     <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
                       <p className="text-sm text-blue-900">
-                        📄 처방전을 PDF로 확인하고 인쇄할 수 있습니다.
+                        📄 '처방전 보기' 버튼을 클릭하면 새 탭에서 PDF를 확인할 수 있습니다.
                       </p>
                       {selectedPrescription.notes && (
                         <div className="mt-3 pt-3 border-t border-blue-200">

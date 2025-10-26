@@ -210,7 +210,22 @@ function PharmacyDashboardContent() {
 
       if (prescriptionsResponse.ok) {
         const prescData = await prescriptionsResponse.json()
-        setPendingPrescriptions(prescData.prescriptions.slice(0, 3))
+        // API 응답을 PendingPrescription 형식으로 변환
+        const formattedPrescriptions = prescData.prescriptions.map((presc: any) => ({
+          id: presc.id,
+          patientName: presc.patient?.name || '환자',
+          patientPhone: presc.patient?.phone,
+          doctorName: presc.doctor?.name || '담당의',
+          clinic: presc.doctor?.clinic || '',
+          receivedTime: presc.issuedAt || new Date().toISOString(),
+          medications: presc.medications || [],
+          totalPrice: presc.totalPrice || 0,
+          urgent: false,
+          estimatedTime: '15분',
+          diagnosis: presc.diagnosis,
+          notes: presc.notes
+        }))
+        setPendingPrescriptions(formattedPrescriptions.slice(0, 3))
       }
 
       if (inventoryResponse.ok) {
@@ -234,13 +249,56 @@ function PharmacyDashboardContent() {
     loadDashboardData()
   }, [loadDashboardData])
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleTimeString('ko-KR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    })
+  const formatTime = (dateString: string | undefined | null) => {
+    if (!dateString) {
+      return '-'
+    }
+
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) {
+        return '-'
+      }
+      return date.toLocaleTimeString('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      })
+    } catch (error) {
+      console.error('시간 포맷 오류:', error, dateString)
+      return '-'
+    }
+  }
+
+  const handleViewPDF = async (prescriptionId: string) => {
+    if (useMockData) {
+      alert('데모 모드에서는 PDF를 볼 수 없습니다. 로그인 후 이용해주세요.')
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/pharmacy/prescriptions/pdf?prescriptionId=${prescriptionId}`, {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        if (response.status === 404) {
+          alert('의사가 아직 처방전 파일을 첨부하지 않았습니다.\n의사에게 문의해주세요.')
+        } else {
+          alert(errorData.error || 'PDF 조회에 실패했습니다.')
+        }
+        return
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      window.open(url, '_blank')
+    } catch (error) {
+      console.error('PDF 조회 오류:', error)
+      alert('PDF 조회 중 오류가 발생했습니다.')
+    }
   }
 
   const handleUpdatePrescriptionStatus = async (prescriptionId: string, status: string) => {
@@ -248,17 +306,22 @@ function PharmacyDashboardContent() {
 
     try {
       const response = await fetch(`/api/pharmacy/prescriptions/${prescriptionId}`, {
-        method: 'PUT',
+        method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
       })
 
       if (response.ok) {
+        alert('처방전 상태가 업데이트되었습니다.')
         loadDashboardData()
+      } else {
+        const error = await response.json()
+        alert(error.error || '상태 업데이트에 실패했습니다.')
       }
     } catch (err) {
       console.error('처방전 상태 업데이트 오류:', err)
+      alert('처방전 상태 업데이트 중 오류가 발생했습니다.')
     }
   }
 
@@ -441,6 +504,14 @@ function PharmacyDashboardContent() {
                       </div>
                     </div>
                     <div className="flex flex-col space-y-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleViewPDF(prescription.id)}
+                      >
+                        <FileText className="h-4 w-4 mr-1" />
+                        처방전 보기
+                      </Button>
                       <Button
                         size="sm"
                         variant="pharmacy"

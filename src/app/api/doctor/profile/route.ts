@@ -36,7 +36,10 @@ export async function GET(req: NextRequest) {
         clinic: true,
         address: true,
         hasOnlineConsultation: true,
-        hasOfflineConsultation: true
+        hasOfflineConsultation: true,
+        workingHours: true,
+        insuranceAccepted: true,
+        parkingAvailable: true
       }
     })
 
@@ -91,7 +94,10 @@ export async function PUT(req: NextRequest) {
       longitude,
       description,
       hasOnlineConsultation,
-      hasOfflineConsultation
+      hasOfflineConsultation,
+      workingHours,
+      insuranceAccepted,
+      parkingAvailable
     } = body
 
     // 진료 방식 검증
@@ -104,6 +110,9 @@ export async function PUT(req: NextRequest) {
 
     console.log('Updating doctor profile:', session.user.id, body)
 
+    // workingHours를 JSON 문자열로 변환
+    const workingHoursString = workingHours ? JSON.stringify(workingHours) : null
+
     const updatedDoctor = await prisma.users.update({
       where: { id: session.user.id },
       data: {
@@ -115,6 +124,9 @@ export async function PUT(req: NextRequest) {
         address,
         hasOnlineConsultation,
         hasOfflineConsultation,
+        workingHours: workingHoursString,
+        insuranceAccepted,
+        parkingAvailable,
         updatedAt: new Date()
       }
     })
@@ -133,7 +145,10 @@ export async function PUT(req: NextRequest) {
         clinic: updatedDoctor.clinic,
         address: updatedDoctor.address,
         hasOnlineConsultation: updatedDoctor.hasOnlineConsultation,
-        hasOfflineConsultation: updatedDoctor.hasOfflineConsultation
+        hasOfflineConsultation: updatedDoctor.hasOfflineConsultation,
+        workingHours: updatedDoctor.workingHours,
+        insuranceAccepted: updatedDoctor.insuranceAccepted,
+        parkingAvailable: updatedDoctor.parkingAvailable
       }
     })
   } catch (error) {

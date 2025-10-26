@@ -18,11 +18,18 @@ import {
   Check,
   Map,
   Video,
-  Building2
+  Building2,
+  Clock,
+  CreditCard,
+  Car
 } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AddressSearchInput } from '@/components/ui/address-search-input'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
+
+interface WorkingHours {
+  [key: string]: { start: string; end: string; isOpen: boolean }
+}
 
 interface DoctorProfile {
   name: string
@@ -41,6 +48,9 @@ interface DoctorProfile {
   avatar: string
   hasOnlineConsultation: boolean
   hasOfflineConsultation: boolean
+  workingHours: WorkingHours
+  insuranceAccepted: boolean
+  parkingAvailable: boolean
 }
 
 function DoctorProfileContent() {
@@ -66,7 +76,18 @@ function DoctorProfileContent() {
     description: '10년 이상 경력의 내과 전문의입니다.',
     avatar: user?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || '김의사')}&background=3B82F6&color=fff`,
     hasOnlineConsultation: true,
-    hasOfflineConsultation: true
+    hasOfflineConsultation: true,
+    workingHours: {
+      monday: { start: '09:00', end: '18:00', isOpen: true },
+      tuesday: { start: '09:00', end: '18:00', isOpen: true },
+      wednesday: { start: '09:00', end: '18:00', isOpen: true },
+      thursday: { start: '09:00', end: '18:00', isOpen: true },
+      friday: { start: '09:00', end: '18:00', isOpen: true },
+      saturday: { start: '09:00', end: '13:00', isOpen: true },
+      sunday: { start: '09:00', end: '18:00', isOpen: false }
+    },
+    insuranceAccepted: false,
+    parkingAvailable: false
   })
 
   const [editedProfile, setEditedProfile] = useState<DoctorProfile>(profile)
@@ -87,6 +108,19 @@ function DoctorProfileContent() {
 
         if (response.ok) {
           const data = await response.json()
+
+          // workingHours가 문자열로 저장되어 있으면 파싱
+          let parsedWorkingHours = profile.workingHours
+          if (data.workingHours) {
+            try {
+              parsedWorkingHours = typeof data.workingHours === 'string'
+                ? JSON.parse(data.workingHours)
+                : data.workingHours
+            } catch (e) {
+              console.error('Failed to parse working hours:', e)
+            }
+          }
+
           const updatedProfile = {
             ...profile,
             name: data.name || profile.name,
@@ -97,7 +131,10 @@ function DoctorProfileContent() {
             clinic: data.clinic || profile.clinic,
             address: data.address || profile.address,
             hasOnlineConsultation: data.hasOnlineConsultation ?? profile.hasOnlineConsultation,
-            hasOfflineConsultation: data.hasOfflineConsultation ?? profile.hasOfflineConsultation
+            hasOfflineConsultation: data.hasOfflineConsultation ?? profile.hasOfflineConsultation,
+            workingHours: parsedWorkingHours,
+            insuranceAccepted: data.insuranceAccepted ?? profile.insuranceAccepted,
+            parkingAvailable: data.parkingAvailable ?? profile.parkingAvailable
           }
           setProfile(updatedProfile)
           setEditedProfile(updatedProfile)
@@ -584,6 +621,182 @@ function DoctorProfileContent() {
                   <Badge variant="secondary" className="flex items-center gap-1">
                     <Video className="h-3 w-3" />
                     비대면 진료 가능
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 진료 시간 설정 카드 */}
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              진료 시간 설정
+            </CardTitle>
+            <CardDescription>요일별 진료 시간을 설정하세요</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {[
+                { key: 'monday', label: '월요일' },
+                { key: 'tuesday', label: '화요일' },
+                { key: 'wednesday', label: '수요일' },
+                { key: 'thursday', label: '목요일' },
+                { key: 'friday', label: '금요일' },
+                { key: 'saturday', label: '토요일' },
+                { key: 'sunday', label: '일요일' }
+              ].map(({ key, label }) => {
+                const daySchedule = (isEditing ? editedProfile : profile).workingHours[key]
+                return (
+                  <div key={key} className="flex items-center gap-4 p-3 border rounded-lg">
+                    <div className="flex items-center gap-3 w-24">
+                      <input
+                        type="checkbox"
+                        id={`working-${key}`}
+                        checked={daySchedule?.isOpen ?? false}
+                        onChange={(e) => {
+                          if (!isEditing) return
+                          setEditedProfile({
+                            ...editedProfile,
+                            workingHours: {
+                              ...editedProfile.workingHours,
+                              [key]: {
+                                ...editedProfile.workingHours[key],
+                                isOpen: e.target.checked
+                              }
+                            }
+                          })
+                        }}
+                        disabled={!isEditing}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+                      />
+                      <Label htmlFor={`working-${key}`} className="font-semibold cursor-pointer">
+                        {label}
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-1">
+                      <Input
+                        type="time"
+                        value={daySchedule?.start || '09:00'}
+                        onChange={(e) => {
+                          if (!isEditing) return
+                          setEditedProfile({
+                            ...editedProfile,
+                            workingHours: {
+                              ...editedProfile.workingHours,
+                              [key]: {
+                                ...editedProfile.workingHours[key],
+                                start: e.target.value
+                              }
+                            }
+                          })
+                        }}
+                        disabled={!isEditing || !daySchedule?.isOpen}
+                        className="w-32"
+                      />
+                      <span className="text-gray-500">~</span>
+                      <Input
+                        type="time"
+                        value={daySchedule?.end || '18:00'}
+                        onChange={(e) => {
+                          if (!isEditing) return
+                          setEditedProfile({
+                            ...editedProfile,
+                            workingHours: {
+                              ...editedProfile.workingHours,
+                              [key]: {
+                                ...editedProfile.workingHours[key],
+                                end: e.target.value
+                              }
+                            }
+                          })
+                        }}
+                        disabled={!isEditing || !daySchedule?.isOpen}
+                        className="w-32"
+                      />
+                    </div>
+
+                    {!daySchedule?.isOpen && (
+                      <Badge variant="secondary" className="ml-auto">휴진</Badge>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 추가 정보 카드 */}
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <CardTitle>추가 정보</CardTitle>
+            <CardDescription>의원의 추가 편의 정보를 설정하세요</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <input
+                    type="checkbox"
+                    id="insuranceAccepted"
+                    checked={isEditing ? editedProfile.insuranceAccepted : profile.insuranceAccepted}
+                    onChange={(e) => setEditedProfile({
+                      ...editedProfile,
+                      insuranceAccepted: e.target.checked
+                    })}
+                    disabled={!isEditing}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+                  />
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="h-6 w-6 text-blue-600" />
+                    <div>
+                      <Label htmlFor="insuranceAccepted" className="text-sm font-semibold cursor-pointer">
+                        보험 적용 가능
+                      </Label>
+                      <p className="text-xs text-gray-500">대면 진료 시 건강보험 적용</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <input
+                    type="checkbox"
+                    id="parkingAvailable"
+                    checked={isEditing ? editedProfile.parkingAvailable : profile.parkingAvailable}
+                    onChange={(e) => setEditedProfile({
+                      ...editedProfile,
+                      parkingAvailable: e.target.checked
+                    })}
+                    disabled={!isEditing}
+                    className="rounded border-gray-300 text-green-600 focus:ring-green-500 h-4 w-4"
+                  />
+                  <div className="flex items-center gap-3">
+                    <Car className="h-6 w-6 text-green-600" />
+                    <div>
+                      <Label htmlFor="parkingAvailable" className="text-sm font-semibold cursor-pointer">
+                        주차 가능
+                      </Label>
+                      <p className="text-xs text-gray-500">주차 공간 이용 가능</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 현재 설정 상태 표시 */}
+              <div className="flex gap-2">
+                {(isEditing ? editedProfile.insuranceAccepted : profile.insuranceAccepted) && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    <CreditCard className="h-3 w-3" />
+                    보험 적용 가능
+                  </Badge>
+                )}
+                {(isEditing ? editedProfile.parkingAvailable : profile.parkingAvailable) && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    <Car className="h-3 w-3" />
+                    주차 가능
                   </Badge>
                 )}
               </div>

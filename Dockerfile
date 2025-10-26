@@ -21,6 +21,10 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+# Build arguments for Next.js public env vars
+ARG NEXT_PUBLIC_KAKAO_MAP_KEY
+ENV NEXT_PUBLIC_KAKAO_MAP_KEY=${NEXT_PUBLIC_KAKAO_MAP_KEY}
+
 # Generate Prisma Client
 RUN npx prisma generate
 

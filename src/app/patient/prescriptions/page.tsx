@@ -455,13 +455,25 @@ export default function PatientPrescriptionsPage() {
   }
 
   // 날짜 포맷팅
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    })
+  const formatDate = (dateString: string | undefined | null) => {
+    if (!dateString) {
+      return '-'
+    }
+
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) {
+        return '-'
+      }
+      return date.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      })
+    } catch (error) {
+      console.error('날짜 포맷 오류:', error, dateString)
+      return '-'
+    }
   }
 
   if (loading) {

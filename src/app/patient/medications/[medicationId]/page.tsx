@@ -20,7 +20,7 @@ import {
   Package
 } from 'lucide-react'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import Script from 'next/script'
+// Script 컴포넌트 대신 useEffect에서 직접 로드
 
 interface Medication {
   id: string
@@ -59,6 +59,7 @@ function MedicationPharmaciesContent() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
   const [map, setMap] = useState<any>(null)
   const [kakaoLoaded, setKakaoLoaded] = useState(false)
+  const [selectedPharmacyId, setSelectedPharmacyId] = useState<string | null>(null)
 
   // 거리 계산 함수 (Haversine formula)
   const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -155,11 +156,23 @@ function MedicationPharmaciesContent() {
     const container = document.getElementById('map')
     if (!container) return
 
-    // 지도 중심 설정 (약국이 있으면 첫 번째 약국, 없으면 사용자 위치)
+    // 선택된 약국 찾기
+    const selectedPharmacy = selectedPharmacyId
+      ? pharmacies.find(p => p.id === selectedPharmacyId)
+      : null
+
+    // 지도 중심 설정 - 선택된 약국 우선, 그 다음 가장 가까운 약국
     let centerLat = 37.5665
     let centerLng = 126.9780
+    let centerLevel = 5
 
-    if (pharmacies.length > 0 && pharmacies[0].latitude && pharmacies[0].longitude) {
+    if (selectedPharmacy && selectedPharmacy.latitude && selectedPharmacy.longitude) {
+      // 선택된 약국이 있으면 그 약국을 중심으로
+      centerLat = selectedPharmacy.latitude
+      centerLng = selectedPharmacy.longitude
+      centerLevel = 3 // 확대해서 표시
+    } else if (pharmacies.length > 0 && pharmacies[0].latitude && pharmacies[0].longitude) {
+      // 선택된 약국이 없으면 첫 번째 약국 (거리순 정렬되어 있으므로 가장 가까운 약국)
       centerLat = pharmacies[0].latitude
       centerLng = pharmacies[0].longitude
     } else if (userLocation) {
@@ -169,38 +182,17 @@ function MedicationPharmaciesContent() {
 
     const options = {
       center: new window.kakao.maps.LatLng(centerLat, centerLng),
-      level: 5
+      level: centerLevel
     }
 
     const kakaoMap = new window.kakao.maps.Map(container, options)
     setMap(kakaoMap)
 
-    // 사용자 위치 마커 (파란색)
-    if (userLocation) {
-      const userMarkerPosition = new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng)
-      const userMarkerImage = new window.kakao.maps.MarkerImage(
-        'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
-        new window.kakao.maps.Size(24, 35)
-      )
-      const userMarker = new window.kakao.maps.Marker({
-        position: userMarkerPosition,
-        map: kakaoMap,
-        image: userMarkerImage
-      })
-
-      const userInfowindow = new window.kakao.maps.InfoWindow({
-        content: `<div style="padding:10px;font-size:12px;"><strong>내 위치</strong></div>`
-      })
-
-      window.kakao.maps.event.addListener(userMarker, 'click', function() {
-        userInfowindow.open(kakaoMap, userMarker)
-      })
-    }
-
     // 약국 마커들
     pharmacies.forEach((pharmacy, index) => {
       if (pharmacy.latitude && pharmacy.longitude) {
         const markerPosition = new window.kakao.maps.LatLng(pharmacy.latitude, pharmacy.longitude)
+
         const marker = new window.kakao.maps.Marker({
           position: markerPosition,
           map: kakaoMap
@@ -219,9 +211,63 @@ function MedicationPharmaciesContent() {
         window.kakao.maps.event.addListener(marker, 'click', function() {
           infowindow.open(kakaoMap, marker)
         })
+
+        // 선택된 약국 또는 첫 번째 약국의 인포윈도우는 자동으로 열기
+        if ((selectedPharmacy && pharmacy.id === selectedPharmacy.id) || (!selectedPharmacy && index === 0)) {
+          infowindow.open(kakaoMap, marker)
+        }
       }
     })
-  }, [kakaoLoaded, userLocation, pharmacies])
+
+    // 사용자 위치 마커 (별 모양) - 약국 마커보다 나중에 추가하여 위에 표시
+    if (userLocation) {
+      const userMarkerPosition = new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng)
+
+      const userMarkerImage = new window.kakao.maps.MarkerImage(
+        'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
+        new window.kakao.maps.Size(24, 35)
+      )
+      const userMarker = new window.kakao.maps.Marker({
+        position: userMarkerPosition,
+        map: kakaoMap,
+        image: userMarkerImage
+      })
+
+      const userInfowindow = new window.kakao.maps.InfoWindow({
+        content: `<div style="padding:10px;font-size:12px;"><strong>내 위치</strong></div>`
+      })
+
+      window.kakao.maps.event.addListener(userMarker, 'click', function() {
+        userInfowindow.open(kakaoMap, userMarker)
+      })
+    }
+  }, [kakaoLoaded, userLocation, pharmacies, selectedPharmacyId])
+
+  // 카카오맵 SDK 로드
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=398db3379079dc2538892e3969bdb399&autoload=false'
+    script.async = true
+    script.onload = () => {
+      if (window.kakao && window.kakao.maps) {
+        window.kakao.maps.load(() => {
+          console.log('카카오맵 SDK 로드 완료')
+          setKakaoLoaded(true)
+        })
+      }
+    }
+    script.onerror = () => {
+      console.error('카카오맵 SDK 로드 실패')
+    }
+    document.head.appendChild(script)
+
+    return () => {
+      // cleanup: script 태그 제거
+      if (script.parentNode) {
+        script.parentNode.removeChild(script)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     getUserLocation()
@@ -257,16 +303,6 @@ function MedicationPharmaciesContent() {
 
   return (
     <>
-      <Script
-        src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY || 'YOUR_KAKAO_MAP_KEY'}&autoload=false`}
-        strategy="afterInteractive"
-        onLoad={() => {
-          window.kakao.maps.load(() => {
-            setKakaoLoaded(true)
-          })
-        }}
-      />
-
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
@@ -437,17 +473,8 @@ function MedicationPharmaciesContent() {
                         size="sm"
                         onClick={() => {
                           if (pharmacy.latitude && pharmacy.longitude) {
+                            setSelectedPharmacyId(pharmacy.id)
                             setViewMode('map')
-                            setTimeout(() => {
-                              if (map) {
-                                const moveLatLon = new window.kakao.maps.LatLng(
-                                  pharmacy.latitude,
-                                  pharmacy.longitude
-                                )
-                                map.setCenter(moveLatLon)
-                                map.setLevel(3)
-                              }
-                            }, 200)
                           } else {
                             alert('위치 정보가 없습니다')
                           }

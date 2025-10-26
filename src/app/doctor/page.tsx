@@ -18,7 +18,13 @@ import {
   MapPin,
   TrendingUp,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  CreditCard,
+  Car,
+  Building2,
+  Settings
 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useRouter } from "next/navigation"
@@ -49,6 +55,14 @@ interface TodayAppointment {
   notes?: string
 }
 
+interface DoctorProfile {
+  hasOnlineConsultation: boolean
+  hasOfflineConsultation: boolean
+  insuranceAccepted: boolean
+  parkingAvailable: boolean
+  workingHours?: any
+}
+
 function DoctorDashboardContent() {
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -62,12 +76,52 @@ function DoctorDashboardContent() {
   })
   const [todayAppointments, setTodayAppointments] = React.useState<TodayAppointment[]>([])
   const [recentPatients, setRecentPatients] = React.useState<any[]>([])
+  const [profile, setProfile] = React.useState<DoctorProfile | null>(null)
 
   React.useEffect(() => {
     if (status === 'authenticated' && session?.user) {
       fetchDashboardData()
+      fetchProfile()
     }
   }, [status, session])
+
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch('/api/doctor/profile', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+
+        // workingHours 파싱
+        let workingHours = null
+        if (data.workingHours) {
+          try {
+            workingHours = typeof data.workingHours === 'string'
+              ? JSON.parse(data.workingHours)
+              : data.workingHours
+          } catch (e) {
+            console.error('Failed to parse workingHours:', e)
+          }
+        }
+
+        setProfile({
+          hasOnlineConsultation: data.hasOnlineConsultation ?? false,
+          hasOfflineConsultation: data.hasOfflineConsultation ?? false,
+          insuranceAccepted: data.insuranceAccepted ?? false,
+          parkingAvailable: data.parkingAvailable ?? false,
+          workingHours
+        })
+      }
+    } catch (error) {
+      console.error('Failed to fetch profile:', error)
+    }
+  }
 
   const fetchDashboardData = async () => {
     setLoading(true)
@@ -245,6 +299,140 @@ function DoctorDashboardContent() {
           variant="doctor"
         />
       </div>
+
+      {/* Profile Information Card */}
+      {profile && (
+        <Card className="border-blue-200 bg-blue-50/50">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-blue-600" />
+                프로필 설정 정보
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/doctor/profile')}
+              >
+                수정하기
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </CardTitle>
+            <CardDescription>
+              현재 설정된 진료 정보를 확인하세요
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* 진료 방식 */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-sm text-gray-700 mb-2">진료 방식</h3>
+                <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+                  {profile.hasOfflineConsultation ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-gray-300" />
+                  )}
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-blue-600" />
+                    <span className={profile.hasOfflineConsultation ? 'text-gray-900' : 'text-gray-400'}>
+                      대면 진료
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+                  {profile.hasOnlineConsultation ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-gray-300" />
+                  )}
+                  <div className="flex items-center gap-2">
+                    <Video className="h-4 w-4 text-green-600" />
+                    <span className={profile.hasOnlineConsultation ? 'text-gray-900' : 'text-gray-400'}>
+                      비대면 진료
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 편의 정보 */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-sm text-gray-700 mb-2">편의 정보</h3>
+                <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+                  {profile.insuranceAccepted ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-gray-300" />
+                  )}
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-blue-600" />
+                    <span className={profile.insuranceAccepted ? 'text-gray-900' : 'text-gray-400'}>
+                      보험 적용 가능
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+                  {profile.parkingAvailable ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-gray-300" />
+                  )}
+                  <div className="flex items-center gap-2">
+                    <Car className="h-4 w-4 text-green-600" />
+                    <span className={profile.parkingAvailable ? 'text-gray-900' : 'text-gray-400'}>
+                      주차 가능
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 진료 시간 설정 여부 */}
+              {profile.workingHours && (
+                <div className="md:col-span-2 p-4 bg-white rounded-lg border">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Clock className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-semibold text-sm text-gray-700">진료 시간 설정</h3>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
+                    {Object.entries(profile.workingHours).map(([day, schedule]: [string, any]) => {
+                      const dayLabels: Record<string, string> = {
+                        monday: '월',
+                        tuesday: '화',
+                        wednesday: '수',
+                        thursday: '목',
+                        friday: '금',
+                        saturday: '토',
+                        sunday: '일'
+                      }
+                      return (
+                        <div
+                          key={day}
+                          className={`text-center p-2 rounded ${
+                            schedule.isOpen
+                              ? 'bg-green-50 border border-green-200'
+                              : 'bg-gray-50 border border-gray-200'
+                          }`}
+                        >
+                          <div className="font-semibold text-sm">{dayLabels[day]}</div>
+                          <div className="text-xs mt-1">
+                            {schedule.isOpen ? (
+                              <span className="text-green-700">
+                                {schedule.start}-{schedule.end}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">휴진</span>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

@@ -29,6 +29,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_KAKAO_MAP_KEY=${NEXT_PUBLIC_KAKAO_MAP_KEY}
     container_name: obesity1_app_production
     restart: always
     ports:
@@ -43,6 +45,9 @@ services:
         condition: service_healthy
     networks:
       - obesity1_network
+    volumes:
+      - prescriptions_data:/app/public/prescriptions
+      - app_cache:/app/.next/cache
     command: >
       sh -c "
         npx prisma migrate deploy &&
@@ -51,6 +56,10 @@ services:
 
 volumes:
   mariadb_data:
+    driver: local
+  prescriptions_data:
+    driver: local
+  app_cache:
     driver: local
 
 networks:

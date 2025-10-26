@@ -30,6 +30,15 @@ export async function POST(request: NextRequest) {
       where: {
         id: prescriptionId,
         patientId: session.user.id
+      },
+      include: {
+        users_prescriptions_patientIdTousers: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
       }
     })
 
@@ -62,6 +71,26 @@ export async function POST(request: NextRequest) {
         status: 'PENDING', // 조제 대기 상태로 변경
         updatedAt: new Date()
       }
+    })
+
+    // 약사에게 알림 생성
+    const patientName = prescription.users_prescriptions_patientIdTousers?.name || '환자'
+    await prisma.user_notifications.create({
+      data: {
+        id: `notif_pharmacy_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+        userId: pharmacyId,
+        title: '새로운 처방전',
+        message: `${patientName}님의 처방전이 전송되었습니다. (처방전번호: ${prescription.prescriptionNumber})`,
+        type: 'NEW_PRESCRIPTION',
+        read: false,
+        createdAt: new Date()
+      }
+    })
+
+    console.log('✅ 약사 알림 생성 완료:', {
+      pharmacyId,
+      pharmacyName: pharmacy.pharmacyName || pharmacy.name,
+      prescriptionNumber: prescription.prescriptionNumber
     })
 
     return NextResponse.json({

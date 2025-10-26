@@ -109,100 +109,115 @@ interface PrescriptionData {
 }
 
 // PDF 문서 컴포넌트
-const PrescriptionDocument: React.FC<{ data: PrescriptionData }> = ({ data }) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      {/* 헤더 */}
-      <View style={styles.header}>
-        <Text style={styles.title}>처 방 전</Text>
-        <Text style={styles.hospitalInfo}>{data.clinicName}</Text>
-        <Text style={styles.hospitalInfo}>의사: {data.doctorName}</Text>
-      </View>
+const PrescriptionDocument: React.FC<{ data: PrescriptionData }> = ({ data }) => {
+  // 빈 문자열을 기본값으로 변환
+  const safeData = {
+    ...data,
+    clinicName: data.clinicName || '-',
+    doctorName: data.doctorName || '-',
+    patientName: data.patientName || '-',
+    patientPhone: data.patientPhone || '-',
+    patientEmail: data.patientEmail || '-',
+    diagnosis: data.diagnosis || '-',
+    notes: data.notes || '',
+    prescriptionNumber: data.prescriptionNumber || '-'
+  }
 
-      {/* 환자 정보 */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>환자 정보</Text>
-        <View style={styles.row}>
-          <Text style={styles.label}>성명:</Text>
-          <Text style={styles.value}>{data.patientName}</Text>
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        {/* 헤더 */}
+        <View style={styles.header}>
+          <Text style={styles.title}>처 방 전</Text>
+          <Text style={styles.hospitalInfo}>{safeData.clinicName}</Text>
+          <Text style={styles.hospitalInfo}>의사: {safeData.doctorName}</Text>
         </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>연락처:</Text>
-          <Text style={styles.value}>{data.patientPhone}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>이메일:</Text>
-          <Text style={styles.value}>{data.patientEmail}</Text>
-        </View>
-      </View>
 
-      {/* 진료 정보 */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>진료 정보</Text>
-        <View style={styles.row}>
-          <Text style={styles.label}>처방전번호:</Text>
-          <Text style={styles.value}>{data.prescriptionNumber}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>진료유형:</Text>
-          <Text style={styles.value}>{data.appointmentType === 'online' ? '비대면 진료' : '대면 진료'}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>진단명:</Text>
-          <Text style={styles.value}>{data.diagnosis}</Text>
-        </View>
-        {data.notes && (
+        {/* 환자 정보 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>환자 정보</Text>
           <View style={styles.row}>
-            <Text style={styles.label}>참고사항:</Text>
-            <Text style={styles.value}>{data.notes}</Text>
+            <Text style={styles.label}>성명:</Text>
+            <Text style={styles.value}>{safeData.patientName}</Text>
           </View>
-        )}
-      </View>
-
-      {/* 처방 약물 */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>처방 약물</Text>
-
-        {/* 테이블 헤더 */}
-        <View style={styles.medicationHeader}>
-          <Text style={styles.medCol1}>약물명</Text>
-          <Text style={styles.medCol2}>용량</Text>
-          <Text style={styles.medCol3}>복용법</Text>
-          <Text style={styles.medCol4}>복용기간</Text>
-          <Text style={styles.medCol5}>수량</Text>
-          <Text style={styles.medCol6}>가격</Text>
+          <View style={styles.row}>
+            <Text style={styles.label}>연락처:</Text>
+            <Text style={styles.value}>{safeData.patientPhone}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>이메일:</Text>
+            <Text style={styles.value}>{safeData.patientEmail}</Text>
+          </View>
         </View>
 
-        {/* 약물 목록 */}
-        {data.medications.map((med, index) => (
-          <View key={index} style={styles.medicationRow}>
-            <Text style={styles.medCol1}>{med.medicationId}</Text>
-            <Text style={styles.medCol2}>{med.dosage}</Text>
-            <Text style={styles.medCol3}>{med.frequency}</Text>
-            <Text style={styles.medCol4}>{med.duration}</Text>
-            <Text style={styles.medCol5}>{med.quantity}</Text>
-            <Text style={styles.medCol6}>{med.price.toLocaleString()}원</Text>
+        {/* 진료 정보 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>진료 정보</Text>
+          <View style={styles.row}>
+            <Text style={styles.label}>처방전번호:</Text>
+            <Text style={styles.value}>{safeData.prescriptionNumber}</Text>
           </View>
-        ))}
-      </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>진료유형:</Text>
+            <Text style={styles.value}>{safeData.appointmentType === 'online' ? '비대면 진료' : '대면 진료'}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>진단명:</Text>
+            <Text style={styles.value}>{safeData.diagnosis}</Text>
+          </View>
+          {safeData.notes && (
+            <View style={styles.row}>
+              <Text style={styles.label}>참고사항:</Text>
+              <Text style={styles.value}>{safeData.notes}</Text>
+            </View>
+          )}
+        </View>
 
-      {/* 발행일 */}
-      <Text style={styles.date}>발행일: {new Date(data.issuedAt).toLocaleDateString('ko-KR')}</Text>
+        {/* 처방 약물 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>처방 약물</Text>
 
-      {/* 서명 */}
-      <View style={styles.signature}>
-        <Text>의사: {data.doctorName} (인)</Text>
-      </View>
+          {/* 테이블 헤더 */}
+          <View style={styles.medicationHeader}>
+            <Text style={styles.medCol1}>약물명</Text>
+            <Text style={styles.medCol2}>용량</Text>
+            <Text style={styles.medCol3}>복용법</Text>
+            <Text style={styles.medCol4}>복용기간</Text>
+            <Text style={styles.medCol5}>수량</Text>
+            <Text style={styles.medCol6}>가격</Text>
+          </View>
 
-      {/* 푸터 */}
-      <View style={styles.footer}>
-        <Text>※ 본 처방전은 전자처방전으로 발행되었습니다.</Text>
-        <Text>※ 약국에서 조제 시 신분증을 지참하시기 바랍니다.</Text>
-        <Text>※ 처방전 유효기간: 발행일로부터 3일</Text>
-      </View>
-    </Page>
-  </Document>
-)
+          {/* 약물 목록 */}
+          {safeData.medications.map((med, index) => (
+            <View key={index} style={styles.medicationRow}>
+              <Text style={styles.medCol1}>{med.medicationId || '-'}</Text>
+              <Text style={styles.medCol2}>{med.dosage || '-'}</Text>
+              <Text style={styles.medCol3}>{med.frequency || '-'}</Text>
+              <Text style={styles.medCol4}>{med.duration || '-'}</Text>
+              <Text style={styles.medCol5}>{med.quantity || '-'}</Text>
+              <Text style={styles.medCol6}>{med.price.toLocaleString()}원</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* 발행일 */}
+        <Text style={styles.date}>발행일: {new Date(safeData.issuedAt).toLocaleDateString('ko-KR')}</Text>
+
+        {/* 서명 */}
+        <View style={styles.signature}>
+          <Text>의사: {safeData.doctorName} (인)</Text>
+        </View>
+
+        {/* 푸터 */}
+        <View style={styles.footer}>
+          <Text>※ 본 처방전은 전자처방전으로 발행되었습니다.</Text>
+          <Text>※ 약국에서 조제 시 신분증을 지참하시기 바랍니다.</Text>
+          <Text>※ 처방전 유효기간: 발행일로부터 3일</Text>
+        </View>
+      </Page>
+    </Document>
+  )
+}
 
 // PDF 다운로드 링크 컴포넌트
 interface PrescriptionPDFProps {

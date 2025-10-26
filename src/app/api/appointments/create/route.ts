@@ -125,14 +125,28 @@ export async function POST(req: NextRequest) {
         }
       })
 
-      // 5. 사용자 알림 생성
+      // 5. 사용자 알림 생성 (환자 및 의사)
+      // 환자 알림
       await prisma.user_notifications.create({
         data: {
-          id: `notif_${Date.now()}`,
+          id: `notif_patient_${Date.now()}`,
           userId: patient.id,
           title: '예약 확정 알림',
           message: `${departmentName} 진료 예약이 확정되었습니다. (${appointmentDate} ${appointmentTime})`,
           type: 'APPOINTMENT_CONFIRMED',
+          read: false,
+          createdAt: new Date()
+        }
+      })
+
+      // 의사 알림
+      await prisma.user_notifications.create({
+        data: {
+          id: `notif_doctor_${Date.now()}`,
+          userId: doctor.id,
+          title: '새로운 예약',
+          message: `${patient.name} 환자님의 ${departmentName} 진료 예약이 접수되었습니다. (${appointmentDate} ${appointmentTime})`,
+          type: 'NEW_APPOINTMENT',
           read: false,
           createdAt: new Date()
         }

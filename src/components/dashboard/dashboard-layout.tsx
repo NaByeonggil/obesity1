@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { cn, getRoleColor } from "@/lib/utils"
 import { UserRole } from "@/types"
+import NotificationBell from "@/components/notifications/NotificationBell"
 import {
   Heart,
   Home,
@@ -207,10 +208,7 @@ export function DashboardLayout({ children, userRole, user }: DashboardLayoutPro
             </div>
 
             <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full" />
-              </Button>
+              <NotificationBell />
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user?.avatar} alt={user?.name} />
                 <AvatarFallback className={cn("text-white text-xs", roleConfig.bgColor)}>
@@ -250,6 +248,7 @@ function getNavigationItems(role: UserRole) {
       return [
         { name: "대시보드", href: "/doctor", icon: Home },
         { name: "예약 관리", href: "/doctor/appointments", icon: Calendar },
+        { name: "환자 관리", href: "/doctor/patients", icon: Users },
         { name: "일정 관리", href: "/doctor/calendar", icon: Calendar },
         { name: "처방전 관리", href: "/doctor/prescriptions", icon: Pill },
         { name: "프로필 설정", href: "/doctor/profile", icon: User },

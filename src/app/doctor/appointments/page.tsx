@@ -338,11 +338,27 @@ function DoctorAppointmentsContent() {
       })
 
       if (response.ok) {
-        const result = await response.json()
-        if (result.success) {
-          // PDF 생성 및 다운로드
-          const fileName = `처방전_${patientName}_${new Date().toISOString().split('T')[0]}.pdf`
-          await generateAndDownloadPDF(result.data, fileName)
+        const contentType = response.headers.get('content-type')
+
+        // PDF 파일이 직접 반환된 경우
+        if (contentType === 'application/pdf') {
+          const blob = await response.blob()
+          const url = URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `처방전_${patientName}_${new Date().toISOString().split('T')[0]}.pdf`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          URL.revokeObjectURL(url)
+          console.log('첨부된 PDF 다운로드 완료')
+        } else {
+          // JSON 데이터가 반환된 경우 (react-pdf로 생성)
+          const result = await response.json()
+          if (result.success) {
+            const fileName = `처방전_${patientName}_${new Date().toISOString().split('T')[0]}.pdf`
+            await generateAndDownloadPDF(result.data, fileName)
+          }
         }
       } else {
         console.error('PDF 다운로드 실패')
@@ -357,14 +373,11 @@ function DoctorAppointmentsContent() {
   // PDF 생성 및 다운로드
   const generateAndDownloadPDF = async (prescriptionData: any, fileName: string) => {
     try {
-      // 동적 import를 사용하여 React-PDF 컴포넌트 로드
-      const { pdf } = await import('@react-pdf/renderer')
-      const { default: PrescriptionDocument } = await import('@/components/prescription/PrescriptionPDF')
-      const React = await import('react')
+      // 동적 import를 사용하여 React-PDF 함수 사용
+      const { generatePrescriptionPDF } = await import('@/components/prescription/PrescriptionPDF')
 
       // PDF 문서 생성
-      const doc = React.createElement(PrescriptionDocument, { data: prescriptionData })
-      const pdfBlob = await pdf(doc).toBlob()
+      const pdfBlob = await generatePrescriptionPDF(prescriptionData)
 
       // 다운로드 링크 생성
       const url = URL.createObjectURL(pdfBlob)
