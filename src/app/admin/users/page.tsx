@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Users,
   Search,
@@ -43,7 +44,11 @@ import {
   ChevronRight,
   Loader2,
   UserPlus,
-  MoreVertical
+  MoreVertical,
+  User,
+  Stethoscope,
+  Pill,
+  Shield
 } from "lucide-react"
 
 interface User {
@@ -100,7 +105,7 @@ function AdminUsersContent() {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [roleFilter, setRoleFilter] = useState("ALL")
+  const [activeTab, setActiveTab] = useState("PATIENT")
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [deletingUser, setDeletingUser] = useState<User | null>(null)
   const [newUser, setNewUser] = useState<any>({
@@ -134,8 +139,8 @@ function AdminUsersContent() {
         limit: pagination.limit.toString(),
       })
 
-      if (roleFilter !== 'ALL') {
-        params.append('role', roleFilter)
+      if (activeTab !== 'ALL') {
+        params.append('role', activeTab)
       }
 
       if (searchTerm) {
@@ -163,7 +168,7 @@ function AdminUsersContent() {
 
   useEffect(() => {
     fetchUsers()
-  }, [pagination.page, roleFilter])
+  }, [pagination.page, activeTab])
 
   // 검색 처리
   const handleSearch = () => {
@@ -297,12 +302,35 @@ function AdminUsersContent() {
           </div>
         </div>
 
-        {/* Filters */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              {/* 검색 */}
-              <div className="flex-1">
+        {/* Role Tabs */}
+        <Tabs value={activeTab} onValueChange={(value) => {
+          setActiveTab(value)
+          setPagination(prev => ({ ...prev, page: 1 }))
+          setNewUser({ ...newUser, role: value })
+        }}>
+          <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsTrigger value="PATIENT" className="flex items-center gap-2">
+              <User className="w-4 h-4" />
+              환자
+            </TabsTrigger>
+            <TabsTrigger value="DOCTOR" className="flex items-center gap-2">
+              <Stethoscope className="w-4 h-4" />
+              의사
+            </TabsTrigger>
+            <TabsTrigger value="PHARMACY" className="flex items-center gap-2">
+              <Pill className="w-4 h-4" />
+              약사
+            </TabsTrigger>
+            <TabsTrigger value="ADMIN" className="flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              관리자
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={activeTab} className="space-y-4">
+            {/* Search Bar */}
+            <Card>
+              <CardContent className="pt-6">
                 <div className="flex gap-2">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -310,7 +338,7 @@ function AdminUsersContent() {
                       placeholder="이름, 이메일, 전화번호로 검색..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                       className="pl-10"
                     />
                   </div>
@@ -318,41 +346,23 @@ function AdminUsersContent() {
                     검색
                   </Button>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-              {/* 역할 필터 */}
-              <div className="w-full md:w-48">
-                <Select value={roleFilter} onValueChange={setRoleFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="역할 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ALL">전체 역할</SelectItem>
-                    <SelectItem value="PATIENT">환자</SelectItem>
-                    <SelectItem value="DOCTOR">의사</SelectItem>
-                    <SelectItem value="PHARMACY">약사</SelectItem>
-                    <SelectItem value="ADMIN">관리자</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Users Table */}
-        <Card>
-          <CardContent className="pt-6">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-              </div>
-            ) : users.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">사용자가 없습니다</p>
-              </div>
-            ) : (
-              <>
+            {/* Users Table */}
+            <Card>
+              <CardContent className="pt-6">
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                  </div>
+                ) : users.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">{roleLabels[activeTab]} 사용자가 없습니다</p>
+                  </div>
+                ) : (
+                  <>
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -487,6 +497,8 @@ function AdminUsersContent() {
             )}
           </CardContent>
         </Card>
+          </TabsContent>
+        </Tabs>
 
         {/* Edit Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -640,25 +652,17 @@ function AdminUsersContent() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>역할 *</Label>
-                <Select
-                  value={newUser.role}
-                  onValueChange={(value) => setNewUser({ ...newUser, role: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="PATIENT">환자</SelectItem>
-                    <SelectItem value="DOCTOR">의사</SelectItem>
-                    <SelectItem value="PHARMACY">약사</SelectItem>
-                    <SelectItem value="ADMIN">관리자</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label>역할</Label>
+                <Input
+                  value={roleLabels[activeTab]}
+                  disabled
+                  className="bg-gray-100"
+                />
+                <p className="text-xs text-gray-500">현재 탭의 역할로 자동 설정됩니다</p>
               </div>
 
               {/* 의사 전용 정보 */}
-              {newUser.role === 'DOCTOR' && (
+              {activeTab === 'DOCTOR' && (
                 <>
                   <div className="border-t pt-4">
                     <h4 className="font-medium mb-3">의사 전용 정보</h4>
@@ -683,7 +687,7 @@ function AdminUsersContent() {
               )}
 
               {/* 약사 전용 정보 */}
-              {newUser.role === 'PHARMACY' && (
+              {activeTab === 'PHARMACY' && (
                 <>
                   <div className="border-t pt-4">
                     <h4 className="font-medium mb-3">약국 정보</h4>
