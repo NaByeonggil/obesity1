@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
 import { StatsCard } from "@/components/dashboard/stats-card"
@@ -154,6 +155,7 @@ const mockRecentActivities = [
 
 function AdminDashboardContent() {
   const { data: session, status } = useSession()
+  const router = useRouter()
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -291,7 +293,11 @@ function AdminDashboardContent() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Button className="h-20 flex-col space-y-2" variant="admin">
+              <Button
+                className="h-20 flex-col space-y-2"
+                variant="admin"
+                onClick={() => router.push('/admin/users')}
+              >
                 <Users className="h-6 w-6" />
                 <span>사용자 관리</span>
               </Button>

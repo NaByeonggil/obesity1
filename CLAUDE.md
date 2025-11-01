@@ -45,6 +45,9 @@ npx ts-node tests/api/test-patient-flow.ts
 
 # Run utility scripts
 npx ts-node scripts/check-doctors.ts
+
+# Create admin account
+npx ts-node scripts/create-admin.ts
 ```
 
 ## Architecture Overview
@@ -184,6 +187,13 @@ const userId = session?.user?.id || tokenUser?.userId
 5. PDF generation available for both patients and pharmacies
 
 **Korean Localization**: UI text is primarily in Korean - maintain this when adding features.
+
+**Admin Features**: Comprehensive admin panel for system management:
+- Dashboard with real-time statistics (users, appointments, prescriptions, growth trends)
+- User management (list, search, filter, edit, delete)
+- Role-based access control (only ADMIN role can access)
+- System monitoring and alerts
+- See `ADMIN-FEATURES.md` for detailed documentation
 
 ## Environment Variables
 Required in `.env`:
