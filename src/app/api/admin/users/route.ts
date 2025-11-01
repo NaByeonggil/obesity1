@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import * as bcrypt from "bcryptjs"
 
 const prisma = new PrismaClient()
 
@@ -91,6 +92,97 @@ export async function GET(req: NextRequest) {
     console.error("Admin users list error:", error)
     return NextResponse.json(
       { error: "사용자 목록을 불러오는 중 오류가 발생했습니다." },
+      { status: 500 }
+    )
+  }
+}
+
+// POST: 새 사용자 생성
+export async function POST(req: NextRequest) {
+  try {
+    // 관리자 권한 확인
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user || session.user.role !== 'ADMIN') {
+      return NextResponse.json(
+        { error: "관리자 권한이 필요합니다." },
+        { status: 403 }
+      )
+    }
+
+    const body = await req.json()
+    const { email, password, name, phone, role, ...roleSpecificData } = body
+
+    // 필수 필드 검증
+    if (!email || !password || !name || !role) {
+      return NextResponse.json(
+        { error: "이메일, 비밀번호, 이름, 역할은 필수입니다." },
+        { status: 400 }
+      )
+    }
+
+    // 이메일 중복 확인
+    const existingUser = await prisma.users.findUnique({
+      where: { email }
+    })
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "이미 존재하는 이메일입니다." },
+        { status: 400 }
+      )
+    }
+
+    // 비밀번호 해시
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    // 사용자 데이터 준비
+    const userData: any = {
+      id: `user_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+      email,
+      password: hashedPassword,
+      name,
+      phone: phone || null,
+      role,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+
+    // 역할별 추가 정보
+    if (role === 'DOCTOR') {
+      userData.specialization = roleSpecificData.specialization || null
+      userData.licenseNumber = roleSpecificData.licenseNumber || null
+      userData.hasOfflineConsultation = roleSpecificData.hasOfflineConsultation ?? true
+      userData.hasOnlineConsultation = roleSpecificData.hasOnlineConsultation ?? false
+    } else if (role === 'PHARMACY') {
+      userData.pharmacyName = roleSpecificData.pharmacyName || null
+      userData.pharmacyAddress = roleSpecificData.pharmacyAddress || null
+      userData.pharmacyLicenseNumber = roleSpecificData.pharmacyLicenseNumber || null
+      userData.latitude = roleSpecificData.latitude || null
+      userData.longitude = roleSpecificData.longitude || null
+    }
+
+    // 사용자 생성
+    const user = await prisma.users.create({
+      data: userData,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+        createdAt: true
+      }
+    })
+
+    return NextResponse.json({
+      message: "사용자가 생성되었습니다.",
+      user
+    }, { status: 201 })
+  } catch (error) {
+    console.error("Admin user create error:", error)
+    return NextResponse.json(
+      { error: "사용자 생성 중 오류가 발생했습니다." },
       { status: 500 }
     )
   }

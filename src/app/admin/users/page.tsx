@@ -103,8 +103,21 @@ function AdminUsersContent() {
   const [roleFilter, setRoleFilter] = useState("ALL")
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [deletingUser, setDeletingUser] = useState<User | null>(null)
+  const [newUser, setNewUser] = useState<any>({
+    email: '',
+    password: '',
+    name: '',
+    phone: '',
+    role: 'PATIENT',
+    specialization: '',
+    licenseNumber: '',
+    pharmacyName: '',
+    pharmacyAddress: '',
+    pharmacyLicenseNumber: ''
+  })
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
   const displayUser = session?.user || {
     name: "관리자",
@@ -195,6 +208,48 @@ function AdminUsersContent() {
     }
   }
 
+  // 사용자 생성
+  const handleCreateUser = async () => {
+    try {
+      // 필수 필드 검증
+      if (!newUser.email || !newUser.password || !newUser.name || !newUser.role) {
+        alert('이메일, 비밀번호, 이름, 역할은 필수입니다.')
+        return
+      }
+
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(newUser)
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || '사용자 생성에 실패했습니다')
+      }
+
+      setIsCreateDialogOpen(false)
+      setNewUser({
+        email: '',
+        password: '',
+        name: '',
+        phone: '',
+        role: 'PATIENT',
+        specialization: '',
+        licenseNumber: '',
+        pharmacyName: '',
+        pharmacyAddress: '',
+        pharmacyLicenseNumber: ''
+      })
+      fetchUsers()
+      alert('사용자가 생성되었습니다.')
+    } catch (err: any) {
+      console.error('Failed to create user:', err)
+      alert(err.message || '사용자 생성에 실패했습니다')
+    }
+  }
+
   // 사용자 삭제
   const handleDeleteUser = async () => {
     if (!deletingUser) return
@@ -227,10 +282,19 @@ function AdminUsersContent() {
             <h2 className="text-2xl font-bold text-gray-900">사용자 관리</h2>
             <p className="text-gray-600 mt-1">시스템에 등록된 모든 사용자를 관리합니다</p>
           </div>
-          <Badge variant="outline" className="text-lg px-4 py-2">
-            <Users className="w-4 h-4 mr-2" />
-            총 {pagination.total}명
-          </Badge>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="admin"
+              onClick={() => setIsCreateDialogOpen(true)}
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              새 사용자 추가
+            </Button>
+            <Badge variant="outline" className="text-lg px-4 py-2">
+              <Users className="w-4 h-4 mr-2" />
+              총 {pagination.total}명
+            </Badge>
+          </div>
         </div>
 
         {/* Filters */}
@@ -526,6 +590,137 @@ function AdminUsersContent() {
               </Button>
               <Button variant="admin" onClick={handleEditUser}>
                 저장
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create User Dialog */}
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>새 사용자 추가</DialogTitle>
+              <DialogDescription>
+                새로운 사용자를 생성합니다. 모든 필수 정보를 입력해주세요.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {/* 기본 정보 */}
+              <div className="space-y-2">
+                <Label>이메일 *</Label>
+                <Input
+                  type="email"
+                  placeholder="example@email.com"
+                  value={newUser.email}
+                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>비밀번호 *</Label>
+                <Input
+                  type="password"
+                  placeholder="비밀번호 (최소 6자)"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>이름 *</Label>
+                <Input
+                  value={newUser.name}
+                  onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>전화번호</Label>
+                <Input
+                  placeholder="010-0000-0000"
+                  value={newUser.phone}
+                  onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>역할 *</Label>
+                <Select
+                  value={newUser.role}
+                  onValueChange={(value) => setNewUser({ ...newUser, role: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PATIENT">환자</SelectItem>
+                    <SelectItem value="DOCTOR">의사</SelectItem>
+                    <SelectItem value="PHARMACY">약사</SelectItem>
+                    <SelectItem value="ADMIN">관리자</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* 의사 전용 정보 */}
+              {newUser.role === 'DOCTOR' && (
+                <>
+                  <div className="border-t pt-4">
+                    <h4 className="font-medium mb-3">의사 전용 정보</h4>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>전문 분야</Label>
+                    <Input
+                      placeholder="예: 내과, 외과, 소아과 등"
+                      value={newUser.specialization}
+                      onChange={(e) => setNewUser({ ...newUser, specialization: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>면허 번호</Label>
+                    <Input
+                      placeholder="의사 면허 번호"
+                      value={newUser.licenseNumber}
+                      onChange={(e) => setNewUser({ ...newUser, licenseNumber: e.target.value })}
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* 약사 전용 정보 */}
+              {newUser.role === 'PHARMACY' && (
+                <>
+                  <div className="border-t pt-4">
+                    <h4 className="font-medium mb-3">약국 정보</h4>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>약국명</Label>
+                    <Input
+                      placeholder="약국 이름"
+                      value={newUser.pharmacyName}
+                      onChange={(e) => setNewUser({ ...newUser, pharmacyName: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>약국 주소</Label>
+                    <Input
+                      placeholder="약국 주소"
+                      value={newUser.pharmacyAddress}
+                      onChange={(e) => setNewUser({ ...newUser, pharmacyAddress: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>약국 면허 번호</Label>
+                    <Input
+                      placeholder="약국 면허 번호"
+                      value={newUser.pharmacyLicenseNumber}
+                      onChange={(e) => setNewUser({ ...newUser, pharmacyLicenseNumber: e.target.value })}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                취소
+              </Button>
+              <Button variant="admin" onClick={handleCreateUser}>
+                생성
               </Button>
             </DialogFooter>
           </DialogContent>
