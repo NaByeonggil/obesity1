@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface-variant": "#3e4946",
+                    "surface-bright": "#ecfdfb",
+                    "inverse-surface": "#243332",
+                    "on-tertiary-container": "#c1ffcc",
+                    "tertiary": "#006231",
+                    "inverse-on-surface": "#e3f4f2",
+                    "outline-variant": "#bec9c5",
+                    "on-secondary": "#ffffff",
+                    "primary-fixed": "#9ff2e3",
+                    "inverse-primary": "#83d5c7",
+                    "on-surface": "#0f1e1d",
+                    "on-error": "#ffffff",
+                    "on-background": "#0f1e1d",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-container": "#007e40",
+                    "surface": "#ecfdfb",
+                    "primary-fixed-dim": "#83d5c7",
+                    "surface-tint": "#006b5f",
+                    "secondary-fixed": "#ffdad2",
+                    "on-primary": "#ffffff",
+                    "surface-container-low": "#e6f7f5",
+                    "tertiary-fixed-dim": "#61de8a",
+                    "surface-container": "#e0f1ef",
+                    "on-primary-fixed": "#00201c",
+                    "secondary-fixed-dim": "#ffb4a2",
+                    "on-primary-container": "#b3fff1",
+                    "background": "#ecfdfb",
+                    "on-tertiary-fixed-variant": "#005228",
+                    "on-secondary-fixed-variant": "#862208",
+                    "on-secondary-fixed": "#3c0700",
+                    "on-tertiary-fixed": "#00210c",
+                    "surface-container-highest": "#d5e6e4",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#ccdddb",
+                    "primary-container": "#1f7a6e",
+                    "on-secondary-container": "#6e1500",
+                    "primary": "#006056",
+                    "tertiary-fixed": "#7efba4",
+                    "surface-container-high": "#dbecea",
+                    "secondary": "#a7391e",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed-variant": "#005047",
+                    "secondary-container": "#fd7958",
+                    "surface-variant": "#d5e6e4",
+                    "outline": "#6e7976",
+                    "error": "#ba1a1a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-sm": "8px",
+                    "gutter": "16px",
+                    "unit": "4px",
+                    "stack-lg": "24px",
+                    "container-margin": "20px",
+                    "stack-md": "16px",
+                    "section-gap": "40px"
+            },
+            "fontFamily": {
+                    "headline-sm": ["Plus Jakarta Sans"],
+                    "body-sm": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "600"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        .timeline-line { width: 2px; background: repeating-linear-gradient(to bottom, #bec9c5 0, #bec9c5 4px, transparent 4px, transparent 8px); }
+        .timeline-line-active { background: #006056; }
+        @keyframes pulse-teal { 0% { box-shadow: 0 0 0 0 rgba(0, 96, 86, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(0, 96, 86, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 96, 86, 0); } }
+        .pulse-effect { animation: pulse-teal 2s infinite; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen pb-24">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 bg-surface flex justify-between items-center px-container-margin py-stack-sm shadow-[0px_4px_12px_rgba(0,107,95,0.04)]">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/50 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-on-surface">arrow_back</span>
+</button>
+<h1 class="text-headline-sm-mobile font-headline-sm-mobile text-on-surface">예약 상세</h1>
+<div class="w-10"></div>
+</header>
+<main class="pt-20 px-container-margin space-y-gutter">
+<!-- Brand Identity & Main Status -->
+<section class="flex flex-col items-center justify-center py-stack-lg">
+<img alt="Nal-ssin Doctor Logo" class="h-8 mb-stack-md opacity-90" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXTmRrQVWzpE1zTtN2lP-kFMmWvsRtyeU6Xk5zj32g0efOmT19wIADqZLV05UC86jae2WgGxGv_GxO_atmZVOYa4HDOAQv6u4vAiHpSuEF6FSxSnqm6Gyvgzj1auvLu6hUL0YimFNtL29NRvLAyEXWXeQ3PAYlbJaGw0ScKYvtGKTaVmWu9MqE1VF3zhxCWqclVz4x42DIBiDX8jGF8TXt7eD6-7V-IyGvKEPZndhoFvCa-Wtgt35iqQoqqIVBjEAWCPRUNape8OkC"/>
+<div class="inline-flex items-center px-4 py-2 bg-primary-container/10 border border-primary/20 rounded-full">
+<span class="material-symbols-outlined text-primary text-[18px] mr-2" style="font-variation-settings: 'FILL' 1;">pending_actions</span>
+<span class="text-label-md font-label-md text-primary">의원 확인 대기</span>
+</div>
+<p class="mt-stack-sm text-body-sm font-body-sm text-on-surface-variant text-center">
+                의원에서 예약을 확인하고 있습니다.<br/>잠시만 기다려주세요.
+            </p>
+</section>
+<!-- Vertical Timeline -->
+<div class="bg-surface-container-lowest rounded-xl p-stack-md shadow-[0px_4px_12px_rgba(0,107,95,0.04)]">
+<div class="space-y-0">
+<!-- Step 1: Completed -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px] text-white font-bold">check</span>
+</div>
+<div class="w-0.5 h-10 bg-primary"></div>
+</div>
+<div class="pb-6">
+<h3 class="text-body-md font-bold text-primary">예약 요청됨</h3>
+<p class="text-label-md font-label-md text-on-surface-variant">2024.06.11 10:30</p>
+</div>
+</div>
+<!-- Step 2: Current -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="w-6 h-6 rounded-full border-2 border-primary bg-surface flex items-center justify-center pulse-effect">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+</div>
+<div class="w-0.5 h-10 timeline-line"></div>
+</div>
+<div class="pb-6">
+<h3 class="text-body-md font-bold text-on-surface">의원 확인 대기</h3>
+<p class="text-label-md font-label-md text-on-surface-variant">현재 단계</p>
+</div>
+</div>
+<!-- Step 3: Pending -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant bg-surface flex items-center justify-center">
+</div>
+</div>
+<div>
+<h3 class="text-body-md font-bold text-outline">예약 확정</h3>
+<p class="text-label-md font-label-md text-outline-variant">확인 후 알림을 보내드려요</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Visit Information Card -->
+<section class="bg-surface-container-lowest rounded-xl p-stack-md shadow-[0px_4px_12px_rgba(0,107,95,0.04)] border border-outline-variant/10">
+<div class="flex items-center mb-stack-md">
+<span class="material-symbols-outlined text-primary mr-2" data-icon="calendar_today">calendar_today</span>
+<span class="text-body-md font-bold text-on-surface">방문 정보</span>
+</div>
+<div class="space-y-stack-sm mb-stack-md">
+<div class="flex justify-between items-start">
+<span class="text-label-md font-label-md text-on-surface-variant">일시</span>
+<span class="text-body-sm font-bold text-on-surface">2024년 6월 12일 (수) 오후 2:00</span>
+</div>
+<div class="flex justify-between items-start">
+<span class="text-label-md font-label-md text-on-surface-variant">의원</span>
+<span class="text-body-sm font-bold text-on-surface text-right">서울 연세 가가 클리닉</span>
+</div>
+<div class="flex justify-between items-start">
+<span class="text-label-md font-label-md text-on-surface-variant">주소</span>
+<div class="text-right">
+<p class="text-body-sm font-bold text-on-surface">서울 강남구 역삼동</p>
+<p class="text-label-md font-label-md text-primary">내 위치에서 350m</p>
+</div>
+</div>
+</div>
+<div class="w-full h-32 rounded-lg bg-surface-container mb-stack-md overflow-hidden relative">
+<img class="w-full h-full object-cover opacity-80" data-alt="A clean, minimalist map interface showing a pinpoint in a modern urban district of Seoul, South Korea. The map is rendered in a soft grayscale and teal color scheme to match the healthcare brand identity, featuring subtle street markers and a pulsing location icon. The overall atmosphere is professional, clear, and reassuring." data-location="Gangnam, Seoul" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGVCvngcpenbqgQAu8p8SnwGCCu6wDKFkzsIEu_V1ayJ4Q-R0XquT3yTUd3oIe9U4j8Dc9kcDbB4nBnhvbn2yGfBVrrcPYH9StQWmGkCOUF8BeEGcpQJUjB5rdGbbEnZ6T677woG9C-__12dq3E8zD6k35BuZ3sm3h_2104BFT2j02NrHYGjp4hI_7iUQYr5dvAJ1au9KKPhLGHAysqEFHlVwn_pwA3C5FW1Pxl7-ts2kqD4ibPiLc1i3UIS8QCvTN-Jad5W8T45XS"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+</div>
+<button class="w-full py-stack-sm rounded-lg border border-primary text-primary text-label-md font-bold hover:bg-primary/5 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">directions</span>
+                길찾기
+            </button>
+</section>
+<!-- Preparation Guide Accordion -->
+<section class="space-y-stack-sm">
+<div class="accordion-item bg-surface-container-low rounded-xl overflow-hidden transition-all duration-300">
+<button class="w-full px-stack-md py-stack-md flex justify-between items-center group" onclick="toggleAccordion('guide-1')">
+<span class="text-body-md font-bold text-on-surface">방문 시 주의사항</span>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform duration-300" id="icon-guide-1">expand_more</span>
+</button>
+<div class="hidden px-stack-md pb-stack-md text-body-sm text-on-surface-variant space-y-2" id="guide-1">
+<p>• 원활한 진료를 위해 예약 시간 10분 전까지 내원해 주세요.</p>
+<p>• 주차 공간이 협소하니 대중교통 이용을 권장합니다.</p>
+</div>
+</div>
+<div class="accordion-item bg-surface-container-low rounded-xl overflow-hidden transition-all duration-300">
+<button class="w-full px-stack-md py-stack-md flex justify-between items-center group" onclick="toggleAccordion('guide-2')">
+<span class="text-body-md font-bold text-on-surface">필요한 준비물</span>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform duration-300" id="icon-guide-2">expand_more</span>
+</button>
+<div class="hidden px-stack-md pb-stack-md text-body-sm text-on-surface-variant space-y-2" id="guide-2">
+<p>• 신분증 지참 필수 (본인 확인용)</p>
+<p>• 현재 복용 중인 약 처방전 (상담 시 필요)</p>
+</div>
+</div>
+</section>
+<!-- Bottom Cancellation -->
+<div class="py-stack-lg flex justify-center">
+<button class="px-6 py-2 text-label-md font-label-md text-on-surface-variant border-b border-outline-variant hover:text-error transition-colors">
+                예약 취소·변경
+            </button>
+</div>
+</main>
+<!-- Bottom Nav Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe pt-2 bg-surface dark:bg-inverse-surface shadow-[0px_-4px_12px_rgba(0,107,95,0.04)] rounded-t-xl border-t border-outline-variant/30">
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary transition-colors py-1">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="text-label-md font-label-md">홈</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-bold bg-primary-container/20 rounded-xl px-4 py-1 active:scale-[0.98] transition-all duration-200">
+<span class="material-symbols-outlined mb-1" data-icon="calendar_today" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<span class="text-label-md font-label-md">예약</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary transition-colors py-1">
+<span class="material-symbols-outlined mb-1" data-icon="description">description</span>
+<span class="text-label-md font-label-md">처방전</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary transition-colors py-1">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="text-label-md font-label-md">마이</span>
+</button>
+</nav>
+<script>
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            const isHidden = content.classList.contains('hidden');
+            
+            // Close others if needed (optional)
+            // document.querySelectorAll('.accordion-content').forEach(el => el.classList.add('hidden'));
+            
+            if (isHidden) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+    </script>
+</body></html>

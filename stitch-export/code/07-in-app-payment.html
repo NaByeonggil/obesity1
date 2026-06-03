@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .custom-shadow {
+            box-shadow: 0 12px 24px -4px rgba(0, 107, 95, 0.04);
+        }
+        .active-ring {
+            box-shadow: 0 0 0 2px #006056;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-variant": "#d5e6e4",
+                      "surface": "#ecfdfb",
+                      "surface-container": "#e0f1ef",
+                      "secondary": "#a7391e",
+                      "surface-dim": "#ccdddb",
+                      "secondary-fixed-dim": "#ffb4a2",
+                      "on-surface-variant": "#3e4946",
+                      "on-secondary-fixed-variant": "#862208",
+                      "on-primary-container": "#b3fff1",
+                      "on-primary": "#ffffff",
+                      "secondary-fixed": "#ffdad2",
+                      "on-primary-fixed-variant": "#005047",
+                      "tertiary-fixed-dim": "#61de8a",
+                      "surface-bright": "#ecfdfb",
+                      "on-tertiary": "#ffffff",
+                      "tertiary-container": "#007e40",
+                      "surface-container-high": "#dbecea",
+                      "secondary-container": "#fd7958",
+                      "primary-fixed": "#9ff2e3",
+                      "surface-container-low": "#e6f7f5",
+                      "surface-tint": "#006b5f",
+                      "on-error-container": "#93000a",
+                      "inverse-on-surface": "#e3f4f2",
+                      "tertiary": "#006231",
+                      "on-error": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "surface-container-highest": "#d5e6e4",
+                      "primary-container": "#1f7a6e",
+                      "inverse-surface": "#243332",
+                      "error": "#ba1a1a",
+                      "inverse-primary": "#83d5c7",
+                      "error-container": "#ffdad6",
+                      "on-surface": "#0f1e1d",
+                      "on-tertiary-fixed": "#00210c",
+                      "on-secondary-fixed": "#3c0700",
+                      "on-primary-fixed": "#00201c",
+                      "background": "#ecfdfb",
+                      "primary-fixed-dim": "#83d5c7",
+                      "outline-variant": "#bec9c5",
+                      "primary": "#006056",
+                      "outline": "#6e7976",
+                      "on-background": "#0f1e1d",
+                      "on-tertiary-container": "#c1ffcc",
+                      "tertiary-fixed": "#7efba4",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-fixed-variant": "#005228",
+                      "on-secondary-container": "#6e1500"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "section-gap": "40px",
+                      "stack-sm": "8px",
+                      "stack-md": "16px",
+                      "stack-lg": "24px",
+                      "gutter": "16px",
+                      "unit": "4px",
+                      "container-margin": "20px"
+              },
+              "fontFamily": {
+                      "body-sm": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "label-md": ["Plus Jakarta Sans"],
+                      "headline-lg-mobile": ["Plus Jakarta Sans"],
+                      "headline-sm": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "body-lg": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "headline-lg": ["30px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "600"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- Top App Bar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-container-margin h-16 bg-surface dark:bg-surface-dim">
+<button class="flex items-center justify-center p-2 text-primary hover:opacity-80 transition-opacity active:scale-95 duration-100">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="text-headline-sm font-headline-sm font-bold text-primary dark:text-primary-fixed">결제하기</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</header>
+<main class="mt-16 px-container-margin pt-stack-lg space-y-stack-lg">
+<!-- Order Summary Card -->
+<section class="animate-in fade-in slide-in-from-bottom-4 duration-500">
+<h2 class="font-label-md text-label-md text-outline uppercase tracking-wider mb-stack-sm ml-1">주문 요약</h2>
+<div class="bg-surface-container-lowest rounded-xl p-5 custom-shadow border border-surface-variant/30">
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="font-headline-sm text-headline-sm text-on-surface mb-1">리피토정 10mg</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">30일분 x 1개</p>
+</div>
+<span class="bg-primary-fixed text-on-primary-fixed px-3 py-1 rounded-full font-label-md text-label-md">처방약</span>
+</div>
+<div class="space-y-2 pt-4 border-t border-outline-variant">
+<div class="flex justify-between font-body-sm text-body-sm">
+<span class="text-on-surface-variant">약제비</span>
+<span class="text-on-surface">12,400원</span>
+</div>
+<div class="flex justify-between font-body-sm text-body-sm">
+<span class="text-on-surface-variant">조제 기술료</span>
+<span class="text-on-surface">3,200원</span>
+</div>
+<div class="flex justify-between font-headline-sm text-headline-sm pt-2 text-primary">
+<span class="font-bold">최종 결제 금액</span>
+<span class="font-extrabold">15,600원</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Payment Method Selection -->
+<section class="space-y-stack-md">
+<h2 class="font-label-md text-label-md text-outline uppercase tracking-wider mb-stack-sm ml-1">결제 수단 선택</h2>
+<div class="grid grid-cols-1 gap-3">
+<!-- Credit Card -->
+<button class="payment-option flex items-center justify-between p-4 bg-surface-container-lowest border-2 border-transparent rounded-xl transition-all duration-200 active:scale-98 text-left active-ring" onclick="selectPayment(this)">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="credit_card">credit_card</span>
+</div>
+<span class="font-body-md text-body-md font-semibold text-on-surface">신용/체크카드</span>
+</div>
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+<!-- Kakao Pay -->
+<button class="payment-option flex items-center justify-between p-4 bg-surface-container-lowest border-2 border-transparent rounded-xl transition-all duration-200 active:scale-98 text-left" onclick="selectPayment(this)">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-[#FEE500] flex items-center justify-center overflow-hidden">
+<img class="w-6 h-6 object-contain" data-alt="A high-quality minimalist logo of Kakao Pay, featuring the iconic yellow brand color and clean typography. The image is set against a bright, airy background with soft lighting, reflecting a professional and secure financial service aesthetic in a modern light-mode interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvxlQoS3mcGoDmFNYPXDl3pqoyu4trYOvnGf7vKRsVlOT-J6G9HW4A0AEFvgX8ePwPWuf4x0VqK2sIk0YxP6uAdkZ8XDirMjH8UjltdjjQjn08oRrC8INjsQhKNpjmb7Qkacn-QynK26_A4PP01zuYsRZbYKYMkfuuZFWRQLVhLXlIaMm1W7WiJvuVnLb8k5mMVPi4S0oGJjrmA2BMfEWzSjlWIb5FYCLE-cGSUIBWhdX05ZxLzCsWrgISQNQuaX3ThW7ys1dgFdYX"/>
+</div>
+<span class="font-body-md text-body-md font-semibold text-on-surface">카카오페이</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+</button>
+<!-- Naver Pay -->
+<button class="payment-option flex items-center justify-between p-4 bg-surface-container-lowest border-2 border-transparent rounded-xl transition-all duration-200 active:scale-98 text-left" onclick="selectPayment(this)">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-[#03C75A] flex items-center justify-center overflow-hidden">
+<img class="w-6 h-6 object-contain" data-alt="A crisp and clean logo for Naver Pay, emphasizing the vibrant green corporate identity. The visual style is minimalist and modern, set in a spacious and brightly lit digital environment. The lighting is soft and high-key, maintaining the premium healthcare app's serene and professional atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAH9c4s542YF41o5V-Y34PBaNn_JLLpYHAfbWaKbY9Ad7MSwp-bahVwvLLyPW3YZviAJihU1EDlYP4rvW--DIXJjDC_lRsTQSR9DswnjKJKx9RZsSPFizQSHzQVF0duvJlFJTJVQmcezY8rmULFdWzZAj_Mac9uafxUiSYA9ieSZM7ia3qBxT_URC-dB_wns1B5ZZqtlAOIfjcrBpb0Wj87EZ_LFL7JDhhnq3m110-OQaMk_Q0rlQTrKeORYv75_-yzhtrEdy7lTsIO"/>
+</div>
+<span class="font-body-md text-body-md font-semibold text-on-surface">네이버페이</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+</button>
+<!-- Toss -->
+<button class="payment-option flex items-center justify-between p-4 bg-surface-container-lowest border-2 border-transparent rounded-xl transition-all duration-200 active:scale-98 text-left" onclick="selectPayment(this)">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-[#0064FF] flex items-center justify-center overflow-hidden">
+<img class="w-6 h-6 object-contain" data-alt="The modern and sleek Toss logo showcased in a high-fidelity digital rendering. The deep blue color palette is vibrant yet professional, placed within a minimalist and bright white space. The image conveys trust and technological advancement, perfectly fitting a premium health and finance application's calm and uncluttered design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDg7rhmqRzZs1xR07hghWNPujiTD0YCFruvDih0CB1EsSdSvdGvjQoJ5Ojufmr7fb46Q4AgoVl8RwXsNuIk-o2UkbOGmJcYBc8lC5qEAGpOh0-93tCBwMBymyoN8tAOdfw2UIEVjy0DXdeb_tVBS7OOZCoN_YyBxlBXlVopz6ZzGFmvP3VtZQ7OKGXSZ2KJBCXYtsST1roQoZZYwSXnTyQBfJ2b9Tr0nSkNGg4DV7bRSLOPCCSrW90cSejaH2jVAeRE4gh97PmforsI"/>
+</div>
+<span class="font-body-md text-body-md font-semibold text-on-surface">토스</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+</button>
+</div>
+</section>
+<!-- Terms Agreement -->
+<section class="pt-4 border-t border-outline-variant/30 space-y-3">
+<label class="flex items-start gap-3 cursor-pointer group">
+<input class="mt-1 w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface-variant group-hover:text-on-surface transition-colors">결제 서비스 이용 약관 동의 (필수)</span>
+</label>
+<label class="flex items-start gap-3 cursor-pointer group">
+<input class="mt-1 w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface-variant group-hover:text-on-surface transition-colors">개인정보 제 3자 제공 및 수집 동의 (필수)</span>
+</label>
+</section>
+</main>
+<!-- Fixed Bottom CTA -->
+<footer class="fixed bottom-0 left-0 w-full p-container-margin bg-white/80 backdrop-blur-md">
+<button class="w-full h-14 bg-secondary-container text-on-primary font-headline-sm rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all duration-200 hover:opacity-90">
+            15,600원 결제하기
+        </button>
+</footer>
+<script>
+        function selectPayment(element) {
+            // Remove active classes from all
+            document.querySelectorAll('.payment-option').forEach(opt => {
+                opt.classList.remove('active-ring');
+                const icon = opt.querySelector('.material-symbols-outlined:last-child');
+                icon.innerText = 'radio_button_unchecked';
+                icon.classList.remove('text-primary');
+                icon.classList.add('text-outline-variant');
+                icon.style.fontVariationSettings = "'FILL' 0";
+            });
+
+            // Add to selected
+            element.classList.add('active-ring');
+            const activeIcon = element.querySelector('.material-symbols-outlined:last-child');
+            activeIcon.innerText = 'check_circle';
+            activeIcon.classList.remove('text-outline-variant');
+            activeIcon.classList.add('text-primary');
+            activeIcon.style.fontVariationSettings = "'FILL' 1";
+        }
+    </script>
+</body></html>

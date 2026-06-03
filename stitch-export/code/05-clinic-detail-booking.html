@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .clinic-hero-gradient {
+            background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 75%, rgba(0,0,0,0.4) 100%);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "surface": "#ecfdfb",
+                      "background": "#ecfdfb",
+                      "inverse-primary": "#83d5c7",
+                      "surface-container-highest": "#d5e6e4",
+                      "on-surface-variant": "#3e4946",
+                      "secondary-container": "#fd7958",
+                      "on-secondary-container": "#6e1500",
+                      "surface-dim": "#ccdddb",
+                      "tertiary-container": "#007e40",
+                      "primary-container": "#1f7a6e",
+                      "on-tertiary-fixed-variant": "#005228",
+                      "secondary-fixed-dim": "#ffb4a2",
+                      "error-container": "#ffdad6",
+                      "on-secondary-fixed": "#3c0700",
+                      "on-error": "#ffffff",
+                      "surface-container-low": "#e6f7f5",
+                      "on-surface": "#0f1e1d",
+                      "primary-fixed-dim": "#83d5c7",
+                      "on-primary-fixed": "#00201c",
+                      "tertiary": "#006231",
+                      "secondary": "#a7391e",
+                      "primary": "#006056",
+                      "on-primary-fixed-variant": "#005047",
+                      "tertiary-fixed-dim": "#61de8a",
+                      "primary-fixed": "#9ff2e3",
+                      "inverse-on-surface": "#e3f4f2",
+                      "on-primary-container": "#b3fff1",
+                      "on-background": "#0f1e1d",
+                      "surface-tint": "#006b5f",
+                      "outline": "#6e7976",
+                      "on-primary": "#ffffff",
+                      "on-tertiary-container": "#c1ffcc",
+                      "tertiary-fixed": "#7efba4",
+                      "surface-container": "#e0f1ef",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-surface": "#243332",
+                      "outline-variant": "#bec9c5",
+                      "on-secondary": "#ffffff",
+                      "surface-container-high": "#dbecea",
+                      "error": "#ba1a1a",
+                      "secondary-fixed": "#ffdad2",
+                      "surface-variant": "#d5e6e4",
+                      "surface-bright": "#ecfdfb",
+                      "on-tertiary-fixed": "#00210c",
+                      "on-secondary-fixed-variant": "#862208"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "section-gap": "40px",
+                      "gutter": "16px",
+                      "unit": "4px",
+                      "container-margin": "20px",
+                      "stack-sm": "8px",
+                      "stack-lg": "24px",
+                      "stack-md": "16px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Plus Jakarta Sans"],
+                      "body-lg": ["Plus Jakarta Sans"],
+                      "headline-sm": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "label-md": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-sm": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "headline-lg": ["30px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- Header Actions (Floating over image) -->
+<header class="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-container-margin py-stack-md">
+<button class="p-2 bg-surface/80 backdrop-blur-md rounded-full shadow-sm text-primary active:scale-95 transition-transform" onclick="history.back()">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex gap-2">
+<button class="p-2 bg-surface/80 backdrop-blur-md rounded-full shadow-sm text-primary active:scale-95 transition-transform">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+<button class="p-2 bg-surface/80 backdrop-blur-md rounded-full shadow-sm text-primary active:scale-95 transition-transform">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</header>
+<main class="pb-32">
+<!-- Hero Section -->
+<section class="relative h-72 w-full overflow-hidden">
+<img alt="Clinic Interior" class="w-full h-full object-cover" data-alt="A wide-angle professional photograph of a modern high-end medical clinic interior. The space is flooded with soft natural daylight, featuring light wood accents, pristine white marble surfaces, and minimalist ergonomic furniture in a serene teal and gray color palette. The atmosphere is exceptionally clean, private, and peaceful, reflecting a premium healthcare environment. High-key lighting emphasizes the clinical yet welcoming aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGMYyPMJbWvh6SwnOkfm0tlpQoy6SE511A1UaLHN0S7FnCIL7AIVheZkyB_pwVZhzdiSlGafYIZWtzt9SjYjY6TaK26tr6RVprPKC0_ONmlzbiXDcmIdZrpil6ah0uR1-i4h3v_XGvmrBMSP5bk8erJamhTi152BMXQzfn0DUhISiPnMyrmI2BgYrzUsT6AscfGBgRwzL1bvNRQCqzyh99igOfHK2gEVBsI_G6n11fG0e2TWstzjH1bL5xuTdGTlA1mY_Y1j0Dav3w"/>
+<div class="absolute inset-0 clinic-hero-gradient"></div>
+</section>
+<!-- Clinic Profile -->
+<section class="-mt-8 relative z-10 px-container-margin">
+<div class="bg-surface-container-lowest rounded-xl p-stack-lg shadow-[0px_4px_12px_rgba(0,107,95,0.04)]">
+<div class="flex flex-col gap-2">
+<h1 class="text-headline-md font-headline-md text-on-surface">서울 연세 가가 클리닉</h1>
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-body-md font-bold">4.8</span>
+</div>
+<span class="text-on-surface-variant text-label-md">(1.2k+ reviews)</span>
+</div>
+<div class="mt-stack-sm space-y-2">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="text-body-sm">강남구 역삼동 (내 위치에서 350m)</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span class="text-body-sm">09:00 - 19:00 (오늘)</span>
+<span class="ml-auto text-primary font-bold text-label-md bg-primary-fixed/20 px-2 py-0.5 rounded">영업 중</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Medical Services Section -->
+<section class="mt-stack-lg px-container-margin">
+<h2 class="text-headline-sm font-headline-sm text-on-surface mb-stack-md">진료 및 상담 서비스</h2>
+<div class="flex flex-wrap gap-2">
+<div class="bg-surface-container-high text-primary px-4 py-2 rounded-full text-label-md font-bold border border-primary/10">
+                    체중관리·비만
+                </div>
+<div class="bg-surface-container-high text-primary px-4 py-2 rounded-full text-label-md font-bold border border-primary/10">
+                    GLP-1 상담
+                </div>
+<div class="bg-surface-container-high text-primary px-4 py-2 rounded-full text-label-md font-bold border border-primary/10">
+                    대사증후군 상담
+                </div>
+<div class="bg-surface-container-high text-primary px-4 py-2 rounded-full text-label-md font-bold border border-primary/10">
+                    종합 내과 진료
+                </div>
+</div>
+</section>
+<!-- Appointment Section -->
+<section class="mt-stack-lg px-container-margin">
+<h2 class="text-headline-sm font-headline-sm text-on-surface mb-stack-md">방문 예약하기</h2>
+<!-- Date Picker -->
+<div class="flex gap-3 overflow-x-auto no-scrollbar pb-stack-sm">
+<!-- Mon (Past/Disabled) -->
+<div class="flex-shrink-0 flex flex-col items-center justify-center w-14 h-20 rounded-xl bg-surface-container-highest/30 text-outline-variant opacity-50 cursor-not-allowed">
+<span class="text-label-md">월</span>
+<span class="text-body-lg font-bold">10</span>
+</div>
+<!-- Tue (Past/Disabled) -->
+<div class="flex-shrink-0 flex flex-col items-center justify-center w-14 h-20 rounded-xl bg-surface-container-highest/30 text-outline-variant opacity-50 cursor-not-allowed">
+<span class="text-label-md">화</span>
+<span class="text-body-lg font-bold">11</span>
+</div>
+<!-- Wed (Active Selected) -->
+<div class="flex-shrink-0 flex flex-col items-center justify-center w-14 h-20 rounded-xl bg-primary text-on-primary shadow-lg shadow-primary/20 transition-all scale-105 ring-2 ring-primary ring-offset-2 ring-offset-background">
+<span class="text-label-md">수</span>
+<span class="text-body-lg font-bold">12</span>
+</div>
+<!-- Thu -->
+<div class="flex-shrink-0 flex flex-col items-center justify-center w-14 h-20 rounded-xl bg-surface-container-lowest text-on-surface border border-outline-variant/30 hover:border-primary transition-colors cursor-pointer">
+<span class="text-label-md">목</span>
+<span class="text-body-lg font-bold">13</span>
+</div>
+<!-- Fri -->
+<div class="flex-shrink-0 flex flex-col items-center justify-center w-14 h-20 rounded-xl bg-surface-container-lowest text-on-surface border border-outline-variant/30 hover:border-primary transition-colors cursor-pointer">
+<span class="text-label-md">금</span>
+<span class="text-body-lg font-bold">14</span>
+</div>
+<!-- Sat -->
+<div class="flex-shrink-0 flex flex-col items-center justify-center w-14 h-20 rounded-xl bg-surface-container-lowest text-on-surface border border-outline-variant/30 hover:border-primary transition-colors cursor-pointer">
+<span class="text-label-md">토</span>
+<span class="text-body-lg font-bold">15</span>
+</div>
+</div>
+<!-- Time Grid -->
+<div class="mt-stack-lg grid grid-cols-3 gap-3">
+<button class="py-3 px-2 rounded-xl bg-surface-container text-outline-variant font-label-md text-center opacity-60" disabled="">09:30 (마감)</button>
+<button class="py-3 px-2 rounded-xl bg-surface-container text-outline-variant font-label-md text-center opacity-60" disabled="">10:00 (마감)</button>
+<button class="py-3 px-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-label-md text-center hover:border-primary active:scale-95 transition-all">11:30</button>
+<button class="py-3 px-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-label-md text-center hover:border-primary active:scale-95 transition-all">13:30</button>
+<button class="py-3 px-2 rounded-xl bg-primary-container text-on-primary-container font-label-md text-center ring-2 ring-primary ring-offset-1 ring-offset-background font-bold">14:00</button>
+<button class="py-3 px-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-label-md text-center hover:border-primary active:scale-95 transition-all">15:00</button>
+<button class="py-3 px-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-label-md text-center hover:border-primary active:scale-95 transition-all">16:30</button>
+<button class="py-3 px-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-label-md text-center hover:border-primary active:scale-95 transition-all">17:00</button>
+<button class="py-3 px-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-label-md text-center hover:border-primary active:scale-95 transition-all">18:00</button>
+</div>
+<!-- Selection Summary -->
+<div class="mt-stack-lg p-stack-md bg-surface-container-low rounded-xl border border-primary/10">
+<div class="flex flex-col gap-1">
+<span class="text-label-md text-on-surface-variant">선택된 예약 시간</span>
+<div class="flex items-center justify-between">
+<span class="text-body-md font-bold text-primary">2024년 6월 12일 (수) 오후 2:00</span>
+<span class="material-symbols-outlined text-primary">event_available</span>
+</div>
+</div>
+</div>
+<!-- Notice -->
+<div class="mt-stack-md flex items-start gap-2 px-1">
+<span class="material-symbols-outlined text-[16px] mt-0.5 text-on-surface-variant">info</span>
+<p class="text-body-sm text-on-surface-variant">예약은 의원 확인 후 확정됩니다. 방문 전 안내 문자를 확인해 주세요.</p>
+</div>
+</section>
+</main>
+<!-- Bottom Fixed CTA -->
+<footer class="fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-lg px-container-margin pb-10 pt-4 z-50">
+<button class="w-full bg-secondary-container hover:bg-secondary text-white text-body-lg font-bold py-5 rounded-xl shadow-lg shadow-secondary-container/30 active:scale-[0.98] transition-all duration-200">
+            예약 요청하기
+        </button>
+</footer>
+<!-- Bottom Nav Placeholder (Contextually Hidden for Focused Task as per instructions) -->
+<!-- The BottomNavBar is suppressed because this is a specific 'Details and Appointment' task-focused sub-page -->
+<script>
+        // Simple Micro-interaction for ripple or atmospheric effect
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                if (this.disabled) return;
+                const circle = document.createElement('span');
+                const diameter = Math.max(this.clientWidth, this.clientHeight);
+                const radius = diameter / 2;
+                
+                circle.style.width = circle.style.height = `${diameter}px`;
+                circle.style.left = `${e.clientX - this.getBoundingClientRect().left - radius}px`;
+                circle.style.top = `${e.clientY - this.getBoundingClientRect().top - radius}px`;
+                circle.classList.add('ripple');
+                
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    .ripple {
+                        position: absolute;
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 600ms linear;
+                        background-color: rgba(255, 255, 255, 0.4);
+                        pointer-events: none;
+                    }
+                    @keyframes ripple {
+                        to {
+                            transform: scale(4);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+                this.appendChild(circle);
+                
+                setTimeout(() => circle.remove(), 600);
+            });
+        });
+    </script>
+</body></html>

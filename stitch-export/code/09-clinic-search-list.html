@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-high": "#dbecea",
+                    "primary-fixed-dim": "#83d5c7",
+                    "primary-fixed": "#9ff2e3",
+                    "surface-container": "#e0f1ef",
+                    "tertiary-fixed": "#7efba4",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#6e1500",
+                    "on-primary-fixed": "#00201c",
+                    "tertiary": "#006231",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#005228",
+                    "surface-bright": "#ecfdfb",
+                    "on-secondary-fixed-variant": "#862208",
+                    "inverse-primary": "#83d5c7",
+                    "error-container": "#ffdad6",
+                    "tertiary-container": "#007e40",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#d5e6e4",
+                    "on-error": "#ffffff",
+                    "on-primary-container": "#b3fff1",
+                    "on-tertiary-container": "#c1ffcc",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed-dim": "#ffb4a2",
+                    "primary-container": "#1f7a6e",
+                    "tertiary-fixed-dim": "#61de8a",
+                    "surface-dim": "#ccdddb",
+                    "on-tertiary-fixed": "#00210c",
+                    "on-surface-variant": "#3e4946",
+                    "inverse-surface": "#243332",
+                    "surface-container-low": "#e6f7f5",
+                    "on-surface": "#0f1e1d",
+                    "surface-tint": "#006b5f",
+                    "on-primary-fixed-variant": "#005047",
+                    "inverse-on-surface": "#e3f4f2",
+                    "surface": "#ecfdfb",
+                    "outline": "#6e7976",
+                    "outline-variant": "#bec9c5",
+                    "background": "#ecfdfb",
+                    "secondary-fixed": "#ffdad2",
+                    "secondary-container": "#fd7958",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary": "#a7391e",
+                    "on-secondary-fixed": "#3c0700",
+                    "primary": "#006056",
+                    "surface-container-highest": "#d5e6e4",
+                    "on-background": "#0f1e1d",
+                    "on-error-container": "#93000a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "12px",
+                    "2xl": "16px",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-sm": "8px",
+                    "gutter": "16px",
+                    "section-gap": "40px",
+                    "unit": "4px",
+                    "container-margin": "20px",
+                    "stack-md": "16px",
+                    "stack-lg": "24px"
+            },
+            "fontFamily": {
+                    "headline-sm": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-sm": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-sm-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #F7F8F7;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        .card-shadow {
+            box-shadow: 0px 4px 12px rgba(0, 107, 95, 0.04);
+        }
+        .active-nav-bg {
+            background-color: rgba(31, 122, 110, 0.1);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-surface select-none">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface shadow-[0px_4px_12px_rgba(0,107,95,0.04)] flex justify-between items-center px-container-margin py-stack-sm h-[64px]">
+<div class="flex items-center gap-stack-sm">
+<img alt="Nalssin Doctor Logo" class="h-8 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzeRC_alV8BRDTZq8bVW713sfYrqgZpB5ctdnYAHfHzEE9cP-Fer88-hAPGegO-T3rgye6smcEqxyke0kd-qf1CgDoYymMR2JRm-QoKiLtMUD0nTgKTP5ASb-VdCLmMX1zTLPo8D4ENK0OrWGK-656bJaRTQ3ZXH89wuTWyHw4a2CNQA-lAtwpeQDMybzAqVWloBdxlr0BcCRc4ZStTflaVZzPQzJo_a9yM2kL0V_W6K7HLgZK2hBNjfe98pyIk_xNZKG4UTgIF8Jb"/>
+</div>
+<div class="flex items-center gap-stack-md">
+<button class="p-2 rounded-full hover:bg-surface-variant/50 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-primary" data-icon="notifications">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30">
+<img class="w-full h-full object-cover" data-alt="A professional female healthcare provider smiling in a clean, high-end medical clinic setting. The lighting is bright and natural, reflecting a premium and trustworthy healthcare environment. The overall aesthetic is minimalist and modern, with soft teal accents consistent with the medical brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHr1Sc7qPSD2N_Qh1GCSyiRwtVbLo-jE4XYOwcLsd9TM9UzpcPM5pobezkljE6s9zm_AS_5Ov8i51OUE43lLaEh2jz5KlFRyA9i4OBT4zEGK1iY8tXpQJdET5jyJz0DwqOp_UI_WJUv01Ny9Fi308PdaOpf_wOoiE76TajQg8VDiayylJUZUvG4LsAEueiIsY0fbeuUP1YJJHKUQM9T_lQhlvjk_xu06EnwLQHBdpii1yYG55QDb8vn8Jl1iUXb5M3N0eHyz-bcnxU"/>
+</div>
+</div>
+</header>
+<main class="pt-[80px] pb-[100px] px-container-margin">
+<!-- Search & Map Toggle Container -->
+<div class="flex items-center gap-gutter mb-stack-lg">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full bg-[#EDF0EF] border-none rounded-2xl py-3.5 pl-12 pr-4 text-body-md focus:ring-2 focus:ring-primary-container/30 transition-all outline-none placeholder:text-outline-variant" placeholder="지역·의원명 검색" type="text"/>
+</div>
+<button class="flex items-center gap-1 bg-surface-container-highest px-4 py-3.5 rounded-2xl card-shadow hover:bg-surface-variant transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="map">map</span>
+<span class="text-label-md font-label-md text-primary whitespace-nowrap">지도보기</span>
+</button>
+</div>
+<!-- Filter Chips -->
+<div class="flex items-center gap-stack-sm overflow-x-auto no-scrollbar pb-stack-md -mx-container-margin px-container-margin">
+<button class="flex items-center gap-1 bg-primary text-white px-4 py-2 rounded-full text-label-md font-label-md active:scale-95 transition-all">
+<span>거리순</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="expand_more">expand_more</span>
+</button>
+<button class="bg-surface-container text-on-surface-variant border border-outline-variant/30 px-4 py-2 rounded-full text-label-md font-label-md whitespace-nowrap active:scale-95 transition-all hover:bg-surface-variant/50">
+                오늘 예약가능
+            </button>
+<button class="bg-surface-container text-on-surface-variant border border-outline-variant/30 px-4 py-2 rounded-full text-label-md font-label-md whitespace-nowrap active:scale-95 transition-all hover:bg-surface-variant/50">
+                비대면 상담
+            </button>
+<button class="bg-surface-container text-on-surface-variant border border-outline-variant/30 px-4 py-2 rounded-full text-label-md font-label-md whitespace-nowrap active:scale-95 transition-all hover:bg-surface-variant/50">
+                GLP-1 전문
+            </button>
+</div>
+<!-- Clinic List Title -->
+<div class="flex items-center justify-between mb-stack-md mt-stack-sm">
+<h2 class="text-headline-sm-mobile font-headline-sm-mobile text-on-surface">내 주변 진료기관</h2>
+<span class="text-label-md font-label-md text-outline">총 42개</span>
+</div>
+<!-- Clinic Cards List -->
+<div class="space-y-gutter">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-2xl p-stack-lg card-shadow border border-outline-variant/10 active:scale-[0.98] transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-stack-sm">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-tertiary-container/10 text-tertiary px-2 py-0.5 rounded text-[10px] font-bold">예약 가능</span>
+<h3 class="text-body-lg font-bold text-on-surface">서울 연세 가가 클리닉</h3>
+</div>
+<div class="flex items-center gap-stack-sm text-label-md font-label-md text-outline">
+<span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[14px] fill-icon text-[#FFB400]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span> 4.8 (1.2k+)</span>
+<span class="w-[1px] h-3 bg-outline-variant"></span>
+<span>350m</span>
+<span class="w-[1px] h-3 bg-outline-variant"></span>
+<span>강남구 역삼동</span>
+</div>
+</div>
+<div class="w-16 h-16 rounded-xl overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="A modern and clean interior of a luxury medical clinic waiting area. The space features minimalist furniture, soft ambient lighting, and subtle teal decorative elements. The atmosphere is professional, serene, and premium, designed to put patients at ease." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiSyADFu7eI7aM8stcNrIBeqUCAxOeb5AEHcOix0oKDgJowXIddKSimeRhHmr3n-8-npB-ZrraqiI558p2u90d6sMBtCqTH7UJxWkI37hOxrZ03zHfN_sBy89cXp9i1mfNtvstw29tEgqPennzMAQ-TvKajD1lyj9KIaUXzQNk39nQ2tGcpMHLPDGB1mG26kGqvG7XamdXSm-mJQZ9_SNqP_fR86gYvWNVuxjz7kQ1_Z9lFWwvFTa3mzdya1OT5qgscoKd5b1d-VDV"/>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mt-stack-md">
+<span class="bg-surface-container text-on-surface-variant px-3 py-1 rounded-lg text-label-md font-label-md">체중관리·비만</span>
+<span class="bg-surface-container text-on-surface-variant px-3 py-1 rounded-lg text-label-md font-label-md">GLP-1 상담</span>
+</div>
+<div class="mt-stack-lg pt-stack-md border-t border-outline-variant/30 flex items-center justify-between">
+<p class="text-body-sm text-on-surface-variant">가장 빠른 예약: <span class="font-bold text-primary">오늘 15:30</span></p>
+<button class="bg-primary-container text-white px-5 py-2 rounded-xl text-label-md font-bold shadow-sm active:scale-95 transition-all">
+                        예약하기
+                    </button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-2xl p-stack-lg card-shadow border border-outline-variant/10 active:scale-[0.98] transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-stack-sm">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-tertiary-container/10 text-tertiary px-2 py-0.5 rounded text-[10px] font-bold">예약 가능</span>
+<h3 class="text-body-lg font-bold text-on-surface">스마트 다이어트 의원</h3>
+</div>
+<div class="flex items-center gap-stack-sm text-label-md font-label-md text-outline">
+<span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[14px] fill-icon text-[#FFB400]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span> 4.9 (856)</span>
+<span class="w-[1px] h-3 bg-outline-variant"></span>
+<span>1.2km</span>
+<span class="w-[1px] h-3 bg-outline-variant"></span>
+<span>서초구 서초동</span>
+</div>
+</div>
+<div class="w-16 h-16 rounded-xl overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="A sleek, futuristic consultation room in a high-end diet clinic. Features white high-gloss surfaces, ergonomic furniture, and advanced medical monitoring equipment. The lighting is bright and clinically clean, with a calm, high-tech vibe in shades of white and soft teal." src="https://lh3.googleusercontent.com/aida-public/AB6AXuChBmEcHL1v6RVe-4ic9vbEWhsK7fsqEUpQ51vjAd_unlb09xpsIJYtEECzRdaRFfbbkLc5mNwJ7BVwhYfn_8L4SK9sdt1n8E0zxkzJ2LwkwTtvvZraR_ZbAxkjAuXuxkzYUC7yBkZ_vnVU3wlEoPItHAcPLK34z08z5VrFtwR6ISbVwG-61fwgkjhphckOFyLJ8_5SOV7xIMr5PsBLCjFIJDbB7ZFX863cxfisNLD9FsSdZFsjFaX20CVwj050zb6i0SOwwo54thwb"/>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mt-stack-md">
+<span class="bg-surface-container text-on-surface-variant px-3 py-1 rounded-lg text-label-md font-label-md">체중관리·비만</span>
+<span class="bg-surface-container text-on-surface-variant px-3 py-1 rounded-lg text-label-md font-label-md">대사증후군</span>
+</div>
+<div class="mt-stack-lg pt-stack-md border-t border-outline-variant/30 flex items-center justify-between">
+<p class="text-body-sm text-on-surface-variant">가장 빠른 예약: <span class="font-bold text-primary">오늘 17:00</span></p>
+<button class="bg-primary-container text-white px-5 py-2 rounded-xl text-label-md font-bold shadow-sm active:scale-95 transition-all">
+                        예약하기
+                    </button>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest rounded-2xl p-stack-lg card-shadow border border-outline-variant/10 active:scale-[0.98] transition-all cursor-pointer opacity-80">
+<div class="flex justify-between items-start mb-stack-sm">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-outline-variant/20 text-outline px-2 py-0.5 rounded text-[10px] font-bold">마감</span>
+<h3 class="text-body-lg font-bold text-on-surface">바른바디 가정의학과</h3>
+</div>
+<div class="flex items-center gap-stack-sm text-label-md font-label-md text-outline">
+<span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[14px] fill-icon text-[#FFB400]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span> 4.7 (430)</span>
+<span class="w-[1px] h-3 bg-outline-variant"></span>
+<span>2.4km</span>
+</div>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mt-stack-md">
+<span class="bg-surface-container text-on-surface-variant px-3 py-1 rounded-lg text-label-md font-label-md">체중관리·비만</span>
+</div>
+<div class="mt-stack-lg pt-stack-md border-t border-outline-variant/30 flex items-center justify-between">
+<p class="text-body-sm text-outline">가장 빠른 예약: <span class="font-medium">내일 09:30</span></p>
+<button class="bg-surface-variant/50 text-on-surface-variant px-5 py-2 rounded-xl text-label-md font-bold cursor-not-allowed">
+                        준비중
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-[24px] pt-2 bg-surface rounded-t-2xl shadow-[0px_-4px_12px_rgba(0,107,95,0.04)] border-t border-outline-variant/10">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant py-1" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="home">home</span>
+<span class="text-label-md font-label-md">홈</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-bold bg-primary-container/10 rounded-xl px-6 py-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[24px] fill-icon" data-icon="calendar_today" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<span class="text-label-md font-label-md">예약</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant py-1" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="description">description</span>
+<span class="text-label-md font-label-md">처방전</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant py-1" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="person">person</span>
+<span class="text-label-md font-label-md">마이</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for chips
+        const chips = document.querySelectorAll('.filter-chip');
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                chips.forEach(c => c.classList.remove('bg-primary', 'text-white'));
+                chip.classList.add('bg-primary', 'text-white');
+            });
+        });
+    </script>
+</body></html>

@@ -76,3 +76,46 @@
     box-shadow: 0 0 0 1px rgb(255 255 255 / 0.05), 0 1px 0 0 rgb(255 255 255 / 0.05), 0 0 20px 0 rgb(0 0 0 / 0.1);
   }
 }
+
+/* ── Stitch "Serene Healthcare Identity" theme ──────────────────────────────
+   Scoped re-theming of the shared CSS-var-backed tokens (primary / secondary /
+   background) so the converted preview screens render in Deep Teal / Soft Coral
+   / Mint without affecting the rest of the app. */
+.stitch-theme {
+  --background: 173 81% 96%;   /* #ecfdfb mint  */
+  --primary: 174 100% 19%;     /* #006056 deep teal */
+  --secondary: 12 70% 39%;     /* #a7391e coral-red */
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  color: #0f1e1d; /* on-surface */
+}
+
+/* Material Symbols (icon font used throughout the Stitch screens) */
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  display: inline-block;
+  line-height: 1;
+  vertical-align: middle;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer utilities {
+  .shadow-premium {
+    box-shadow: 0px 4px 12px rgba(31, 122, 110, 0.04);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

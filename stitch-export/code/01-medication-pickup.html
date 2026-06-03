@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nal-ssin Doctor - Medication Pickup Guide</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#1f7a6e",
+                    "on-secondary-fixed-variant": "#862208",
+                    "on-secondary-container": "#6e1500",
+                    "tertiary-fixed-dim": "#61de8a",
+                    "inverse-on-surface": "#e3f4f2",
+                    "outline": "#6e7976",
+                    "error-container": "#ffdad6",
+                    "surface-container": "#e0f1ef",
+                    "secondary-container": "#fd7958",
+                    "on-primary-fixed": "#00201c",
+                    "inverse-surface": "#243332",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#005228",
+                    "inverse-primary": "#83d5c7",
+                    "surface-bright": "#ecfdfb",
+                    "secondary": "#a7391e",
+                    "tertiary-container": "#007e40",
+                    "on-background": "#0f1e1d",
+                    "on-surface-variant": "#3e4946",
+                    "surface-dim": "#ccdddb",
+                    "on-secondary": "#ffffff",
+                    "primary-fixed-dim": "#83d5c7",
+                    "surface-variant": "#d5e6e4",
+                    "outline-variant": "#bec9c5",
+                    "on-secondary-fixed": "#3c0700",
+                    "primary": "#006056",
+                    "background": "#ecfdfb",
+                    "secondary-fixed-dim": "#ffb4a2",
+                    "on-primary-container": "#b3fff1",
+                    "on-error": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed": "#00210c",
+                    "surface-container-high": "#dbecea",
+                    "surface": "#ecfdfb",
+                    "tertiary-fixed": "#7efba4",
+                    "surface-tint": "#006b5f",
+                    "surface-container-low": "#e6f7f5",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#d5e6e4",
+                    "on-surface": "#0f1e1d",
+                    "on-tertiary-container": "#c1ffcc",
+                    "primary-fixed": "#9ff2e3",
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "tertiary": "#006231",
+                    "secondary-fixed": "#ffdad2",
+                    "on-primary-fixed-variant": "#005047",
+                    "accent-coral": "#FF7A59"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-margin": "20px",
+                    "stack-lg": "24px",
+                    "stack-sm": "8px",
+                    "gutter": "16px",
+                    "unit": "4px",
+                    "stack-md": "16px",
+                    "section-gap": "40px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"],
+                    "body-sm": ["Plus Jakarta Sans"],
+                    "headline-sm": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-lg": ["30px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .shadow-premium {
+            box-shadow: 0px 4px 12px rgba(31, 122, 110, 0.04);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="docked full-width top-0 z-50 shadow-[0px_4px_12px_rgba(31,122,110,0.04)] bg-surface dark:bg-surface-container-high h-16 w-full fixed">
+<div class="flex justify-between items-center px-container-margin w-full h-full max-w-screen-xl mx-auto">
+<button class="active:scale-95 transition-transform duration-200 hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors rounded-full p-2">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">menu</span>
+</button>
+<h1 class="font-headline-sm-mobile text-headline-sm-mobile font-bold text-primary dark:text-primary-fixed-dim">날씬닥터</h1>
+<div class="h-10 w-10 rounded-full bg-surface-container overflow-hidden">
+<img alt="User profile" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBiX9vL2jxRSNhhskw82N9FtEyJmahyAgP6ATHPdwPqy4XQ7nZDWhRdzoeIZbfXNoTRyA3VEA46iaEYAvlyWrSOFmSCHkaekHUcwMK1Ty7aVO6EQggD6qFlcbqcTeebCpTevj_Yh07PJ3qGP-19EIc49Gwgy3RhR1Qi58wZIsPbFOJBU82NpOLwfEFrySzsk-KcUh-6wPSrQawtZbhW5AQOYTu4gcNhC6D9s9T15kPOelwq_oNjSIxJEmHUVkXBu2vUPT22OubVyV_"/>
+</div>
+</div>
+</header>
+<main class="pt-20 px-container-margin max-w-md mx-auto space-y-stack-md">
+<!-- Success Status Card -->
+<section class="bg-surface-container-lowest rounded-xl p-stack-md shadow-premium flex flex-col items-center space-y-stack-sm text-center">
+<div class="w-32 h-32 flex items-center justify-center">
+<img alt="Status Illustration" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyK2MxkrSV9zxFPK4VQCCVJ0Lg3ZQYMh-SR8SY0Rh8n3h5m2vYKXWok4pHJ1YXXsC89Vi5SqZ4ICLTb1agyKmUF3wb9U9AIsvjxeOV1CXpUMO6qBc4s_sBKdreJkCFlGgRinirr5IvEumN2w25M5hdX46Br5Zg61via3myyYOglQnsqMQWdJsRC-Zjx4OnF0u8G3xSN7fvEEtk1e4eU60vXKN-aK8NptxzfJK3L5r9QYx0hRynrQXn5vNuO2U4p6lpMxVfndFFSbSI"/>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-primary">조제·결제 완료</h2>
+<p class="font-body-sm text-on-surface-variant">약국에서 처방약 조제가 완료되었습니다.<br/>아래 QR코드를 제시해주세요.</p>
+</section>
+<!-- QR Code Section -->
+<section class="bg-surface-container-lowest rounded-xl p-stack-lg shadow-premium flex flex-col items-center space-y-stack-md">
+<div class="p-4 bg-white border-2 border-primary rounded-xl overflow-hidden aspect-square w-48 shadow-inner">
+<img alt="Pickup QR Code" class="w-full h-full object-contain" data-alt="A high-contrast, professional QR code centered on a clean white background within a soft teal frame. The QR code represents a medical pickup authorization, with a precise and modern digital aesthetic. The lighting is bright and studio-like, emphasizing a sterile and secure healthcare environment. The overall mood is efficient and reliable." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn2JvGoeOm8gUc8TnufZHlKyGKSaUlgbvGwE6NxqJ6mzG0nm6tRH1kJt76XEk27MHvONaF5IhKc9J6iaVLi4ag3A7gt5rPpjb47LQfwh9xLAbqWjkz1RAXgbOQnBBQ1gByK55UwycRqTQtM90t6iYba-hihy2dlTBuXfbBQVv3AavDPgxWxUepALhX1vbhB9RzRbmHKpqj1yX9IHNdqbQVzU0ZUpjLuFJijvipC4BmnCUXr9_xgd6UFGyr-_k5i0rpRe4AlNYL6Ayn"/>
+</div>
+<div class="text-center">
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">주문 번호</p>
+<p class="font-headline-md text-headline-md text-primary mt-1">20240612-0042</p>
+</div>
+</section>
+<!-- Pharmacy Info Card -->
+<section class="bg-surface-container-lowest rounded-xl p-stack-md shadow-premium space-y-stack-md">
+<div class="flex justify-between items-start">
+<div class="space-y-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">메디컬정문약국</h3>
+<div class="flex items-center space-x-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<p class="font-body-sm text-body-sm">서울 중구 남대문로 84</p>
+</div>
+</div>
+<div class="bg-primary-container/10 text-primary px-3 py-1 rounded-full">
+<p class="font-label-md text-label-md">오후 8:30까지 영업</p>
+</div>
+</div>
+<div class="flex items-center space-x-stack-sm pt-2">
+<a class="flex-1 flex items-center justify-center space-x-2 border border-outline-variant py-3 rounded-lg hover:bg-surface-container transition-colors active:scale-95 duration-200" href="tel:02-123-4567">
+<span class="material-symbols-outlined text-on-surface-variant">call</span>
+<span class="font-body-md text-on-surface">02-123-4567</span>
+</a>
+<button class="flex-1 flex items-center justify-center space-x-2 bg-primary py-3 rounded-lg text-white hover:opacity-90 active:scale-95 transition-all duration-200 shadow-md">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">directions</span>
+<span class="font-body-md">길찾기</span>
+</button>
+</div>
+</section>
+<!-- Accordion Guide -->
+<section class="bg-surface-container-lowest rounded-xl shadow-premium overflow-hidden">
+<button class="w-full flex justify-between items-center p-stack-md hover:bg-surface-container-low transition-colors" onclick="toggleAccordion('med-guide')">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary">info</span>
+<span class="font-headline-sm text-headline-sm">보관 및 복약 안내</span>
+</div>
+<span class="material-symbols-outlined transition-transform duration-300" id="guide-icon">expand_more</span>
+</button>
+<div class="max-h-0 overflow-hidden transition-all duration-500 ease-in-out px-stack-md bg-surface-container-lowest" id="med-guide">
+<div class="pb-stack-md space-y-stack-md border-t border-outline-variant pt-stack-md">
+<div class="flex items-start space-x-3">
+<div class="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+<div>
+<p class="font-body-md font-bold text-on-surface">식후 30분 복용</p>
+<p class="font-body-sm text-on-surface-variant">위장 장애 예방을 위해 규칙적인 식사 후 복용을 권장합니다.</p>
+</div>
+</div>
+<div class="flex items-start space-x-3">
+<div class="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+<div>
+<p class="font-body-md font-bold text-on-surface">실온 보관</p>
+<p class="font-body-sm text-on-surface-variant">직사광선을 피하고 습기가 적은 서늘한 곳에 보관하세요.</p>
+</div>
+</div>
+<div class="flex items-start space-x-3">
+<div class="w-2 h-2 rounded-full bg-secondary-container mt-2 flex-shrink-0"></div>
+<div>
+<p class="font-body-md font-bold text-on-secondary-fixed-variant">음주 금지</p>
+<p class="font-body-sm text-on-surface-variant">복용 기간 중 알코올 섭취는 간 손상 및 부작용 위험을 높일 수 있습니다.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Bottom CTA -->
+<div class="fixed bottom-20 left-0 w-full px-container-margin z-40 md:hidden">
+<button class="w-full bg-accent-coral text-white font-headline-sm py-4 rounded-xl shadow-lg active:scale-95 transition-all duration-200 hover:brightness-105">
+            수령 완료
+        </button>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface dark:bg-surface-container-highest shadow-[0px_-4px_12px_rgba(31,122,110,0.04)] rounded-t-xl">
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:bg-surface-container dark:hover:bg-inverse-surface transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md">홈</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:bg-surface-container dark:hover:bg-inverse-surface transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined">local_hospital</span>
+<span class="font-label-md text-label-md">의원</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-full px-4 py-1 active:scale-[0.98]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">medication</span>
+<span class="font-label-md text-label-md">처방전</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:bg-surface-container dark:hover:bg-inverse-surface transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-label-md">마이</span>
+</div>
+</nav>
+<script>
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById('guide-icon');
+            if (content.style.maxHeight === '0px' || content.style.maxHeight === '') {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.style.maxHeight = '0px';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Initialize accordion state
+        document.addEventListener('DOMContentLoaded', () => {
+            const content = document.getElementById('med-guide');
+            content.style.maxHeight = '0px';
+        });
+    </script>
+</body></html>

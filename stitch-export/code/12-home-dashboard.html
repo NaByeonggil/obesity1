@@ -1,0 +1,299 @@
+<!DOCTYPE html><html class="light" lang="ko" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
+<title>날씬닥터 - 스마트 다이어트 관리</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed": "#ffdad2",
+                    "primary-fixed": "#9ff2e3",
+                    "error": "#ba1a1a",
+                    "on-surface": "#0f1e1d",
+                    "on-primary-container": "#b3fff1",
+                    "tertiary-fixed": "#7efba4",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-high": "#dbecea",
+                    "on-tertiary-fixed": "#00210c",
+                    "on-secondary-container": "#6e1500",
+                    "on-primary-fixed-variant": "#005047",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-highest": "#d5e6e4",
+                    "secondary": "#a7391e",
+                    "error-container": "#ffdad6",
+                    "secondary-container": "#fd7958",
+                    "on-surface-variant": "#3e4946",
+                    "secondary-fixed-dim": "#ffb4a2",
+                    "primary": "#006056",
+                    "tertiary": "#006231",
+                    "on-secondary-fixed": "#3c0700",
+                    "inverse-on-surface": "#e3f4f2",
+                    "surface-tint": "#006b5f",
+                    "on-background": "#0f1e1d",
+                    "on-tertiary-fixed-variant": "#005228",
+                    "on-tertiary-container": "#c1ffcc",
+                    "surface-variant": "#d5e6e4",
+                    "inverse-surface": "#243332",
+                    "surface": "#ecfdfb",
+                    "tertiary-fixed-dim": "#61de8a",
+                    "surface-container": "#e0f1ef",
+                    "surface-dim": "#ccdddb",
+                    "on-secondary": "#ffffff",
+                    "primary-fixed-dim": "#83d5c7",
+                    "on-primary-fixed": "#00201c",
+                    "surface-container-low": "#e6f7f5",
+                    "surface-bright": "#ecfdfb",
+                    "on-error": "#ffffff",
+                    "inverse-primary": "#83d5c7",
+                    "outline-variant": "#bec9c5",
+                    "primary-container": "#1f7a6e",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed-variant": "#862208",
+                    "outline": "#6e7976",
+                    "on-error-container": "#93000a",
+                    "background": "#ecfdfb",
+                    "tertiary-container": "#007e40"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-md": "16px",
+                    "stack-lg": "24px",
+                    "stack-sm": "8px",
+                    "gutter": "16px",
+                    "unit": "4px",
+                    "container-margin": "20px",
+                    "section-gap": "40px"
+            },
+            "fontFamily": {
+                    "label-md": ["Plus Jakarta Sans"],
+                    "body-sm": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-sm": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #ecfdfb;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .active-nav-bg {
+            background-color: rgba(31, 122, 110, 0.1);
+        }
+    </style>
+</head>
+<body class="text-on-surface antialiased pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-margin py-stack-sm w-full bg-surface dark:bg-inverse-surface shadow-[0px_4px_12px_rgba(0,107,95,0.04)]">
+<div class="flex items-center gap-2"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiqAfQQPYTJXxLE1TTUAM52jVLHJC0v4ijtGTZao6RAp8tGNWo_qJtlqN-Dz98SoKyXQzvs3-ocYqQg1y72ZVZQz7A0gHXqK35qfZYstjiWAXwfrUMrZs7YobWR_5DkKQA4J4kpb3CgAh_uHiDl6jXsDZypvSwdNhaA6HllFU_jwAa2j2cS_mXM7al4Ldg69r7AvYxWMzIZpeJ17cK3Tdf25dwyPwWQJon7piuRmq7LU9Sghxc0pUaKzA4TVXzoJ7QCjtIpLhSPZgP" alt="      " class="h-10 w-auto object-contain"></div>
+<div class="flex items-center gap-3">
+<button class="p-2 rounded-full hover:bg-surface-variant/50 transition-all duration-200 active:scale-[0.98]">
+<span class="material-symbols-outlined text-primary" data-icon="notifications">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center border-2 border-surface shadow-sm overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional close-up portrait of a Korean man in his 30s with a warm and friendly expression. He is wearing a clean, modern white linen shirt against a soft, out-of-focus medical office background. The lighting is bright and natural, reflecting a clean healthcare aesthetic with subtle teal accents. The visual style is premium and trustworthy." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVpoiseFYohxBopFphsmItQ2QKECFRG7RAOIXiz5NFgv4Su_GDQCV-QMNqSu-qf95Z82Y5PmXFSzS6EjfyNjoluPp7F8INY4gDYTlI8c1w2YlShc8GFkJSFvkKna8J80jO3eoEa8km_EK--V-2CEn_6LXxK-HYKzKLvT2aTvrbJSyQc7LPaJyjyWjiPdqyvy4RGMC1ymtl_9rX6csPFltDJAnRU9rp_GjmCC1OUgrffpY_q20Bo83Yc2bI3pOwoYf1ybVpF1tHkGuS">
+</div>
+</div>
+</header>
+<main class="mt-20 px-container-margin">
+<!-- Welcome Message -->
+<section class="py-stack-lg animate-in fade-in slide-in-from-bottom-4 duration-700" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+<h2 class="text-headline-lg-mobile font-headline-lg-mobile text-on-surface">
+                김민수님, 안녕하세요 <br>
+<span class="text-primary font-bold">건강한 하루를 시작해볼까요?</span>
+</h2>
+</section>
+<!-- Status Card (Upcoming Reservation) -->
+<section class="mb-stack-lg" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out 0.1s;">
+<div class="bg-surface-container-lowest rounded-xl p-5 shadow-[0px_4px_12px_rgba(0,107,95,0.04)] border border-outline-variant/20 overflow-hidden relative active:scale-[0.98] transition-all duration-200">
+<div class="flex justify-between items-start mb-4">
+<div>
+<span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-label-md font-label-md">진료 예정</span>
+<p class="mt-2 text-body-md font-bold">오후 2:30 비대면 진료</p>
+</div>
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+</div>
+<div class="flex items-center gap-3 py-3 border-t border-outline-variant/30">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="medical_services">medical_services</span>
+</div>
+<div>
+<p class="text-body-sm text-on-surface-variant">서울 연세 가가 클리닉</p>
+<p class="text-body-md font-semibold">이정후 전문의</p>
+</div>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[120px]" data-icon="pulse">pulse_alert</span>
+</div>
+</div>
+</section>
+<!-- Service Quick Links (Bento) -->
+<section class="mb-stack-lg" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out 0.2s;">
+<h3 class="text-headline-sm font-headline-sm mb-4">빠른 메뉴</h3>
+<div class="grid grid-cols-2 gap-4">
+<div class="col-span-2 bg-primary text-white p-5 rounded-xl shadow-md flex justify-between items-center active:scale-[0.98] transition-all">
+<div>
+<p class="text-headline-sm font-bold">비대면 진료 예약</p>
+<p class="text-body-sm opacity-80">어디서나 편하게 상담받으세요</p>
+</div>
+<div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="video_call">video_call</span>
+</div>
+</div>
+<div class="bg-white p-4 rounded-xl shadow-sm border border-outline-variant/10 active:scale-[0.98] transition-all">
+<div class="w-10 h-10 bg-secondary-fixed rounded-lg flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-secondary" data-icon="description">description</span>
+</div>
+<p class="text-body-md font-bold">처방전 관리</p>
+<p class="text-label-md text-on-surface-variant">내 처방 이력 확인</p>
+</div>
+<div class="bg-white p-4 rounded-xl shadow-sm border border-outline-variant/10 active:scale-[0.98] transition-all">
+<div class="w-10 h-10 bg-tertiary-fixed rounded-lg flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-tertiary" data-icon="edit_note">edit_note</span>
+</div>
+<p class="text-body-md font-bold">다이어트 기록</p>
+<p class="text-label-md text-on-surface-variant">오늘의 식단과 운동</p>
+</div>
+</div>
+</section>
+<!-- Health Tip Section -->
+<section class="mb-stack-lg" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out 0.3s;">
+<h3 class="text-headline-sm font-headline-sm mb-4">오늘의 건강 팁</h3>
+<div class="bg-surface-container-low rounded-xl overflow-hidden shadow-sm border border-outline-variant/20 flex">
+<div class="w-1/3 h-32 relative overflow-hidden">
+<img alt="Healthy Tip Illustration" class="w-full h-full object-cover" data-alt="A minimalist and artistic flat illustration of a balanced meal with fresh greens, an avocado, and a bright egg on a clean white ceramic plate. The background is a soft, pastel off-white with gentle light-teal shadows. The lighting is diffused and calm, creating a serene and premium lifestyle atmosphere that encourages healthy eating." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgSkPPgInW88TgVAgc5-k1kiCj2qDenWUdsdhjNG0BmlhU5u8WvANCWIq3-aLIGTpNjsLbNjBlFGht7slX9rbWnrwg0yGGWxMm58IgMR5lvrCpD4n5KBHMJhYrcgqic7InBxtH9QLwDLlIQh8nZs878wcBbmFwGMgdjwx-m28x9L8-QdM3aBo7NYNSCJvC3lHsplJgm7jsgVzXxXjLhJrMqOGioM1qatjSSkAxGFyTf3gjoQr7_WASGy6ACrie47A2W6LbY9eWI-ST">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent to-surface-container-low"></div>
+</div>
+<div class="w-2/3 p-4 flex flex-col justify-center">
+<p class="text-primary font-bold text-label-md mb-1">식단 가이드</p>
+<p class="text-body-md font-semibold line-clamp-2 mb-2">물 섭취만으로도 대사량이 10% 증가한다는 사실, 알고 계셨나요?</p>
+<button class="text-primary text-label-md font-bold flex items-center gap-1">
+                        더 알아보기 <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Weekly Progress Card -->
+<section class="mb-stack-lg" style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out 0.4s;">
+<div class="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/10">
+<div class="flex justify-between items-center mb-4">
+<h3 class="text-body-md font-bold">주간 활동 목표</h3>
+<span class="text-primary text-label-md font-bold">85% 완료</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 mb-4">
+<div class="bg-primary h-2 rounded-full transition-all duration-1000" style="width: 85%"></div>
+</div>
+<div class="flex justify-between">
+<div class="text-center">
+<p class="text-label-md text-on-surface-variant mb-1">걸음수</p>
+<p class="text-body-sm font-bold">8,420</p>
+</div>
+<div class="text-center">
+<p class="text-label-md text-on-surface-variant mb-1">수분</p>
+<p class="text-body-sm font-bold">1.2L</p>
+</div>
+<div class="text-center">
+<p class="text-label-md text-on-surface-variant mb-1">칼로리</p>
+<p class="text-body-sm font-bold">1,450</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe pt-2 bg-surface dark:bg-inverse-surface rounded-t-xl shadow-[0px_-4px_12px_rgba(0,107,95,0.04)] border-t border-outline-variant/30">
+<!-- 홈 (Active) -->
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-bold bg-primary-container/20 rounded-xl px-4 py-1 active:scale-[0.98] transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-label-md font-label-md">홈</span>
+</a>
+<!-- 예약 -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary transition-colors active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="text-label-md font-label-md">예약</span>
+</a>
+<!-- 처방전 -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary transition-colors active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="text-label-md font-label-md">처방전</span>
+</a>
+<!-- 마이 -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary transition-colors active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-label-md font-label-md">마이</span>
+</a>
+</nav>
+<!-- FAB for New Record -->
+<button class="fixed bottom-24 right-6 w-14 h-14 bg-secondary-container text-white rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-all duration-200 z-40">
+<span class="material-symbols-outlined text-[32px]" data-icon="add">add</span>
+</button>
+<script>
+        // Micro-interaction for cards
+        document.querySelectorAll('.active\\:scale-\\[0\\.98\\]').forEach(card => {
+            card.addEventListener('touchstart', () => {
+                card.classList.add('shadow-inner');
+            });
+            card.addEventListener('touchend', () => {
+                card.classList.remove('shadow-inner');
+            });
+        });
+
+        // Simple Fade-in animation logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            sections.forEach((section, index) => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(10px)';
+                section.style.transition = `all 0.5s ease-out ${index * 0.1}s`;
+                
+                setTimeout(() => {
+                    section.style.opacity = '1';
+                    section.style.transform = 'translateY(0)';
+                }, 50);
+            });
+        });
+    </script>
+
+
+</body></html>
