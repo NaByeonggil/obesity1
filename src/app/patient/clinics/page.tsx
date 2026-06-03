@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Card } from '@/components/ui/card';
@@ -68,6 +68,14 @@ const departmentNames: { [key: string]: string } = {
 };
 
 export default function ClinicsListingPage() {
+  return (
+    <Suspense fallback={null}>
+      <ClinicsListingPageInner />
+    </Suspense>
+  );
+}
+
+function ClinicsListingPageInner() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();

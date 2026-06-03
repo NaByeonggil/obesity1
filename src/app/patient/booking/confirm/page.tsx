@@ -25,6 +25,14 @@ import {
 } from "lucide-react"
 
 export default function BookingConfirmPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <BookingConfirmPageInner />
+    </React.Suspense>
+  )
+}
+
+function BookingConfirmPageInner() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const searchParams = useSearchParams()

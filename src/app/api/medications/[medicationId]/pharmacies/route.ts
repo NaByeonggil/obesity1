@@ -54,10 +54,8 @@ function getUserFromToken(request: NextRequest): { userId: string; email: string
  * GET /api/medications/[medicationId]/pharmacies
  * 특정 의약품을 보유한 약국 목록 조회
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { medicationId: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ medicationId: string }> }) {
+  const params = await props.params;
   try {
     // NextAuth 세션 확인
     const session = await getServerSession(authOptions)

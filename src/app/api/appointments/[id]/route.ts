@@ -5,10 +5,8 @@ import { verifyToken, getTokenFromAuthHeader } from '@/lib/auth'
 type AppointmentStatus = 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED'
 type UserRole = 'PATIENT' | 'DOCTOR' | 'PHARMACY' | 'ADMIN'
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const authHeader = request.headers.get('authorization')
     const token = getTokenFromAuthHeader(authHeader)
@@ -99,10 +97,8 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const authHeader = request.headers.get('authorization')
     const token = getTokenFromAuthHeader(authHeader)

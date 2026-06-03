@@ -46,6 +46,14 @@ interface Clinic {
 }
 
 export default function BookingPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <BookingPageInner />
+    </React.Suspense>
+  )
+}
+
+function BookingPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const department = searchParams.get('department') || ''

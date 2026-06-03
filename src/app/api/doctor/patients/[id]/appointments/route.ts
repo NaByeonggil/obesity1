@@ -6,10 +6,8 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 const prisma = new PrismaClient()
 
 // 특정 환자의 진료 이력 조회
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions)
 

@@ -151,10 +151,10 @@ export default function DebugAuthPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">
-                <div><strong>User Agent:</strong> {navigator.userAgent}</div>
-                <div><strong>Current URL:</strong> {window.location.href}</div>
-                <div><strong>Cookies Enabled:</strong> {navigator.cookieEnabled ? '✅' : '❌'}</div>
-                <div><strong>Current Cookies:</strong> {document.cookie || '(없음)'}</div>
+                <div><strong>User Agent:</strong> {typeof navigator !== 'undefined' ? navigator.userAgent : ''}</div>
+                <div><strong>Current URL:</strong> {typeof window !== 'undefined' ? window.location.href : ''}</div>
+                <div><strong>Cookies Enabled:</strong> {typeof navigator !== 'undefined' ? (navigator.cookieEnabled ? '✅' : '❌') : ''}</div>
+                <div><strong>Current Cookies:</strong> {typeof document !== 'undefined' ? (document.cookie || '(없음)') : ''}</div>
               </div>
             </CardContent>
           </Card>

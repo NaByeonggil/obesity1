@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -57,6 +57,14 @@ const roleInfo: Record<Role, RoleInfo> = {
 }
 
 export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterPageInner />
+    </Suspense>
+  )
+}
+
+function RegisterPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [role, setRole] = useState<Role>('patient')
