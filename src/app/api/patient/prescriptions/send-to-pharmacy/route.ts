@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { after } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { PrismaClient } from '@prisma/client'
+import { runPrescriptionOcr } from '@/lib/ocr-client'
 
 const prisma = new PrismaClient()
 
@@ -92,6 +94,16 @@ export async function POST(request: NextRequest) {
       pharmacyName: pharmacy.pharmacyName || pharmacy.name,
       prescriptionNumber: prescription.prescriptionNumber
     })
+
+    // 처방전 PDF → 텍스트 변환 (Qwen3-VL OCR, 약국 프로그램 입력용)
+    // 응답 반환 후 백그라운드로 실행되어 전송 플로우를 지연시키지 않음
+    if (prescription.pdfFilePath && !prescription.ocrText) {
+      after(() =>
+        runPrescriptionOcr(prescriptionId).catch((e) =>
+          console.error('[ocr] 백그라운드 변환 오류:', e)
+        )
+      )
+    }
 
     return NextResponse.json({
       success: true,
