@@ -49,7 +49,7 @@ export default function PrescriptionPharmacySendPage() {
         <div className="flex items-center gap-3">
           <img
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiqAfQQPYTJXxLE1TTUAM52jVLHJC0v4ijtGTZao6RAp8tGNWo_qJtlqN-Dz98SoKyXQzvs3-ocYqQg1y72ZVZQz7A0gHXqK35qfZYstjiWAXwfrUMrZs7YobWR_5DkKQA4J4kpb3CgAh_uHiDl6jXsDZypvSwdNhaA6HllFU_jwAa2j2cS_mXM7al4Ldg69r7AvYxWMzIZpeJ17cK3Tdf25dwyPwWQJon7piuRmq7LU9Sghxc0pUaKzA4TVXzoJ7QCjtIpLhSPZgP"
-            alt="’‘’‘’‘’‘’‘’‘’‘’‘’‘’‘ ’‘’‘’‘"
+            alt="날씬닥터 로고"
             className="h-10 w-auto object-contain"
           />
         </div>

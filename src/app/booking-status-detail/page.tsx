@@ -47,7 +47,7 @@ export default function BookingStatusDetailPage() {
         {/* Brand Identity & Main Status */}
         <section className="flex flex-col items-center justify-center py-stack-lg">
           <img
-            alt="Nal-ssin Doctor Logo"
+            alt="날씬닥터 로고"
             className="h-8 mb-stack-md opacity-90"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXTmRrQVWzpE1zTtN2lP-kFMmWvsRtyeU6Xk5zj32g0efOmT19wIADqZLV05UC86jae2WgGxGv_GxO_atmZVOYa4HDOAQv6u4vAiHpSuEF6FSxSnqm6Gyvgzj1auvLu6hUL0YimFNtL29NRvLAyEXWXeQ3PAYlbJaGw0ScKYvtGKTaVmWu9MqE1VF3zhxCWqclVz4x42DIBiDX8jGF8TXt7eD6-7V-IyGvKEPZndhoFvCa-Wtgt35iqQoqqIVBjEAWCPRUNape8OkC"
           />

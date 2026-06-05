@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HealthPath - 진료 과목 선택</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#ffffff",
+                    "surface-tint": "#006b5f",
+                    "secondary": "#a7391e",
+                    "on-tertiary-fixed-variant": "#005228",
+                    "on-secondary-fixed": "#3c0700",
+                    "secondary-fixed": "#ffdad2",
+                    "on-background": "#0f1e1d",
+                    "on-tertiary-container": "#c1ffcc",
+                    "inverse-surface": "#243332",
+                    "surface-container-high": "#dbecea",
+                    "secondary-fixed-dim": "#ffb4a2",
+                    "inverse-on-surface": "#e3f4f2",
+                    "primary-fixed": "#9ff2e3",
+                    "on-tertiary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#83d5c7",
+                    "error-container": "#ffdad6",
+                    "surface-container": "#e0f1ef",
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "on-secondary": "#ffffff",
+                    "primary-container": "#1f7a6e",
+                    "on-tertiary-fixed": "#00210c",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-dim": "#ccdddb",
+                    "tertiary": "#006231",
+                    "surface-container-highest": "#d5e6e4",
+                    "tertiary-fixed-dim": "#61de8a",
+                    "primary-fixed-dim": "#83d5c7",
+                    "on-primary-fixed-variant": "#005047",
+                    "on-primary-container": "#b3fff1",
+                    "secondary-container": "#fd7958",
+                    "tertiary-fixed": "#7efba4",
+                    "primary": "#006056",
+                    "surface": "#ecfdfb",
+                    "on-primary-fixed": "#00201c",
+                    "tertiary-container": "#007e40",
+                    "on-secondary-container": "#6e1500",
+                    "surface-variant": "#d5e6e4",
+                    "surface-container-low": "#e6f7f5",
+                    "surface-bright": "#ecfdfb",
+                    "on-secondary-fixed-variant": "#862208",
+                    "background": "#ecfdfb",
+                    "outline-variant": "#bec9c5",
+                    "outline": "#6e7976",
+                    "on-surface-variant": "#3e4946",
+                    "on-surface": "#0f1e1d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "container-margin": "20px",
+                    "stack-lg": "24px",
+                    "section-gap": "40px",
+                    "gutter": "16px",
+                    "stack-sm": "8px",
+                    "stack-md": "16px"
+            },
+            "fontFamily": {
+                    "label-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-sm": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-sm": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      body {
+        background-color: #ecfdfb;
+        color: #0f1e1d;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .card-shadow {
+        box-shadow: 0 12px 24px rgba(0, 96, 86, 0.04);
+      }
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+      }
+      .custom-scroll::-webkit-scrollbar {
+        display: none;
+      }
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+      }
+    </style>
+</head>
+<body class="font-body-md text-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopAppBar -->
+<nav class="flex justify-between items-center px-container-margin w-full h-16 fixed top-0 left-0 z-50 bg-background/80 backdrop-blur-md">
+<div class="flex items-center gap-2">
+<img alt="Nal-ssin Doctor Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0snjzPpd0sPEuv0D2TCGYuaKUFSN4JiK3CQS8xras2RxeZ0Ep70zsAMssH7rdP3WxQ5MW6VYYa3ofx4Vkn7rh68W2aXVbCDQuGRkBSrCVftzGEe8nDciCrt6Ro3IWDgfd-TXQc1LIe2nLCYBM10mRbrC-8Zjs2OOas6CcdnugWMUlynZ6mio5Dcah1InA0u3kU-s8y-Yw-ZzPef6yBYUUWV9rA2MVQUlC-Dn4tjb9EtnJEcceLGXihSiFv98zM6Rexv7lW8dytAcz"/>
+</div>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-primary cursor-pointer hover:opacity-80 transition-opacity" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</div>
+</nav>
+<main class="pt-20 pb-32 px-container-margin max-w-screen-sm mx-auto">
+<!-- Hero Section -->
+<header class="mb-stack-lg">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2">진료 과목 선택</h1>
+<p class="font-body-md text-body-md text-on-surface-variant opacity-80">로그인 없이 바로 진료 과목을 확인해보세요</p>
+</header>
+<!-- Treatments Bento Grid -->
+<div class="grid grid-cols-2 gap-gutter">
+<!-- Card 1: 비만약 처방 -->
+<div class="group relative overflow-hidden rounded-xl bg-surface-container-lowest p-5 card-shadow flex flex-col items-center text-center transition-all duration-300 active:scale-95 cursor-pointer">
+<div class="absolute top-3 right-3 z-10">
+<span class="bg-primary-container text-on-primary-container font-label-md text-label-md px-2 py-0.5 rounded-full">대면</span>
+</div>
+<div class="w-full aspect-square mb-stack-md flex items-center justify-center bg-surface-container rounded-lg group-hover:scale-105 transition-transform">
+<img alt="Weight management capsule supplement bottle in soft teal lighting" class="w-full h-full object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgfKGQvUrMHHx8UqgCpEg4Mw1M5ZAGSRzGBypElGj7XGrpkIozTH8GeLDweYmoLsj4LJqtQmoRZHOdOYNq-QY2Ipf3Od8f-o0HSNMPE0gXw-U8YE5lDrMKfzUh88BsQykdaqCTFOQf-fHhv5i8xdOuvGPwyo0Fl9TB3NDgNmLS-Fx6tZseYi-6HxCs0Fim8JBCxOeiwNvQadXopimNx4C5dGwFMzBtYs7SW1bzGfz7vQjtABo0Adg4GKKgG9E3P3ghtHaRAaJsBsIP"/>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">비만약 처방</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-tight">체중 관리를 위한 맞춤 처방</p>
+</div>
+<!-- Card 2: 비만약 주사 -->
+<div class="group relative overflow-hidden rounded-xl bg-surface-container-lowest p-5 card-shadow flex flex-col items-center text-center transition-all duration-300 active:scale-95 cursor-pointer">
+<div class="absolute top-3 right-3 z-10">
+<span class="bg-primary-container text-on-primary-container font-label-md text-label-md px-2 py-0.5 rounded-full">대면</span>
+</div>
+<div class="w-full aspect-square mb-stack-md flex items-center justify-center bg-surface-container rounded-lg group-hover:scale-105 transition-transform">
+<img alt="Modern insulin pen injector device for weight management in soft teal and white color palette" class="w-full h-full object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvkfdpfmr7-ATF-CsuhGeRhKrTqFjoBs6-3e55f_pRVwrMb-6ZlTyzBapRxL5dDE1M2taunvQlNFyBUI_C5VmIet8hWfJ-iI4aX99Zn4b5uKzr9jh595ql8oql2VfgGRnxPLtQMLM7wG-m2NUMBKjEm99nNmD8KWhbnpPksrUbm2bBSmJduBfBosm4kEHZheX7q6Xa681iUlvxGUhT1dxqrEgYnNNsIAvXz0YPh4ENGo8xjvJdrgmyw8Sh2ZmxgGcvAQGzlD5Ne_ie"/>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">비만약 주사</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-tight">위고비·마운자로 상담</p>
+</div>
+<!-- Card 3: 탈모약 처방 -->
+<div class="group relative overflow-hidden rounded-xl bg-surface-container-lowest p-5 card-shadow flex flex-col items-center text-center transition-all duration-300 active:scale-95 cursor-pointer">
+<div class="absolute top-3 right-3 z-10">
+<span class="bg-primary-container text-on-primary-container font-label-md text-label-md px-2 py-0.5 rounded-full">대면</span>
+</div>
+<div class="w-full aspect-square mb-stack-md flex items-center justify-center bg-surface-container rounded-lg group-hover:scale-105 transition-transform">
+<img alt="Premium hair loss treatment bottle with revitalizing logo on a minimalist light teal background" class="w-full h-full object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMGtCP-_O4_SjgWUk1qSh-_m1VYvszZXjmBAVtj3lNLsIm6n70Qsna9n7SD_3gCNmcy1T9qYFDp-NY332QE5KalVoTcY1AUwz_7Il3U7bnKOve8A_PCtsMDOKGzfEMkkLH1h_1O9RW4eCeX2l9CIazxHHIYSEgiw4-ivhuM-wLGlyMqn1Mw0jnF7OjAQq0kET3eXbHvRPZ6HLTe7Z-Rm4YycK293gxC76n6NRumiTz8Ky0P-mwH47c2TV_3S9tEdY0EUQdzuE5S8AQ"/>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">탈모약 처방</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-tight">풍성한 내일을 위한 관리</p>
+</div>
+<!-- Card 4: 인공눈물 -->
+<div class="group relative overflow-hidden rounded-xl bg-surface-container-lowest p-5 card-shadow flex flex-col items-center text-center transition-all duration-300 active:scale-95 cursor-pointer">
+<div class="absolute top-3 right-3 z-10">
+<span class="bg-secondary-container text-on-secondary-container font-label-md text-label-md px-2 py-0.5 rounded-full">비대면</span>
+</div>
+<div class="w-full aspect-square mb-stack-md flex items-center justify-center bg-surface-container rounded-lg group-hover:scale-105 transition-transform">
+<img alt="Medical grade eye drop bottle for artificial tears in a soothing soft teal setting" class="w-full h-full object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYK5aN3oc2SYQVZbFxK2YQX1fKjQn8Nldak-HrIgdHHpjpVZCnJpstsM9frTMvl2X9LSKrMfgsL8nVwu7rmYR24EUa6Gy9-Sx2OiDa7aX4zigeUI-1QL0OSZHt2TZTtrjpYH-yOzO6YhEdZv39jcatWNKj7wIVD_Afc_jTM0T330rS4PqfoZpkHadRDJovHI5f0UwD4OIGv8GqjgEPbhG_tgoqseTkcwJ5hbawZz5PLLAV8v_WRap18tX4I4vfRLhsn1V7CcrkMduM"/>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">인공눈물</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-tight">촉촉한 눈을 위한 비대면 처방</p>
+</div>
+</div>
+<!-- Supportive Info Section (Lifestyle Context) -->
+<section class="mt-section-gap bg-primary-container/10 p-6 rounded-xl border border-primary-container/20">
+<div class="flex items-start gap-4">
+<div class="bg-primary-container p-2 rounded-full text-on-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">privacy_tip</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-primary mb-1">철저한 정보 보호</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">귀하의 건강 데이터는 암호화되어 안전하게 보관됩니다. 날씬닥터는 의료 전문가와의 연결만을 목적으로 합니다.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Action Area -->
+<div class="fixed bottom-0 left-0 w-full px-container-margin pb-10 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent z-40">
+<div class="max-w-screen-sm mx-auto">
+<button class="w-full bg-primary text-on-primary font-headline-sm text-headline-sm py-4 rounded-xl shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2">
+                로그인하고 시작하기
+                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<p class="text-center font-label-md text-label-md text-on-surface-variant mt-4 opacity-60">
+                이미 회원이신가요? <span class="text-primary font-bold cursor-pointer underline underline-offset-4">로그인하기</span>
+</p>
+</div>
+</div>
+<!-- Micro-interaction Script -->
+<script>
+        document.querySelectorAll('.group').forEach(card => {
+            card.addEventListener('click', () => {
+                // Flash effect for feedback
+                const bg = card.querySelector('.bg-surface-container-lowest');
+                card.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    card.style.transform = '';
+                }, 100);
+            });
+        });
+    </script>
+</body></html>

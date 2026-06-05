@@ -89,6 +89,17 @@
   color: #0f1e1d; /* on-surface */
 }
 
+/* Stepper track line (prescription transfer progress) — absolutely positioned
+   thin bar running through the vertical center of the 24px step circles. */
+.stepper-line {
+  position: absolute;
+  top: 11px; /* (24px circle − 2px line) / 2 */
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  border-radius: 9999px;
+}
+
 /* Material Symbols (icon font used throughout the Stitch screens) */
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
@@ -110,6 +121,9 @@
 @layer utilities {
   .shadow-premium {
     box-shadow: 0px 4px 12px rgba(31, 122, 110, 0.04);
+  }
+  .card-shadow {
+    box-shadow: 0 12px 24px rgba(0, 96, 86, 0.04);
   }
   .no-scrollbar::-webkit-scrollbar {
     display: none;

@@ -3,10 +3,13 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useSession, signOut } from "next-auth/react"
 import { previewPath, nextPreviewPath, BOTTOM_NAV } from "@/lib/preview/routes"
 
 export default function HomeDashboardPage() {
   const router = useRouter()
+  const { data: session, status } = useSession()
+  const isLoggedIn = status === "authenticated"
   const [data, setData] = useState<any>(null)
 
   useEffect(() => {
@@ -28,17 +31,35 @@ export default function HomeDashboardPage() {
           />
         </div>
         <div className="flex items-center gap-3">
-          <button className="p-2 rounded-full hover:bg-surface-variant/50 transition-all duration-200 active:scale-[0.98]">
-            <span className="material-symbols-outlined text-primary" data-icon="notifications">notifications</span>
-          </button>
-          <div className="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center border-2 border-surface shadow-sm overflow-hidden">
-            <img
-              alt="User Profile"
-              className="w-full h-full object-cover"
-              data-alt="A professional close-up portrait of a Korean man in his 30s with a warm and friendly expression. He is wearing a clean, modern white linen shirt against a soft, out-of-focus medical office background. The lighting is bright and natural, reflecting a clean healthcare aesthetic with subtle teal accents. The visual style is premium and trustworthy."
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVpoiseFYohxBopFphsmItQ2QKECFRG7RAOIXiz5NFgv4Su_GDQCV-QMNqSu-qf95Z82Y5PmXFSzS6EjfyNjoluPp7F8INY4gDYTlI8c1w2YlShc8GFkJSFvkKna8J80jO3eoEa8km_EK--V-2CEn_6LXxK-HYKzKLvT2aTvrbJSyQc7LPaJyjyWjiPdqyvy4RGMC1ymtl_9rX6csPFltDJAnRU9rp_GjmCC1OUgrffpY_q20Bo83Yc2bI3pOwoYf1ybVpF1tHkGuS"
-            />
-          </div>
+          {isLoggedIn ? (
+            <>
+              <button className="p-2 rounded-full hover:bg-surface-variant/50 transition-all duration-200 active:scale-[0.98]">
+                <span className="material-symbols-outlined text-primary" data-icon="notifications">notifications</span>
+              </button>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="p-2 rounded-full hover:bg-surface-variant/50 transition-all duration-200 active:scale-[0.98]"
+                aria-label="로그아웃"
+              >
+                <span className="material-symbols-outlined text-primary" data-icon="logout">logout</span>
+              </button>
+              <div className="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center border-2 border-surface shadow-sm overflow-hidden">
+                <img
+                  alt="User Profile"
+                  className="w-full h-full object-cover"
+                  data-alt="A professional close-up portrait of a Korean man in his 30s with a warm and friendly expression. He is wearing a clean, modern white linen shirt against a soft, out-of-focus medical office background. The lighting is bright and natural, reflecting a clean healthcare aesthetic with subtle teal accents. The visual style is premium and trustworthy."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVpoiseFYohxBopFphsmItQ2QKECFRG7RAOIXiz5NFgv4Su_GDQCV-QMNqSu-qf95Z82Y5PmXFSzS6EjfyNjoluPp7F8INY4gDYTlI8c1w2YlShc8GFkJSFvkKna8J80jO3eoEa8km_EK--V-2CEn_6LXxK-HYKzKLvT2aTvrbJSyQc7LPaJyjyWjiPdqyvy4RGMC1ymtl_9rX6csPFltDJAnRU9rp_GjmCC1OUgrffpY_q20Bo83Yc2bI3pOwoYf1ybVpF1tHkGuS"
+                />
+              </div>
+            </>
+          ) : (
+            <button
+              onClick={() => router.push("/auth/login")}
+              className="bg-primary text-white px-4 py-2 rounded-full text-label-md font-bold active:scale-[0.98] transition-all duration-200"
+            >
+              로그인
+            </button>
+          )}
         </div>
       </header>
       <main className="mt-20 px-container-margin">
@@ -48,8 +69,17 @@ export default function HomeDashboardPage() {
           style={{ opacity: 1, transform: "translateY(0px)", transition: "0.5s ease-out" }}
         >
           <h2 className="text-headline-lg-mobile font-headline-lg-mobile text-on-surface">
-            {data?.user?.name ?? "김민수"}님, 안녕하세요 <br />
-            <span className="text-primary font-bold">건강한 하루를 시작해볼까요?</span>
+            {isLoggedIn ? (
+              <>
+                {session?.user?.name ?? data?.user?.name ?? "회원"}님, 안녕하세요 <br />
+                <span className="text-primary font-bold">건강한 하루를 시작해볼까요?</span>
+              </>
+            ) : (
+              <>
+                안녕하세요 <br />
+                <span className="text-primary font-bold">로그인하고 건강 관리를 시작해보세요</span>
+              </>
+            )}
           </h2>
         </section>
         {/* Status Card (Upcoming Reservation) */}

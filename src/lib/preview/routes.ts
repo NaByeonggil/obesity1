@@ -20,6 +20,9 @@ export type PreviewSlug =
 
 /** 슬러그 → 미리보기 경로 */
 export function previewPath(slug: PreviewSlug): string {
+  // 홈은 루트(/)가 홈페이지입니다. 루트에서 로그인 여부에 따라
+  // 홈 대시보드(로그인) / 통합 홈 랜딩(비로그인)으로 분기합니다.
+  if (slug === "home-dashboard") return "/"
   return `${PREVIEW_BASE}/${slug}`
 }
 

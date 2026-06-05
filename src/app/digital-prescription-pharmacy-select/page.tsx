@@ -46,7 +46,7 @@ export default function DigitalPrescriptionPharmacySelectPage() {
             </span>
           </button>
           <img
-            alt="날씨닥터 로고"
+            alt="날씬닥터 로고"
             className="h-8 w-auto"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnrYtr2olo9-k5Ym9q9WOyzK69BhMaox2Z1FM5agVveGsG1M672LRcabh3e-C2ShH1eSoKYYGhQ2w2Nd9khieLltlKCVOElmF7OnF1zG7utvF8W0rO-c9CocgrKvSV56qFecYXKCmcfsUgn0ahQWPIBGggqZNjI3Avenn4NvjSBvLOIEPGAGH9OHhWkWxUS5dy5bfDI-8xWlEnG4tjGwatO6oN_eh9YEc4VhU9McV6eTmECM-vHTzYtHVE51OUdfuign7D9c4CYGhc"
           />

@@ -31,7 +31,7 @@ export default function ClinicSearchListPage() {
       <header className="fixed top-0 w-full z-50 bg-surface shadow-[0px_4px_12px_rgba(0,107,95,0.04)] flex justify-between items-center px-container-margin py-stack-sm h-[64px]">
         <div className="flex items-center gap-stack-sm">
           <img
-            alt="Nalssin Doctor Logo"
+            alt="날씬닥터 로고"
             className="h-8 w-auto"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzeRC_alV8BRDTZq8bVW713sfYrqgZpB5ctdnYAHfHzEE9cP-Fer88-hAPGegO-T3rgye6smcEqxyke0kd-qf1CgDoYymMR2JRm-QoKiLtMUD0nTgKTP5ASb-VdCLmMX1zTLPo8D4ENK0OrWGK-656bJaRTQ3ZXH89wuTWyHw4a2CNQA-lAtwpeQDMybzAqVWloBdxlr0BcCRc4ZStTflaVZzPQzJo_a9yM2kL0V_W6K7HLgZK2hBNjfe98pyIk_xNZKG4UTgIF8Jb"
           />
