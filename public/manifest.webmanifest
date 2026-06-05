@@ -1,0 +1,40 @@
+{
+  "name": "날씬닥터 프리미엄 헬스케어",
+  "short_name": "날씬닥터",
+  "description": "예약부터 처방·약국 수령까지, 프리미엄 헬스케어 경험",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ecfdfb",
+  "theme_color": "#006056",
+  "lang": "ko",
+  "dir": "ltr",
+  "categories": ["health", "medical", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "의원 검색", "url": "/clinic-search-list" },
+    { "name": "처방전", "url": "/prescription-pharmacy-send" },
+    { "name": "마이페이지", "url": "/payment-mypage" }
+  ]
+}

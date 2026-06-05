@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>디지털 처방전 및 약국 선택</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .animate-slide-up {
+            animation: slideUp 0.3s ease-out forwards;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#ecfdfb",
+                        "primary-fixed-dim": "#83d5c7",
+                        "on-primary-container": "#b3fff1",
+                        "on-primary-fixed-variant": "#005047",
+                        "inverse-on-surface": "#e3f4f2",
+                        "on-primary-fixed": "#00201c",
+                        "secondary-fixed": "#ffdad2",
+                        "secondary-container": "#fd7958",
+                        "primary-fixed": "#9ff2e3",
+                        "surface-dim": "#ccdddb",
+                        "secondary": "#a7391e",
+                        "on-error": "#ffffff",
+                        "on-background": "#0f1e1d",
+                        "background": "#ecfdfb",
+                        "on-secondary-fixed": "#3c0700",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#d5e6e4",
+                        "on-tertiary-container": "#c1ffcc",
+                        "surface-container": "#e0f1ef",
+                        "outline": "#6e7976",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#83d5c7",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#3e4946",
+                        "on-surface": "#0f1e1d",
+                        "secondary-fixed-dim": "#ffb4a2",
+                        "surface-container-high": "#dbecea",
+                        "on-secondary-fixed-variant": "#862208",
+                        "tertiary-fixed": "#7efba4",
+                        "surface-container-low": "#e6f7f5",
+                        "tertiary-container": "#007e40",
+                        "primary-container": "#1f7a6e",
+                        "tertiary-fixed-dim": "#61de8a",
+                        "outline-variant": "#bec9c5",
+                        "on-secondary-container": "#6e1500",
+                        "tertiary": "#006231",
+                        "primary": "#006056",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#d5e6e4",
+                        "surface": "#ecfdfb",
+                        "on-tertiary-fixed-variant": "#005228",
+                        "on-tertiary-fixed": "#00210c",
+                        "inverse-surface": "#243332",
+                        "on-secondary": "#ffffff",
+                        "surface-tint": "#006b5f",
+                        "surface-container-lowest": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap": "40px",
+                        "stack-lg": "24px",
+                        "container-margin": "20px",
+                        "unit": "4px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "body-sm": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg": ["30px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-inverse-surface shadow-[0px_4px_12px_rgba(0,107,95,0.04)] flex justify-between items-center px-container-margin py-stack-sm h-16">
+<div class="flex items-center">
+<img alt="날씨닥터 로고" class="h-8 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnrYtr2olo9-k5Ym9q9WOyzK69BhMaox2Z1FM5agVveGsG1M672LRcabh3e-C2ShH1eSoKYYGhQ2w2Nd9khieLltlKCVOElmF7OnF1zG7utvF8W0rO-c9CocgrKvSV56qFecYXKCmcfsUgn0ahQWPIBGggqZNjI3Avenn4NvjSBvLOIEPGAGH9OHhWkWxUS5dy5bfDI-8xWlEnG4tjGwatO6oN_eh9YEc4VhU9McV6eTmECM-vHTzYtHVE51OUdfuign7D9c4CYGhc"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-surface-variant/50 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-primary" data-icon="notifications">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary-container overflow-hidden border border-outline-variant/30">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A clean, professional portrait of a modern healthcare user, styled in high-key lighting with a minimalist background. The photography is crisp and bright, aligning with a premium healthcare app aesthetic, using soft teal and neutral white tones for a calm and trustworthy mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA58eIQRR3tnZjoYSe5VhrSOxk5Yj69rdhnCb5fFpora5FC8HTH0wN6z5Ugow_soNCA4NoKET9nuUObjy5QE6ZfgA0Z79KLSaIMuSwOsAYqVaYOW8zQILSM2dfj5AdPM-E5y2EOEDUa0pYsEaxg477YZ4bdEKN7JDAUXRaPr3IeBV5xadJGdcrOtyE19G-rKW-tv44VXGeqCCG61W9CxjH0lr4ryGpKTQCZgwI5ddGBLuKvWGegnhui2hCJw50F84wByabpivjP6P8I"/>
+</div>
+</div>
+</header>
+<main class="pt-20 px-container-margin space-y-stack-lg">
+<!-- Prescription Section -->
+<section class="space-y-stack-md">
+<div class="flex justify-between items-end">
+<h2 class="text-headline-sm font-headline-sm text-on-surface">디지털 처방전</h2>
+<span class="text-label-md font-label-md text-primary">No. 20240612-0042</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-stack-md shadow-[0px_4px_12px_rgba(0,107,95,0.04)] border border-outline-variant/20">
+<div class="space-y-unit mb-stack-md">
+<div class="flex justify-between items-center">
+<span class="text-label-md font-label-md text-on-surface-variant">발급 의원</span>
+<span class="text-body-md font-bold text-on-surface">서울 연세 가가 클리닉</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-label-md font-label-md text-on-surface-variant">발급일</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">2024.06.12</span>
+</div>
+</div>
+<div class="border-t border-outline-variant/20 pt-stack-md">
+<div class="bg-surface-container-low rounded-lg overflow-hidden">
+<table class="w-full text-left">
+<thead class="bg-surface-container-high/50">
+<tr>
+<th class="px-3 py-2 text-label-md font-label-md text-on-surface-variant">약품명</th>
+<th class="px-3 py-2 text-label-md font-label-md text-on-surface-variant text-right">용량/기간</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<tr>
+<td class="px-3 py-3 text-body-sm font-body-sm text-on-surface">리피토정 10mg</td>
+<td class="px-3 py-3 text-body-sm font-body-sm text-on-surface text-right">30일분</td>
+</tr>
+<tr>
+<td class="px-3 py-3 text-body-sm font-body-sm text-on-surface">노바스크정 5mg</td>
+<td class="px-3 py-3 text-body-sm font-body-sm text-on-surface text-right">30일분</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="mt-4 flex items-center justify-center gap-2 text-primary/60">
+<span class="material-symbols-outlined text-[18px]" data-icon="verified_user">verified_user</span>
+<span class="text-label-md font-label-md">건강보험심사평가원 인증됨</span>
+</div>
+</div>
+</section>
+<!-- Pharmacy Selection Section -->
+<section class="space-y-stack-md">
+<h2 class="text-headline-sm font-headline-sm text-on-surface">약국 선택</h2>
+<!-- Search Bar -->
+<div class="relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</div>
+<input class="w-full pl-12 pr-4 py-3 bg-surface-container-low border-none rounded-xl text-body-md focus:ring-2 focus:ring-primary transition-all placeholder:text-on-surface-variant/50" placeholder="주변 약국 검색 또는 주소 입력" type="text"/>
+</div>
+<!-- Pharmacy List -->
+<div class="grid gap-gutter">
+<!-- Pharmacy Card 1 -->
+<div class="pharmacy-card group cursor-pointer bg-surface-container-lowest p-stack-md rounded-xl border-2 border-transparent shadow-[0px_4px_12px_rgba(0,107,95,0.04)] transition-all hover:shadow-md relative overflow-hidden" id="pharmacy-1" onclick="selectPharmacy('pharmacy-1')">
+<div class="flex justify-between items-start mb-2">
+<div>
+<div class="flex items-center gap-2">
+<h3 class="text-body-lg font-bold text-on-surface">서울봄약국</h3>
+<span class="px-2 py-0.5 bg-tertiary/10 text-tertiary rounded-full text-[10px] font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    재고 확인됨
+                                </span>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-label-md font-label-md text-primary bg-primary/5 px-1.5 rounded">240m</span>
+<span class="text-body-sm text-on-surface-variant">서울 중구 세종대로 110</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-label-md font-label-md text-tertiary">~ 21:00 영업</span>
+</div>
+</div>
+<div class="flex gap-2 mt-3">
+<span class="px-2 py-1 bg-surface-variant rounded text-[11px] text-on-surface-variant">연중무휴</span>
+<span class="px-2 py-1 bg-surface-variant rounded text-[11px] text-on-surface-variant">주차가능</span>
+</div>
+</div>
+<!-- Pharmacy Card 2 (Selected State Example) -->
+<div class="pharmacy-card group cursor-pointer bg-surface-container-lowest p-stack-md rounded-xl border-2 border-primary shadow-[0px_4px_12px_rgba(0,107,95,0.04)] transition-all hover:shadow-md relative overflow-hidden ring-4 ring-primary/5" id="pharmacy-2" onclick="selectPharmacy('pharmacy-2')">
+<div class="flex justify-between items-start mb-2">
+<div>
+<div class="flex items-center gap-2">
+<h3 class="text-body-lg font-bold text-on-surface">메디컬정문약국</h3>
+<span class="px-2 py-0.5 bg-tertiary/10 text-tertiary rounded-full text-[10px] font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    재고 확인됨
+                                </span>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-label-md font-label-md text-primary bg-primary/5 px-1.5 rounded">480m</span>
+<span class="text-body-sm text-on-surface-variant">서울 중구 남대문로 84</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-label-md font-label-md text-tertiary">~ 20:30 영업</span>
+</div>
+</div>
+<div class="flex gap-2 mt-3">
+<span class="px-2 py-1 bg-surface-variant rounded text-[11px] text-on-surface-variant">대기없음</span>
+<span class="px-2 py-1 bg-surface-variant rounded text-[11px] text-on-surface-variant">친절한 상담</span>
+</div>
+<!-- Selection Indicator -->
+<div class="absolute top-3 right-3 text-primary">
+<span class="material-symbols-outlined text-[24px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Pharmacy Card 3 -->
+<div class="pharmacy-card group cursor-pointer bg-surface-container-lowest p-stack-md rounded-xl border-2 border-transparent shadow-[0px_4px_12px_rgba(0,107,95,0.04)] transition-all hover:shadow-md relative overflow-hidden" id="pharmacy-3" onclick="selectPharmacy('pharmacy-3')">
+<div class="flex justify-between items-start mb-2">
+<div>
+<div class="flex items-center gap-2">
+<h3 class="text-body-lg font-bold text-on-surface">종로메디약국</h3>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-label-md font-label-md text-on-surface-variant bg-surface-variant px-1.5 rounded">1.2km</span>
+<span class="text-body-sm text-on-surface-variant">서울 종로구 우정국로 26</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-label-md font-label-md text-on-surface-variant">~ 19:00 영업</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Bottom CTA (Appears when pharmacy selected) -->
+<div class="fixed bottom-20 left-0 w-full px-container-margin z-40 transition-transform duration-300" id="cta-container">
+<button class="w-full bg-secondary-container text-on-error py-4 rounded-2xl shadow-xl font-bold text-body-lg flex items-center justify-center gap-2 active:scale-95 transition-all">
+<span>이 약국으로 처방 전송</span>
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe pt-2 bg-surface dark:bg-inverse-surface border-t border-outline-variant/30 rounded-t-xl shadow-[0px_-4px_12px_rgba(0,107,95,0.04)]">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-label-md font-label-md mt-1">홈</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="text-label-md font-label-md mt-1">예약</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-bold bg-primary-container/20 rounded-xl px-4 py-1 active:scale-[0.98] transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="description" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="text-label-md font-label-md mt-1">처방전</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-label-md font-label-md mt-1">마이</span>
+</a>
+</nav>
+<script>
+        function selectPharmacy(id) {
+            // Remove selection from all cards
+            document.querySelectorAll('.pharmacy-card').forEach(card => {
+                card.classList.remove('border-primary', 'ring-4', 'ring-primary/5');
+                card.classList.add('border-transparent');
+                
+                // Remove existing check indicator
+                const indicator = card.querySelector('.absolute.top-3.right-3');
+                if (indicator) indicator.remove();
+            });
+
+            // Add selection to clicked card
+            const selectedCard = document.getElementById(id);
+            selectedCard.classList.remove('border-transparent');
+            selectedCard.classList.add('border-primary', 'ring-4', 'ring-primary/5');
+
+            // Add check indicator
+            const indicator = document.createElement('div');
+            indicator.className = 'absolute top-3 right-3 text-primary animate-slide-up';
+            indicator.innerHTML = '<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: \'FILL\' 1;">check_circle</span>';
+            selectedCard.appendChild(indicator);
+
+            // Show CTA button
+            const cta = document.getElementById('cta-container');
+            cta.classList.remove('translate-y-[200%]');
+            cta.classList.add('translate-y-0');
+        }
+
+        // Initialize with pharmacy-2 selected as requested
+        document.addEventListener('DOMContentLoaded', () => {
+            // Pharmacy 2 is pre-styled in HTML for demonstration
+            // No action needed if pre-rendered, but ensures consistency
+        });
+    </script>
+</body></html>

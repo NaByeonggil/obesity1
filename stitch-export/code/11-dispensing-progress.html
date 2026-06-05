@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed-variant": "#005047",
+                    "surface-tint": "#006b5f",
+                    "surface-container-low": "#e6f7f5",
+                    "on-surface": "#0f1e1d",
+                    "on-surface-variant": "#3e4946",
+                    "inverse-surface": "#243332",
+                    "tertiary-fixed-dim": "#61de8a",
+                    "surface-dim": "#ccdddb",
+                    "on-tertiary-fixed": "#00210c",
+                    "secondary-fixed-dim": "#ffb4a2",
+                    "primary-container": "#1f7a6e",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-container": "#c1ffcc",
+                    "on-error-container": "#93000a",
+                    "on-background": "#0f1e1d",
+                    "surface-container-highest": "#d5e6e4",
+                    "primary": "#006056",
+                    "on-secondary-fixed": "#3c0700",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary": "#a7391e",
+                    "secondary-container": "#fd7958",
+                    "outline-variant": "#bec9c5",
+                    "background": "#ecfdfb",
+                    "surface": "#ecfdfb",
+                    "outline": "#6e7976",
+                    "inverse-on-surface": "#e3f4f2",
+                    "on-tertiary": "#ffffff",
+                    "tertiary": "#006231",
+                    "on-secondary-container": "#6e1500",
+                    "on-primary-fixed": "#00201c",
+                    "on-secondary": "#ffffff",
+                    "tertiary-fixed": "#7efba4",
+                    "surface-container": "#e0f1ef",
+                    "primary-fixed": "#9ff2e3",
+                    "primary-fixed-dim": "#83d5c7",
+                    "surface-container-high": "#dbecea",
+                    "on-primary-container": "#b3fff1",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#d5e6e4",
+                    "tertiary-container": "#007e40",
+                    "error": "#ba1a1a",
+                    "inverse-primary": "#83d5c7",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#862208",
+                    "surface-bright": "#ecfdfb",
+                    "on-tertiary-fixed-variant": "#005228"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "40px",
+                    "stack-md": "16px",
+                    "stack-lg": "24px",
+                    "unit": "4px",
+                    "container-margin": "20px",
+                    "stack-sm": "8px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-sm": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-sm": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-lg": ["30px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .timeline-line {
+            width: 2px;
+            background: theme('colors.outline-variant');
+            position: absolute;
+            top: 24px;
+            bottom: 24px;
+            left: 11px;
+            z-index: 0;
+        }
+        .pulse-ring {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .5; transform: scale(1.2); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background font-body-md text-on-surface antialiased min-h-screen flex flex-col">
+<!-- Top Toast Notification -->
+<div class="fixed top-20 left-1/2 -translate-x-1/2 z-[60] w-[calc(100%-40px)] max-w-md transition-all duration-500 ease-out transform translate-y-0 opacity-100" id="toast-notif">
+<div class="bg-primary text-on-primary px-5 py-4 rounded-xl shadow-[0_8px_24px_rgba(0,96,86,0.15)] flex items-center gap-3">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">info</span>
+<p class="font-label-md text-label-md flex-1">조제가 완료되었어요! 지금 결제하고 방문하세요.</p>
+<button class="text-on-primary/60 hover:text-on-primary" onclick="this.parentElement.parentElement.classList.add('opacity-0', '-translate-y-4')">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim docked full-width top-0 z-50">
+<div class="flex justify-between items-center w-full px-container-margin h-16">
+<button class="text-primary dark:text-primary-fixed hover:opacity-80 transition-opacity Active: scale-95 duration-100">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-headline-sm font-headline-sm font-bold text-primary dark:text-primary-fixed">날씬닥터</h1>
+<button class="text-primary dark:text-primary-fixed hover:opacity-80 transition-opacity Active: scale-95 duration-100">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 px-container-margin py-stack-lg space-y-stack-lg pb-32">
+<!-- Vertical Timeline Card -->
+<section class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_12px_rgba(0,107,95,0.04)] relative">
+<h2 class="font-headline-sm text-headline-sm mb-6 text-on-surface">조제 현황</h2>
+<div class="relative flex flex-col gap-8">
+<div class="timeline-line"></div>
+<!-- Stage 1 -->
+<div class="flex items-center gap-4 relative z-10">
+<div class="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</div>
+<div class="flex flex-col">
+<span class="text-on-surface-variant font-label-md text-label-md">처방 전송됨</span>
+<span class="text-outline text-xs">오전 10:15</span>
+</div>
+</div>
+<!-- Stage 2 -->
+<div class="flex items-center gap-4 relative z-10">
+<div class="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</div>
+<div class="flex flex-col">
+<span class="text-on-surface-variant font-label-md text-label-md">약국 수락</span>
+<span class="text-outline text-xs">오전 10:18</span>
+</div>
+</div>
+<!-- Stage 3 (Active) -->
+<div class="flex items-center gap-4 relative z-10">
+<div class="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center relative">
+<div class="absolute inset-0 rounded-full bg-primary-container pulse-ring"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-on-primary-container relative z-10"></div>
+</div>
+<div class="flex flex-col">
+<span class="text-primary font-headline-sm text-headline-sm">조제 중</span>
+<span class="text-primary-container text-xs font-medium">약사님이 꼼꼼히 조제하고 있어요</span>
+</div>
+</div>
+<!-- Stage 4 -->
+<div class="flex items-center gap-4 relative z-10 opacity-40">
+<div class="w-6 h-6 rounded-full bg-outline-variant flex items-center justify-center">
+<div class="w-2 h-2 rounded-full bg-white"></div>
+</div>
+<div class="flex flex-col">
+<span class="text-on-surface-variant font-label-md text-label-md">조제 완료</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Pharmacy Info Card -->
+<section class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_12px_rgba(0,107,95,0.04)] flex flex-col gap-stack-md">
+<div class="flex items-start justify-between">
+<div class="space-y-1">
+<span class="text-primary font-label-md text-label-md tracking-wider">방문 약국 정보</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">메디컬정문약국</h3>
+</div>
+<div class="w-14 h-14 rounded-xl overflow-hidden bg-surface-container-high shrink-0">
+<img alt="Pharmacy exterior" class="w-full h-full object-cover" data-alt="A professional and modern pharmacy storefront in Seoul, featuring clean glass windows, a soft green medical cross sign, and warm interior lighting. The aesthetic is clinical yet welcoming, with white shelves organized neatly. The photography is high-end, utilizing a shallow depth of field to emphasize the entrance." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRCFRBHtT1qNrNNj5s3YegpqbrTUobCcN6e3UpJbbWF52rJsxjQMG6wFFNE-7dcQeWkKyDnRU5GnELH8Mo2XUmyeenawakeqGjR8EbXgr9Ieh9KVGilLGA4XAqcfgmomexvRWQKcUBOcgQH9geK8KQ6dpBCIf68e34AvmCfJc2W-Ic5ugg7ZnDFhrqcroK1vuamtkOowzz7pV272W8TtVLItf1rfd85x-10Ez3_sCISS8Kq5RGtAla1vAA2CUP5ur7nbRGHrbrDqNS"/>
+</div>
+</div>
+<div class="space-y-3 pt-2">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px] text-outline">location_on</span>
+<span class="text-body-md font-body-md">서울 중구 남대문로 84</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px] text-outline">call</span>
+<span class="text-body-md font-body-md">02-123-4567</span>
+</div>
+</div>
+<div class="pt-2">
+<button class="w-full border border-primary text-primary font-label-md text-label-md py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-primary/5 transition-colors">
+<span class="material-symbols-outlined text-[18px]">directions</span>
+                    길찾기
+                </button>
+</div>
+</section>
+<!-- Completion Banner (Conditional Simulation) -->
+<div class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500" id="completion-banner">
+<div class="bg-primary-container/20 border border-primary-container/30 rounded-xl p-5 flex items-center gap-4">
+<div class="bg-primary-container p-2 rounded-full">
+<span class="material-symbols-outlined text-on-primary-container">celebration</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-primary-fixed-variant">조제가 완료되었습니다!</h4>
+<p class="text-body-sm font-body-sm text-on-primary-fixed-variant/80 leading-relaxed">결제를 완료하시면 대기 없이 바로 약을 수령하실 수 있습니다.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Fixed CTA -->
+<div class="fixed bottom-[88px] left-0 w-full px-container-margin z-40">
+<button class="w-full bg-[#FF7A59] text-white font-headline-sm text-headline-sm py-5 rounded-xl shadow-[0_8px_20px_rgba(255,122,89,0.25)] hover:scale-[1.02] active:scale-95 transition-all">
+            결제하기
+        </button>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-white dark:bg-surface-container-lowest rounded-t-xl shadow-[0_-4px_12px_rgba(0,107,95,0.04)] dark:shadow-none">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="text-label-md font-label-md mt-1">홈</span>
+</a>
+<!-- Clinics -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">local_hospital</span>
+<span class="text-label-md font-label-md mt-1">의원</span>
+</a>
+<!-- Prescriptions (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-xl px-3 py-1 scale-98 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="text-label-md font-label-md mt-1">처방전</span>
+</a>
+<!-- Pharmacy -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">storefront</span>
+<span class="text-label-md font-label-md mt-1">약국</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction: Simulate status update after 3 seconds
+        setTimeout(() => {
+            const toast = document.getElementById('toast-notif');
+            if (toast) {
+                toast.classList.remove('-translate-y-4', 'opacity-0');
+            }
+            
+            // Toggle visibility of completion banner as an example interaction
+            const banner = document.getElementById('completion-banner');
+            banner.classList.remove('hidden');
+        }, 3000);
+    </script>
+</body></html>
