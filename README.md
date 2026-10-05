@@ -19,12 +19,14 @@ npm run dev
 ./deploy.sh
 
 # 또는 수동 배포
-docker-compose -f docker-compose.production.yml up -d --build
+docker compose --env-file .env.production -f docker-compose.production.yml up -d --build
 ```
 
-### SSL 인증서 설치
+### SSL 인증서 점검
+인증서는 Caddy가 Let's Encrypt에서 자동 발급/갱신합니다 (nginx, certbot 설치 불필요).
 ```bash
-./setup-ssl.sh
+./setup-ssl.sh           # 상태 점검
+./setup-ssl.sh --retry   # 발급 즉시 재시도
 ```
 
 ## 📚 문서
@@ -62,7 +64,7 @@ docker-compose -f docker-compose.production.yml up -d --build
 - **Backend**: Next.js API Routes, Prisma ORM
 - **Database**: MySQL/MariaDB
 - **Authentication**: NextAuth.js + JWT
-- **Deployment**: Docker, Nginx, Let's Encrypt SSL
+- **Deployment**: Docker, Caddy (Let's Encrypt SSL 자동 발급)
 
 ## 🔧 개발 명령어
 
@@ -109,7 +111,7 @@ obesity1/
 │   └── troubleshooting/  # 문제 해결
 ├── scripts/               # 유틸리티 스크립트
 ├── deploy.sh             # 배포 스크립트
-├── setup-ssl.sh          # SSL 설치 스크립트
+├── setup-ssl.sh          # SSL 인증서 점검 스크립트
 └── CLAUDE.md             # 개발 가이드
 ```
 

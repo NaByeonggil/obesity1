@@ -254,22 +254,22 @@ NEXTAUTH_URL="https://obesity.ai.kr"
 
 ### Docker Production Deployment
 The platform is deployed using Docker with the following services:
-- **App**: Next.js application (port 3000 internal, 443 external via nginx)
-- **MySQL**: Database service (port 3306 internal)
-- **Nginx**: Reverse proxy with SSL/TLS (port 80, 443)
+- **App**: Next.js application (port 3000, published on `127.0.0.1` only; public traffic goes through Caddy)
+- **MariaDB**: Database service (port 3306 internal, `127.0.0.1:3307` on the host)
+- **Caddy**: Reverse proxy with automatic Let's Encrypt HTTPS (port 80, 443), configured in `Caddyfile`
 
 ```bash
-# Full deployment
+# Full deployment (build, start, HTTPS check)
 ./deploy.sh
 
 # Manual deployment
-docker-compose -f docker-compose.production.yml up -d --build
+docker compose --env-file .env.production -f docker-compose.production.yml up -d --build
 
-# SSL certificate setup
+# SSL certificate check (add --retry to restart Caddy and retry issuance)
 ./setup-ssl.sh
 ```
 
-**Important**: The platform is deployed at `https://obesity.ai.kr` with Let's Encrypt SSL certificates. See `docs/deployment/` for detailed deployment guides.
+**Important**: The platform is deployed at `https://obesity.ai.kr`. Caddy issues and renews the Let's Encrypt certificates on its own — do not install nginx or certbot on the host, they would conflict with Caddy on ports 80/443. The server sits behind a home router, so ports 80 and 443 must be forwarded to it. The guides in `docs/deployment/` predate Caddy and describe the old nginx + certbot setup.
 
 ### Systemd Auto-start (Optional)
 Use `install-service.sh` or `setup-autostart.sh` to configure automatic startup on system boot. See `AUTO-START-SETUP.md` for details.

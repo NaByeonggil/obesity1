@@ -66,3 +66,4 @@ src/app/test-appointments
 # Temporary files
 tmp
 temp
+.env.caddy

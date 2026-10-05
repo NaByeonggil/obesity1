@@ -1,0 +1,29 @@
+# obesity.ai.kr HTTPS 리버스 프록시 (Let's Encrypt 인증서 자동 발급/갱신)
+
+{
+	# ACME 계정 연락처 (.env.caddy 의 ACME_EMAIL)
+	email {$ACME_EMAIL}
+}
+
+obesity.ai.kr {
+	encode zstd gzip
+
+	# 클라이언트 요청 크기 제한 (파일 업로드용)
+	request_body {
+		max_size 10MB
+	}
+
+	# 보안 헤더
+	header {
+		X-Frame-Options "SAMEORIGIN"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer-when-downgrade"
+	}
+
+	# Next.js 애플리케이션으로 프록시
+	reverse_proxy app:3000
+}
+
+www.obesity.ai.kr {
+	redir https://obesity.ai.kr{uri} permanent
+}
