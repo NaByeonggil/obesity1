@@ -1,5 +1,10 @@
 # obesity.ai.kr 서빙에 필요한 포트 설정
 
+> ⚠️ **이 문서는 예전 nginx + certbot 구성 기준입니다.**
+> 현재 프로덕션은 Caddy 컨테이너가 HTTPS와 인증서 발급/갱신을 처리합니다 (`Caddyfile`, `docker-compose.production.yml`).
+> 호스트에 nginx나 certbot을 설치하면 80/443 포트가 Caddy와 충돌하므로 아래 nginx/certbot 절차는 따르지 마세요.
+> 배포는 `./deploy.sh`, 인증서 점검은 `./setup-ssl.sh` 를 사용합니다. 앱(3000)과 DB(3307) 포트는 `127.0.0.1` 에만 바인딩됩니다.
+
 ## 🔌 필수 포트 (반드시 열어야 함)
 
 ### 1. **포트 80 (HTTP)**
