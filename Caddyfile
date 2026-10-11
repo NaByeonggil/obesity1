@@ -27,3 +27,10 @@ obesity.ai.kr {
 www.obesity.ai.kr {
 	redir https://obesity.ai.kr{uri} permanent
 }
+
+# YouTube 자동화 앱 (~/바탕화면/youtube, docker-compose.local.yml 의 youtube-app 서비스)
+youtube.obesity.ai.kr {
+	encode zstd gzip
+
+	reverse_proxy youtube-app:3001
+}
