@@ -34,3 +34,16 @@ youtube.obesity.ai.kr {
 
 	reverse_proxy youtube-app:3001
 }
+
+# 사업계획서 에디터 (~/바탕화면/money, docker-compose.production.yml 의 money-app 서비스)
+# 앱 자체에 인증이 없어 누구나 수정·초기화할 수 있으므로 Basic 인증으로 막는다.
+# 비밀번호 변경: caddy hash-password 로 만든 해시를 .env.caddy 의 MONEY_AUTH_HASH 에 넣고 caddy 재생성
+money.obesity.ai.kr {
+	encode zstd gzip
+
+	basic_auth {
+		nbg {$MONEY_AUTH_HASH}
+	}
+
+	reverse_proxy money-app:3000
+}
